@@ -457,12 +457,7 @@ Bảng~\ref{tab:overall-comparison} tổng hợp kết quả của tất cả 6 
 
     \item \textbf{5-shot và 20-shot đạt kết quả tương đương nhau} (~64-65\%), cho thấy diminishing returns khi tăng k từ 5 lên 20.
 
-    \item \textbf{Full fine-tuning không vượt trội} (64.4\%), thậm chí còn kém hơn zero-shot. Nguyên nhân có thể do:
-    \begin{itemize}
-        \item Dataset size nhỏ (chỉ 43 classes với 100 samples/class)
-        \item Overfitting khi unfreeze toàn bộ backbone
-        \item CLIP pretrained đã quá mạnh cho COCO, không cần fine-tune thêm
-    \end{itemize}
+    \item \textbf{Full fine-tuning không vượt trội} (64.4\%), thậm chí còn kém hơn zero-shot. Dưới góc độ lý thuyết, sự sụt giảm này là minh chứng rõ rệt cho hiện tượng \textbf{"Quên thảm khốc" (Catastrophic Forgetting)}. Khi mở khóa (unfreeze) toàn bộ mạng lưới chứa khoảng 150 triệu tham số và liên tục đẩy đạo hàm cập nhật từ một lượng dữ liệu tập trung quá nhỏ (chỉ 100 mẫu/lớp), mô hình đã tự phá vỡ không gian biểu diễn tổng quát mà nó từng tích lũy từ 400 triệu ảnh pre-train. Các trọng số bị "bẻ cong" (bias) thái quá về phía tập phân bố của COCO, hệ quả là mất đi khả năng tổng quát hóa ban đầu.
 \end{enumerate}
 
 \subsubsection{Thời gian Huấn luyện và Inference}
@@ -587,7 +582,7 @@ Qua thực nghiệm so sánh ba phương pháp phân loại đa phương thức 
 
     \item \textbf{Diminishing returns khi tăng k}: Performance gần như không thay đổi từ k=5 đến k=20, cho thấy k=5 đã đủ để học được pattern cơ bản.
 
-    \item \textbf{Full fine-tuning không luôn tốt hơn}: Với dataset nhỏ (43 classes, 100 samples/class), việc unfreeze backbone không mang lại cải thiện, thậm chí còn kém hơn zero-shot do overfitting.
+    \item \textbf{Hệ lụy của Full Fine-tuning trên dữ liệu nhỏ}: Việc unfreeze toàn bộ mạng backbone khổng lồ trên lượng dữ liệu ít ỏi không mang lại cải thiện. Thay vào đó, nó gây ra hiện tượng \textbf{"Quên thảm khốc" (Catastrophic Forgetting)}, khiến mô hình đánh mất năng lực tổng quát hóa nguyên bản và rơi vào trạng thái quá khớp (overfitting) cục bộ.
 \end{enumerate}
 
 \subsubsection{Trade-offs giữa các Phương pháp}
@@ -646,7 +641,12 @@ Qua thực nghiệm so sánh ba phương pháp phân loại đa phương thức 
 \subsubsection{Hướng Phát triển}
 Một số hướng cải thiện tiềm năng:
 \begin{enumerate}
-    \item \textbf{Prompt engineering}: Thử các template prompt phức tạp hơn cho zero-shot
+    \item \textbf{Prompt engineering}: Thay vì chỉ sử dụng template đơn giản \texttt{"a photo of a \{category\}"}, có thể thử các dạng prompt phong phú hơn nhằm tận dụng tối đa năng lực ngôn ngữ của CLIP để nâng cao hiệu năng Zero-shot. Ví dụ:
+    \begin{itemize}
+        \item \texttt{"a photo of a \{category\}, a type of animal/vehicle/object"} (cung cấp ngữ cảnh siêu phạm trù)
+        \item \texttt{"a clear photo of \{category\} in natural lighting"} (mô tả điều kiện chụp)
+        \item \textbf{Prompt Ensembling}: Kết hợp dự đoán từ nhiều template prompt khác nhau và lấy trung bình vector text embedding, thay vì chỉ dùng một template duy nhất. Phương pháp này được OpenAI sử dụng trong bài báo gốc của CLIP và cho thấy cải thiện đáng kể so với single-template.
+    \end{itemize}
     \item \textbf{Data augmentation}: Tăng cường dữ liệu cho few-shot learning
     \item \textbf{Adapter tuning}: Thay vì full fine-tuning, chỉ thêm các adapter layers nhỏ
     \item \textbf{Knowledge distillation}: Dùng zero-shot làm teacher cho few-shot student

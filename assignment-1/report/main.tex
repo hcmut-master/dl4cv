@@ -201,6 +201,15 @@
 \tableofcontents
 \newpage
 
+\section*{Tài liệu và Mã nguồn dự án}
+Nhằm đảm bảo tính minh bạch khoa học và khả năng tái lập (reproducibility) kết quả, toàn bộ mã nguồn, dữ liệu thực nghiệm, bài thuyết trình và portfolio của nhóm được công khai tại các đường dẫn sau:
+\begin{itemize}
+	\item \textbf{Trang giới thiệu (Github Page):} \url{https://hcmut-master.github.io/portfolio/#/}
+	\item \textbf{Mã nguồn thực nghiệm (Github Repo):} \url{https://github.com/hcmut-master/dl4cv/tree/master}
+	\item \textbf{Slide trình bày (Canva):} \url{https://www.canva.com/design/DAHE9HdVt3o/fjYvClFKaNK-rSQiKfWjmQ}
+\end{itemize}
+
+\vspace{0.5cm}
 
 \section{Giới thiệu đề tài}
 
@@ -242,9 +251,9 @@ Tập dữ liệu CIFAR-10 bao gồm 60.000 ảnh màu có kích thước 32x32 
 Tập dữ liệu IMDB chứa 50.000 văn bản đánh giá phim tiếng Anh, với độ dài và cấu trúc ngữ nghĩa phong phú, đa dạng. Kích thước tập dữ liệu này hoàn toàn đáp ứng điều kiện về số lượng mẫu huấn luyện.
 
 \begin{itemize}
-	\item \textbf{Cách đáp ứng ràng buộc 5 lớp:} Thông thường, IMDB được dùng cho bài toán phân loại nhị phân (Tích cực/Tiêu cực). Tuy nhiên, vì đề bài quy định rõ bài toán nhị phân là không hợp lệ để so sánh mô hình và phải có ít nhất 5 lớp, nhóm đã tiến hành tiền xử lý (preprocessing) lại nhãn của tập dữ liệu. Dựa trên điểm số rating gốc của người dùng (từ 1 đến 10 sao), nhóm đã phân loại lại tập dữ liệu thành 5 lớp cảm xúc tương ứng (ví dụ: Rất tiêu cực, Tiêu cực, Trung lập, Tích cực, Rất tích cực).
+	\item \textbf{Đặc trưng bài toán:} Thông thường, tập dữ liệu IMDB được sử dụng cho bài toán phân loại nhị phân (Binary Classification) để dự đoán thái độ Tích cực (Positive) hoặc Tiêu cực (Negative) của người dùng đối với một tác phẩm điện ảnh. Điều này cho phép nhóm tập trung hoàn toàn vào việc đánh giá khả năng trích xuất đặc trưng ngữ nghĩa của các mô hình học sâu.
 
-	\item \textbf{Lý do lựa chọn:} Các đoạn đánh giá trên IMDB thường có cấu trúc câu dài và phức tạp. Việc phân loại thành 5 mức độ cảm xúc yêu cầu mô hình phải hiểu được các từ khóa nhấn mạnh và ngữ cảnh đảo ngược. Nhờ đó, nhóm có thể thấy rõ sự chênh lệch về hiệu năng khi xử lý chuỗi dài giữa mạng nơ-ron hồi quy RNN (LSTM) và cơ chế tự chú ý của Transformer.
+	\item \textbf{Lý do lựa chọn:} Các đoạn đánh giá trên IMDB thường có cấu trúc câu dài và phức tạp. Việc phân loại thái độ yêu cầu mô hình phải hiểu được các từ khóa nhấn mạnh và ngữ cảnh đảo ngược. Nhờ đó, nhóm có thể thấy rõ sự chênh lệch về hiệu năng khi xử lý chuỗi dài giữa mạng nơ-ron hồi quy RNN (LSTM) và cơ chế tự chú ý của Transformer.
 \end{itemize}
 
 \subsubsection{Tập dữ liệu đa phương thức: COCO Captions 2017}
@@ -273,153 +282,6 @@ COCO (Common Objects in Context) Captions là bộ dữ liệu tiêu chuẩn quy
 
 	\item \textbf{Ma trận nhầm lẫn (Confusion Matrix):} Nhóm bổ sung thêm ma trận này nhằm trực quan hóa các trường hợp mô hình nhận diện sai, từ đó phục vụ cho việc phân tích lỗi sâu hơn ở phần sau.
 \end{itemize}
-
-
-\section{Giới thiệu về thuật toán CNN}\label{sec:dataset}
-
-Trong bài toán OCR, Mạng Nơ-ron Tích chập (Convolutional Neural Network - CNN) không đơn thuần là một bộ phân loại (classifier) mà đóng vai trò là bộ mã hóa đặc trưng thị giác (\textit{Visual Feature Encoder}). Mục tiêu của nó là ánh xạ hình ảnh đầu vào $I \in \mathbb{R}^{H \times W \times C}$ (với $H, W, C$ lần lượt là chiều cao, chiều rộng và số kênh màu) thành một bản đồ đặc trưng (feature map) trừu tượng $X \in \mathbb{R}^{H' \times W' \times D}$.
-
-\subsection{Động lực và ý tưởng cốt lõi}
-Trước khi đi sâu vào kiến trúc, cần xem xét lý do CNN vượt trội hơn các mạng MLP (Multi-layer Perceptron) truyền thống trong xử lý ảnh:
-
-\begin{enumerate}
-	\item \textbf{Vấn đề bùng nổ tham số:} Nếu áp dụng MLP fully-connected trực tiếp lên một ảnh có kích thước lớn (ví dụ $1000 \times 1000$ pixels), số lượng trọng số sẽ tăng lên khổng lồ (lên tới $10^{12}$ cho một lớp ẩn), dẫn đến việc mô hình dễ bị \textit{overfitting} và tiêu tốn tài nguyên tính toán không cần thiết.
-	\item \textbf{Cấu trúc không gian (Spatial Structure):} MLP coi các pixel là độc lập, trong khi hình ảnh có tính chất cục bộ (\textit{feature localization}) - các pixel lân cận có mối quan hệ mật thiết, và tính chất bất biến vị trí (\textit{translation invariance}) - một đặc trưng (như cạnh, góc) có ý nghĩa như nhau dù xuất hiện ở vị trí nào trong ảnh.
-\end{enumerate}
-
-Để giải quyết vấn đề này, CNN sử dụng ba cơ chế tính toán chính: \textbf{Local Receptive Fields} (Vùng cảm nhận cục bộ), \textbf{Shared Weights} (Chia sẻ trọng số) và \textbf{Spatial Subsampling} (Lấy mẫu không gian).
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{Images/CNN_1.png}
-	\vspace{10pt}
-	\caption{Cơ chế tính toán của CNN}
-	\label{fig:cnn-mechanism}
-\end{figure}
-
-\subsection{Các thành phần toán học và kiến trúc}
-
-\subsubsection{Phép toán tích chập (Convolution Operation)}
-Đây là lớp cốt lõi dùng để trích xuất các đặc trưng cục bộ. Thay vì kết nối đầy đủ, CNN sử dụng một bộ lọc (kernel/filter) $K$ có kích thước nhỏ $K_h \times K_w$ trượt qua toàn bộ ảnh.
-
-Với một ảnh đầu vào $I$ và bộ lọc $K$, giá trị của bản đồ đặc trưng đầu ra $S$ tại vị trí $(i, j)$ được tính bằng công thức tích chập rời rạc:
-
-\begin{equation}
-	S(i, j) = (I * K)(i, j) = \sum_{u=0}^{K_h-1} \sum_{v=0}^{K_w-1} I(i - u, j - v) \cdot K(u, v)
-\end{equation}
-
-Ngoài ra, trong các ứng dụng thực tế như OCR, một lớp tích chập thường được biểu diễn dưới dạng:
-\begin{equation}
-	Y = \sigma(W * X + b)
-\end{equation}
-trong đó $W$ là kernel, $X$ là input, $b$ là bias, và $\sigma$ là hàm activation.
-
-Ngoài kích thước bộ lọc, hai siêu tham số quan trọng kiểm soát kiến trúc là:
-\begin{itemize}
-	\item \textbf{Padding ($P$):} Thêm các pixel giả (thường là 0) xung quanh biên ảnh để kiểm soát kích thước đầu ra và tránh mất thông tin ở rìa ảnh.
-	\item \textbf{Stride ($S$):} Bước nhảy của bộ lọc khi trượt trên ảnh. Stride càng lớn thì kích thước đầu ra càng nhỏ (giảm độ phân giải không gian).
-\end{itemize}
-
-Kích thước của Feature Map đầu ra ($H_{out} \times W_{out}$) được tính theo công thức:
-\begin{equation}
-	H_{out} = \left\lfloor \frac{H_{in} + 2P - K_h}{S} \right\rfloor + 1; \quad
-	W_{out} = \left\lfloor \frac{W_{in} + 2P - K_w}{S} \right\rfloor + 1
-\end{equation}
-
-Trong ngữ cảnh OCR, các lớp tích chập đầu tiên sẽ học các đặc trưng cấp thấp (\textit{low-level features}) như các cạnh (edges), góc (corners). Các lớp sâu hơn sẽ tổ hợp lại để nhận diện các nét bút (strokes) và cấu trúc tô pô của ký tự.
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.95\linewidth]{Images/CNN_2.png}
-	\vspace{10pt}
-	\caption{Mô phỏng đơn giản về Convolution Layer}
-	\label{fig:conv-layer}
-\end{figure}
-
-\subsubsection{Hàm kích hoạt phi tuyến (Non-linearity)}
-Sau mỗi phép tích chập, một hàm kích hoạt phi tuyến được áp dụng để mô hình có thể học được các mối quan hệ phức tạp. Hàm phổ biến nhất là \textbf{ReLU (Rectified Linear Unit)}, giúp giảm thiểu vấn đề biến mất đạo hàm (\textit{vanishing gradient}) và tăng tốc độ hội tụ:
-
-\begin{equation}
-	f(x) = \max(0, x)
-\end{equation}
-
-Ngoài ReLU, có nhiều hàm activation khác được sử dụng trong các kiến trúc CNN hiện đại:
-
-\begin{table}[h!]
-	\centering
-	\caption{So sánh các hàm Activation phổ biến}
-	\begin{tabular}{|l|l|l|}
-		\hline
-		\textbf{Hàm Activation} & \textbf{Công thức}                                                         & \textbf{Ưu điểm/Nhược điểm}                           \\
-		\hline
-		ReLU                    & $f(x) = \max(0, x)$                                                        & Nhanh, tránh vanishing gradient, nhưng có dead neuron \\
-		\hline
-		Leaky ReLU              & $f(x) = \max(\alpha x, x)$                                                 & Khắc phục dead neuron của ReLU                        \\
-		\hline
-		ELU                     & $f(x) = \begin{cases} x & x > 0 \\ \alpha(e^x - 1) & x \leq 0 \end{cases}$ & Smooth, tốt hơn ReLU nhưng chậm hơn                   \\
-		\hline
-		Sigmoid                 & $f(x) = \frac{1}{1+e^{-x}}$                                                & Dễ hiểu nhưng dễ bị vanishing gradient                \\
-		\hline
-		Tanh                    & $f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$                                 & Đầu ra trong $[-1, 1]$, tốt hơn Sigmoid               \\
-		\hline
-	\end{tabular}
-	\label{tab:activation}
-\end{table}
-
-\subsubsection{Pooling và Bất biến dịch chuyển}
-Lớp Pooling thực hiện giảm chiều dữ liệu (\textit{down-sampling}) để giảm chi phí tính toán và tăng tính bất biến với các biến dạng nhẹ. Có hai loại phổ biến:
-\begin{itemize}
-	\item \textbf{Max Pooling:} Chọn giá trị lớn nhất trong vùng lân cận (giữ lại đặc trưng nổi bật nhất).
-	      \begin{figure}[H]
-		      \centering
-		      \includegraphics[width=0.95\linewidth]{Images/CNN_3.png}
-		      \vspace{10pt}
-		      \caption{Mô phỏng đơn giản về Max Pooling}
-		      \label{fig:max-pooling}
-	      \end{figure}
-	\item \textbf{Average Pooling:} Tính giá trị trung bình trong vùng lân cận (làm mượt đặc trưng).
-	      \begin{figure}[H]
-		      \centering
-		      \includegraphics[width=0.95\linewidth]{Images/CNN_4.png}
-		      \vspace{10pt}
-		      \caption{Mô phỏng đơn giản về Average Pooling}
-		      \label{fig:average-pooling}
-	      \end{figure}
-\end{itemize}
-
-Về mặt toán học, với một vùng lân cận $R_{i,j}$ kích thước $K \times K$ và stride $S$, công thức tính kích thước đầu ra sau Pooling (không padding) là:
-\begin{equation}
-	H_{out} = \left\lfloor \frac{H_{in} - K}{S} \right\rfloor + 1
-\end{equation}
-
-Đối với OCR, lớp này giúp mô hình nhận diện được ký tự ngay cả khi nó bị dịch chuyển nhẹ hoặc co giãn trong ảnh (\textit{Translation Invariance}).
-
-\begin{table}[H]
-	\centering
-	\caption{So sánh các loại Pooling}
-	\begin{tabularx}{\textwidth}{|l|X|X|}
-		\hline
-		\textbf{Loại Pooling} & \textbf{Định nghĩa}                                             & \textbf{Ứng dụng}         \\
-		\hline
-		Max Pooling           & $y_{i,j} = \max_{(p,q) \in R_{i,j}} x_{p,q}$                    & Giữ lại feature mạnh nhất \\
-		\hline
-		Average Pooling       & $y_{i,j} = \frac{1}{|R_{i,j}|}\sum_{(p,q) \in R_{i,j}} x_{p,q}$ & Làm mịn features          \\
-		\hline
-		L2 Pooling            & $y_{i,j} = \sqrt{\sum_{(p,q) \in R_{i,j}} x_{p,q}^2}$           & Cân bằng hơn Max Pooling  \\
-		\hline
-	\end{tabularx}
-	\label{tab:pooling}
-\end{table}
-
-\subsection{Mô hình hóa chuỗi (Sequence Modeling) với RNN}
-Sau khi CNN trích xuất các đặc trưng hình ảnh, đầu ra là một chuỗi các vector đặc trưng $X = [x_1, x_2, ..., x_T]$, trong đó $T$ là chiều dài của chuỗi (tương ứng với chiều rộng của ảnh sau khi down-sampling). Tuy nhiên, CNN chỉ nắm bắt được thông tin cục bộ và thiếu khả năng xử lý ngữ cảnh chuỗi. Để giải quyết vấn đề này, Mạng Nơ-ron Hồi quy (RNN) được sử dụng.
-
-\subsection{Hạn chế của RNN truyền thống và giải pháp LSTM}
-Mạng RNN truyền thống cập nhật trạng thái ẩn $h_t$ dựa trên đầu vào hiện tại $x_t$ và trạng thái trước đó $h_{t-1}$:
-
-\begin{equation}
-	h_t = \tanh(W_{xh}x_t + W_{hh}h_{t-1} + b)
-\end{equation}
-
-Tuy nhiên, RNN thường gặp vấn đề \textit{biến mất đạo hàm} (vanishing gradient) khi xử lý các chuỗi dài, khiến nó không thể học được sự phụ thuộc xa. Để khắc phục, kiến trúc \textbf{Long Short-Term Memory (LSTM)} được đề xuất với cơ chế cổng (gating mechanism) bao gồm: cổng quên ($f_t$), cổng vào ($i_t$) và cổng ra ($o_t$), giúp điều tiết dòng thông tin qua các trạng thái tế bào ($c_t$).
 
 \section{Phân loại văn bản với RNN \& Transformer}
 \subsection{Tổng quan về Xử lý ngôn ngữ tự nhiên và Phân tích cảm xúc}
@@ -606,6 +468,8 @@ Văn bản được tách từ dựa trên khoảng trắng và ánh xạ vào m
 
 \subsubsubsection{Biểu diễn cho mô hình BERT}
 Sử dụng bộ \texttt{BertTokenizer} từ kiến trúc \texttt{bert-base-uncased} với thuật toán \textbf{WordPiece}. Kích thước từ vựng đạt $30,522$ token. Các chuỗi được xử lý tự động để đạt độ dài cố định \texttt{MAX\_LEN = 512}.
+
+\textit{Ghi chú: Trong môi trường triển khai thực tế, kỹ thuật \textbf{Dynamic Padding} (đệm theo batch thay vì đệm toàn cục về 512 token) có thể giảm đáng kể chi phí tính toán và tăng tốc độ suy diễn, vì phần lớn các đoạn văn bản trong thực tế ngắn hơn nhiều so với 512 token.}
 
 \subsubsection{Kiến trúc Đề xuất 1: Mạng Bi-LSTM tích hợp Gộp đặc trưng (Pooling)}
 Mô hình \texttt{LSTMClassifier} bao gồm các tầng chức năng sau:
@@ -801,10 +665,657 @@ Phân tích 4 thành phần $TP, TN, FP, FN$ cung cấp góc nhìn vi mô về c
 \subsubsection{Tiểu kết}
 Kết quả thực nghiệm đã minh chứng định lượng sức mạnh biểu diễn vượt trội của mô hình BERT. Bằng cách tận dụng cơ chế Tự chú ý và không gian kiến thức học chuyển giao, BERT không chỉ thiết lập mức hiệu suất $94.32\%$ mà còn duy trì độ bền vững tuyệt đối trước các văn bản có cấu trúc đánh lừa. Về phần mình, kiến trúc Bi-LSTM với ma trận GloVe, dù có hiện tượng quá khớp và độ chính xác thấp hơn ($89.50\%$), vẫn chứng minh được giá trị thực tiễn trong các bài toán yêu cầu chi phí tham số thấp và tốc độ suy diễn nhanh.
 
+\subsection{Kết luận}
+
+\subsubsection{Kết luận chung}
+Nghiên cứu này đã hoàn thành xuất sắc các mục tiêu đề ra ban đầu thông qua việc xây dựng, tinh chỉnh và đối sánh toàn diện hai kiến trúc học sâu đại diện cho hai thế hệ công nghệ trong Xử lý Ngôn ngữ Tự nhiên (NLP): Mạng nơ-ron hồi quy hai chiều (Bi-LSTM) kết hợp không gian nhúng từ GloVe, và Mô hình ngôn ngữ lớn dựa trên kiến trúc Transformer (BERT). Quá trình thực nghiệm trên tập dữ liệu đánh giá điện ảnh IMDb quy mô 50,000 mẫu đã cung cấp những minh chứng định lượng và định tính rõ nét, cho phép rút ra các kết luận trọng tâm sau:
+
+\begin{enumerate}
+	\item \textbf{Sự dịch chuyển mô hình (Paradigm Shift) và Sức mạnh của Học chuyển giao (Transfer Learning):} Việc áp dụng kỹ thuật tinh chỉnh (fine-tuning) trên mô hình \texttt{bert-base-uncased} đã thiết lập một cột mốc hiệu suất vượt trội. Kiến trúc Transformer đạt độ chính xác (Accuracy) trên tập kiểm thử lên tới $94.32\%$ và điểm F1-Score là $0.9432$, với hàm suy hao (Test Loss) ở mức $0.2511$. Cơ chế Tự chú ý (Self-Attention) cho phép mạng tính toán tương quan toàn cục của mọi từ vựng trong câu cùng một thời điểm, giúp giải quyết triệt để rào cản về "khoảng cách ngữ nghĩa" mà các mạng tuần tự thường gặp phải. Khả năng thừa hưởng tri thức ngôn ngữ từ quá trình tiền huấn luyện (pre-training) giúp BERT hội tụ cực nhanh chỉ sau 3 epoch.
+
+	\item \textbf{Giới hạn của Kiến trúc Quy hồi (RNN) trước bài toán Ngữ cảnh dài:}\\
+	      Mô hình Bi-LSTM, mặc dù đã được tối ưu hóa bằng cách kết hợp ma trận nhúng GloVe 100 chiều và chiến lược gộp đặc trưng kép (Average Pooling kết hợp Max Pooling), vẫn bộc lộ những hạn chế cố hữu. Hiệu suất mô hình đạt đỉnh ở mức $89.50\%$ độ chính xác. Phân tích động lực học huấn luyện chỉ ra rằng Bi-LSTM rất dễ rơi vào trạng thái quá khớp (overfitting) nghiêm trọng khi xử lý dữ liệu phức tạp trong thời gian dài (độ chính xác tập huấn luyện đạt $99.62\%$ nhưng hàm mất mát trên tập kiểm định lại phân kỳ lên mức $1.3039$). Kiến trúc xử lý tuần tự khiến thông tin bị suy hao khi khoảng cách giữa các từ mang tính quyết định cảm xúc và các hư từ (như từ phủ định) cách xa nhau.
+
+	\item \textbf{Giá trị thực tiễn và Sự đánh đổi (Trade-off) trong triển khai:}\\
+	      Bất chấp sự chênh lệch xấp xỉ $5\%$ về độ chính xác, kiến trúc Bi-LSTM vẫn duy trì được giá trị thực tiễn nhất định. So với hệ thống khổng lồ chứa hơn 109 triệu tham số của BERT, mạng LSTM có kiến trúc gọn nhẹ hơn đáng kể, đòi hỏi ít tài nguyên phần cứng (VRAM) và thời gian suy diễn (inference time) nhanh hơn. Việc lựa chọn mô hình trong môi trường công nghiệp thực tế sẽ phụ thuộc vào bài toán tối ưu hóa giữa yêu cầu khắt khe về độ chính xác và ràng buộc về năng lực điện toán.
+\end{enumerate}
+
+\subsubsection{Hạn chế của nghiên cứu}
+Bên cạnh các thành tựu đạt được về mặt phương pháp luận và thực nghiệm, đồ án vẫn còn tồn tại một số rào cản mang tính hệ thống cần được nhìn nhận một cách khách quan:
+
+\begin{itemize}
+	\item \textbf{Rào cản về độ dài chuỗi đầu vào và khó khăn trong huấn luyện LSTM:} Kiến trúc BERT được cấu hình với chiều dài chuỗi tối đa là 512 token, trong khi mô hình Bi-LSTM bị giới hạn ở 256 token để tránh hiện tượng bùng nổ thời gian huấn luyện và tràn bộ nhớ. Sự chênh lệch này có thể tạo ra một lợi thế nhất định cho BERT khi tiếp cận các văn bản cực dài. Hơn nữa, việc áp đặt cơ chế cắt xén (truncation) phần đuôi văn bản chứa đựng rủi ro làm mất đi các luận điểm chốt mang tính quyết định ở cuối bài đánh giá.
+	\item \textbf{Tính chất phân loại nhị phân (Binary Classification Constraint):} Việc ép buộc phổ thái độ và cảm xúc phức tạp của con người vào hai lớp duy nhất (Tích cực và Tiêu cực) đã vô hình trung triệt tiêu các sắc thái đánh giá trung lập (Neutral) hoặc các bình luận mang tính đa chiều (khen chê đan xen ở mức độ ngang nhau).
+\end{itemize}
+
+\section{Phân loại ảnh với CNN \& ViT}
+
+\subsection{Mở đầu}
+
+\subsubsection{Lý do chọn đề tài}
+Phân loại ảnh là một trong những bài toán nền tảng và quan trọng nhất trong lĩnh vực Thị giác máy tính (Computer Vision). Sự bùng nổ của Học sâu (Deep Learning), đặc biệt là các Mạng nơ-ron tích chập (CNN) và gần đây là Vision Transformers (ViT), đã mang lại những bước tiến đột phá trong khả năng nhận dạng và trích xuất đặc trưng hình ảnh. Tuy nhiên, việc lựa chọn kiến trúc mô hình, phương pháp huấn luyện (từ đầu hay học chuyển giao), cũng như tối ưu hóa siêu tham số (hyperparameters) luôn là thách thức lớn. Nghiên cứu này được thực hiện nhằm đánh giá toàn diện hiệu năng của các phương pháp tiếp cận khác nhau, từ việc tự thiết kế một mạng CNN đặc tả cho ảnh độ phân giải thấp, đến việc tận dụng tri thức từ các mô hình khổng lồ thông qua Transfer Learning.
+
+\subsubsection{Mục tiêu nghiên cứu}
+Nghiên cứu tập trung vào việc hiện thực hóa và so sánh hiệu suất phân loại của bốn phương pháp tiếp cận trên tập dữ liệu CIFAR-10:
+\begin{itemize}
+	\item Xây dựng và huấn luyện từ đầu một kiến trúc mạng phần dư tùy chỉnh (Custom ResNet) dành riêng cho ảnh kích thước nhỏ $32 \times 32$.
+	\item Áp dụng kỹ thuật tinh chỉnh toàn bộ trọng số (Fine-tuning) trên mô hình Pre-trained ResNet18.
+	\item Sử dụng mô hình Pre-trained ResNet18 như một bộ trích xuất đặc trưng tĩnh (Frozen Backbone).
+	\item Sử dụng mô hình Pre-trained Vision Transformer (ViT-B/16) như một bộ trích xuất đặc trưng tĩnh (Frozen Backbone).
+\end{itemize}
+
+\subsubsection{Phạm vi nghiên cứu}
+Nghiên cứu được giới hạn trên tập dữ liệu chuẩn CIFAR-10, bao gồm 10 lớp đối tượng cơ bản. Quá trình đánh giá không chỉ dừng lại ở các độ đo thống kê (Accuracy, F1-score) mà còn mở rộng sang khả năng suy luận trên dữ liệu thực tế ngoài phân bố (out-of-distribution) và phân tích tính giải thích của mô hình thông qua thuật toán Grad-CAM.
+
+\subsection{Cơ sở lý thuyết}
+
+\subsubsection{Giới thiệu về thuật toán CNN}\label{sec:dataset}
+
+Trong bài toán phân loại ảnh, Mạng Nơ-ron Tích chập (Convolutional Neural Network - CNN) không đơn thuần là một bộ phân loại (classifier) mà đóng vai trò là bộ mã hóa đặc trưng thị giác (\textit{Visual Feature Encoder}). Mục tiêu của nó là ánh xạ hình ảnh đầu vào $I \in \mathbb{R}^{H \times W \times C}$ (với $H, W, C$ lần lượt là chiều cao, chiều rộng và số kênh màu) thành một bản đồ đặc trưng (feature map) trừu tượng $X \in \mathbb{R}^{H' \times W' \times D}$.
+
+\subsubsubsection{Động lực và ý tưởng cốt lõi}
+Trước khi đi sâu vào kiến trúc, cần xem xét lý do CNN vượt trội hơn các mạng MLP (Multi-layer Perceptron) truyền thống trong xử lý ảnh:
+
+\begin{enumerate}
+	\item \textbf{Vấn đề bùng nổ tham số:} Nếu áp dụng MLP fully-connected trực tiếp lên một ảnh có kích thước lớn (ví dụ $1000 \times 1000$ pixels), số lượng trọng số sẽ tăng lên khổng lồ (lên tới $10^{12}$ cho một lớp ẩn), dẫn đến việc mô hình dễ bị \textit{overfitting} và tiêu tốn tài nguyên tính toán không cần thiết.
+	\item \textbf{Cấu trúc không gian (Spatial Structure):} MLP coi các pixel là độc lập, trong khi hình ảnh có tính chất cục bộ (\textit{feature localization}) - các pixel lân cận có mối quan hệ mật thiết, và tính chất bất biến vị trí (\textit{translation invariance}) - một đặc trưng (như cạnh, góc) có ý nghĩa như nhau dù xuất hiện ở vị trí nào trong ảnh.
+\end{enumerate}
+
+Để giải quyết vấn đề này, CNN sử dụng ba cơ chế tính toán chính: \textbf{Local Receptive Fields} (Vùng cảm nhận cục bộ), \textbf{Shared Weights} (Chia sẻ trọng số) và \textbf{Spatial Subsampling} (Lấy mẫu không gian).
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{Images/CNN_1.png}
+	\vspace{10pt}
+	\caption{Cơ chế tính toán của CNN}
+	\label{fig:cnn-mechanism}
+\end{figure}
+
+\subsubsubsection{Các thành phần toán học và kiến trúc}
+
+\textbf{Phép toán tích chập (Convolution Operation)}
+
+Đây là lớp cốt lõi dùng để trích xuất các đặc trưng cục bộ. Thay vì kết nối đầy đủ, CNN sử dụng một bộ lọc (kernel/filter) $K$ có kích thước nhỏ $K_h \times K_w$ trượt qua toàn bộ ảnh.
+
+Với một ảnh đầu vào $I$ và bộ lọc $K$, giá trị của bản đồ đặc trưng đầu ra $S$ tại vị trí $(i, j)$ được tính bằng công thức tích chập rời rạc:
+
+\begin{equation}
+	S(i, j) = (I * K)(i, j) = \sum_{u=0}^{K_h-1} \sum_{v=0}^{K_w-1} I(i - u, j - v) \cdot K(u, v)
+\end{equation}
+
+Ngoài ra, trong các ứng dụng thực tế về thị giác máy tính, một lớp tích chập thường được biểu diễn dưới dạng:
+\begin{equation}
+	Y = \sigma(W * X + b)
+\end{equation}
+trong đó $W$ là kernel, $X$ là input, $b$ là bias, và $\sigma$ là hàm activation.
+
+Ngoài kích thước bộ lọc, hai siêu tham số quan trọng kiểm soát kiến trúc là:
+\begin{itemize}
+	\item \textbf{Padding ($P$):} Thêm các pixel giả (thường là 0) xung quanh biên ảnh để kiểm soát kích thước đầu ra và tránh mất thông tin ở rìa ảnh.
+	\item \textbf{Stride ($S$):} Bước nhảy của bộ lọc khi trượt trên ảnh. Stride càng lớn thì kích thước đầu ra càng nhỏ (giảm độ phân giải không gian).
+\end{itemize}
+
+Kích thước của Feature Map đầu ra ($H_{out} \times W_{out}$) được tính theo công thức:
+\begin{equation}
+	H_{out} = \left\lfloor \frac{H_{in} + 2P - K_h}{S} \right\rfloor + 1; \quad
+	W_{out} = \left\lfloor \frac{W_{in} + 2P - K_w}{S} \right\rfloor + 1
+\end{equation}
+
+Trong bài toán thị giác máy tính, các lớp tích chập đầu tiên sẽ học các đặc trưng cấp thấp (\textit{low-level features}) như các cạnh (edges), góc (corners). Các lớp sâu hơn sẽ tổ hợp lại để nhận diện các bộ phận của vật thể và cấu trúc tổng thể của đối tượng.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Images/CNN_2.png}
+	\vspace{10pt}
+	\caption{Mô phỏng đơn giản về Convolution Layer}
+	\label{fig:conv-layer}
+\end{figure}
+
+\textbf{Hàm kích hoạt phi tuyến (Non-linearity)}
+
+Sau mỗi phép tích chập, một hàm kích hoạt phi tuyến được áp dụng để mô hình có thể học được các mối quan hệ phức tạp. Hàm phổ biến nhất là \textbf{ReLU (Rectified Linear Unit)}, giúp giảm thiểu vấn đề biến mất đạo hàm (\textit{vanishing gradient}) và tăng tốc độ hội tụ:
+
+\begin{equation}
+	f(x) = \max(0, x)
+\end{equation}
+
+Ngoài ReLU, có nhiều hàm activation khác được sử dụng trong các kiến trúc CNN hiện đại:
+
+\begin{table}[h!]
+	\centering
+	\caption{So sánh các hàm Activation phổ biến}
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Hàm Activation} & \textbf{Công thức}                                                         & \textbf{Ưu điểm/Nhược điểm}                           \\
+		\hline
+		ReLU                    & $f(x) = \max(0, x)$                                                        & Nhanh, tránh vanishing gradient, nhưng có dead neuron \\
+		\hline
+		Leaky ReLU              & $f(x) = \max(\alpha x, x)$                                                 & Khắc phục dead neuron của ReLU                        \\
+		\hline
+		ELU                     & $f(x) = \begin{cases} x & x > 0 \\ \alpha(e^x - 1) & x \leq 0 \end{cases}$ & Smooth, tốt hơn ReLU nhưng chậm hơn                   \\
+		\hline
+		Sigmoid                 & $f(x) = \frac{1}{1+e^{-x}}$                                                & Dễ hiểu nhưng dễ bị vanishing gradient                \\
+		\hline
+		Tanh                    & $f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$                                 & Đầu ra trong $[-1, 1]$, tốt hơn Sigmoid               \\
+		\hline
+	\end{tabular}
+	\label{tab:activation}
+\end{table}
+
+\textbf{Pooling và Bất biến dịch chuyển}
+
+Lớp Pooling thực hiện giảm chiều dữ liệu (\textit{down-sampling}) để giảm chi phí tính toán và tăng tính bất biến với các biến dạng nhẹ. Có hai loại phổ biến:
+\begin{itemize}
+	\item \textbf{Max Pooling:} Chọn giá trị lớn nhất trong vùng lân cận (giữ lại đặc trưng nổi bật nhất).
+	      \begin{figure}[H]
+		      \centering
+		      \includegraphics[width=0.95\linewidth]{Images/CNN_3.png}
+		      \vspace{10pt}
+		      \caption{Mô phỏng đơn giản về Max Pooling}
+		      \label{fig:max-pooling}
+	      \end{figure}
+	\item \textbf{Average Pooling:} Tính giá trị trung bình trong vùng lân cận (làm mượt đặc trưng).
+	      \begin{figure}[H]
+		      \centering
+		      \includegraphics[width=0.95\linewidth]{Images/CNN_4.png}
+		      \vspace{10pt}
+		      \caption{Mô phỏng đơn giản về Average Pooling}
+		      \label{fig:average-pooling}
+	      \end{figure}
+\end{itemize}
+
+Về mặt toán học, với một vùng lân cận $R_{i,j}$ kích thước $K \times K$ và stride $S$, công thức tính kích thước đầu ra sau Pooling (không padding) là:
+\begin{equation}
+	H_{out} = \left\lfloor \frac{H_{in} - K}{S} \right\rfloor + 1
+\end{equation}
+
+Đối với bài toán nhận dạng đối tượng, lớp này giúp mô hình nhận diện được vật thể ngay cả khi nó bị dịch chuyển nhẹ hoặc co giãn trong ảnh (\textit{Translation Invariance}).
+
+\begin{table}[H]
+	\centering
+	\caption{So sánh các loại Pooling}
+	\begin{tabularx}{\textwidth}{|l|X|X|}
+		\hline
+		\textbf{Loại Pooling} & \textbf{Định nghĩa}                                             & \textbf{Ứng dụng}         \\
+		\hline
+		Max Pooling           & $y_{i,j} = \max_{(p,q) \in R_{i,j}} x_{p,q}$                    & Giữ lại feature mạnh nhất \\
+		\hline
+		Average Pooling       & $y_{i,j} = \frac{1}{|R_{i,j}|}\sum_{(p,q) \in R_{i,j}} x_{p,q}$ & Làm mịn features          \\
+		\hline
+		L2 Pooling            & $y_{i,j} = \sqrt{\sum_{(p,q) \in R_{i,j}} x_{p,q}^2}$           & Cân bằng hơn Max Pooling  \\
+		\hline
+	\end{tabularx}
+	\label{tab:pooling}
+\end{table}
+
+\subsubsection{Mạng Phần dư (Residual Networks - ResNet)}
+
+Khi thiết kế các mạng nơ-ron tích chập (CNN) với độ sâu lớn nhằm trích xuất các đặc trưng ngữ nghĩa phức tạp (high-level semantic features), quá trình huấn luyện thường đối mặt với hai rào cản lớn: hiện tượng triệt tiêu đạo hàm (vanishing gradient) và sự suy thoái hiệu suất (degradation problem). Mặc dù các kỹ thuật như chuẩn hóa theo lô (Batch Normalization) đã phần nào giải quyết vấn đề đạo hàm, hiện tượng suy thoái vẫn khiến cho mạng càng sâu thì sai số huấn luyện càng tăng. Kiến trúc Mạng phần dư (Residual Networks - ResNet) đã đề xuất một mô thức học hoàn toàn mới để khắc phục triệt để vấn đề này thông qua các cơ chế định tuyến tín hiệu tiên tiến.
+
+\subsubsubsection{Cơ chế Kết nối tắt (Skip Connections)}
+
+Thay vì kỳ vọng một chuỗi các lớp (layers) xếp chồng lên nhau có thể xấp xỉ trực tiếp hàm mục tiêu lý tưởng $\mathcal{H}(\mathbf{x})$, ResNet thay đổi hướng tiếp cận bằng cách ép các lớp này xấp xỉ một hàm phần dư (residual function) $\mathcal{F}(\mathbf{x})$. Hàm phần dư được định nghĩa là sự chênh lệch giữa hàm mục tiêu và vector đầu vào: $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$.
+
+Từ đó, ánh xạ đầu ra của một khối phần dư (Residual Block) được biểu diễn toán học như sau:
+\begin{equation}
+	\mathbf{y} = \mathcal{F}(\mathbf{x}, \{W_i\}) + \mathbf{x}
+\end{equation}
+
+Trong phương trình này:
+\begin{itemize}
+	\item $\mathbf{x}$ và $\mathbf{y}$ lần lượt là vector đặc trưng đầu vào và đầu ra của khối phần dư.
+	\item Khối $\mathcal{F}(\mathbf{x}, \{W_i\})$ đại diện cho quá trình biến đổi phi tuyến thông qua các lớp tích chập với tập trọng số $W_i$.
+	\item Phép toán cộng $\mathcal{F}(\mathbf{x}) + \mathbf{x}$ chính là hiện thân của "kết nối tắt" (skip connection hay shortcut connection), cho phép thông tin và đạo hàm có thể lan truyền trực tiếp qua các cấu trúc mạng sâu mà không bị suy hao.
+\end{itemize}
+
+Trong khuôn khổ của nghiên cứu, cấu trúc này được hiện thực hóa mã nguồn thông qua lớp \texttt{ResidualBlock}, nơi kết nối tắt được tính toán trực tiếp bằng vòng lặp cộng dồn tensor đầu vào với đầu ra của lớp tích chập qua phép gán \texttt{x = layer(x) + x}. Đối với những khối mà không gian đặc trưng (spatial dimensions) hoặc số kênh (channels) bị thay đổi, một phép biến đổi tuyến tính $W_s$ (thường là tích chập kích thước $1 \times 1$) sẽ được áp dụng lên $\mathbf{x}$ để đảm bảo tính đồng nhất về mặt kích thước trước khi thực hiện phép cộng ma trận:
+\begin{equation}
+	\mathbf{y} = \mathcal{F}(\mathbf{x}, \{W_i\}) + W_s \mathbf{x}
+\end{equation}
+
+\subsubsubsection{Cấu trúc Tiền kích hoạt (Pre-activation)}
+
+Trong kiến trúc ResNet nguyên bản, thứ tự các phép toán bên trong một khối phần dư thường được sắp xếp theo chuỗi tiêu chuẩn: Tích chập (Convolution) $\rightarrow$ Chuẩn hóa theo lô (Batch Normalization - BN) $\rightarrow$ Hàm kích hoạt (ReLU). Tuy nhiên, để tối ưu hóa hơn nữa luồng lan truyền ngược (backward pass) của đạo hàm khi mạng trở nên rất sâu, nghiên cứu này đã áp dụng biến thể Tiền kích hoạt (Pre-activation) cho mạng tự thiết kế (Custom ResNet).
+
+Trong cấu trúc \texttt{PreActConvLayer} được đề xuất, trình tự xử lý tín hiệu được tái cấu trúc thành: Chuẩn hóa theo lô $\rightarrow$ Hàm kích hoạt ReLU $\rightarrow$ Tích chập. Phương trình toán học cho chuỗi biến đổi khối này được viết lại như sau:
+\begin{equation}
+	\mathbf{x}_{out} = \text{Conv}(\text{ReLU}(\text{BatchNorm}(\mathbf{x}_{in})))
+\end{equation}
+
+Việc đưa hàm chuẩn hóa và hàm kích hoạt phi tuyến lên trước phép tích chập mang lại hai lợi ích lý thuyết quan trọng để cải thiện hiệu suất:
+\begin{enumerate}
+	\item \textbf{Tính trơn tru trong tối ưu hóa (Ease of optimization):} Thiết kế này giữ cho trục kết nối tắt truyền tín hiệu thẳng từ đầu vào đến đầu ra mà không phải đi qua bất kỳ phép biến đổi phi tuyến nào sau phép cộng. Điều này giúp luồng gradient truyền ngược trở về các lớp nông (shallow layers) một cách nguyên vẹn nhất, gia tăng tốc độ hội tụ của hệ thống.
+	\item \textbf{Khả năng điều chuẩn (Regularization effect):} Vì phép chuẩn hóa theo lô (BN) được áp dụng trực tiếp lên đầu vào $\mathbf{x}_{in}$ thay vì đầu ra của lớp tích chập, nó cung cấp một hiệu ứng nhiễu có lợi ở mức độ thấp, hoạt động như một cơ chế điều chuẩn tự nhiên giúp giảm thiểu khả năng mạng bị quá khớp (overfitting) trong quá trình huấn luyện.
+\end{enumerate}
+
+\subsubsection{Vision Transformer - ViT}
+
+Sự ra đời của kiến trúc Transformer ban đầu dành riêng cho Xử lý Ngôn ngữ Tự nhiên (NLP) đã tạo ra một sự chuyển dịch mô thức mạnh mẽ. Vision Transformer (ViT) là bước đột phá mang triết lý đó áp dụng trực tiếp vào lĩnh vực Thị giác máy tính, loại bỏ hoàn toàn sự phụ thuộc vào các phép toán tích chập cục bộ truyền thống. Trong nghiên cứu này, phiên bản mô hình \texttt{ViT\_B\_16} được triển khai nhằm đối sánh trực tiếp với kiến trúc phần dư ResNet.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\linewidth]{Images/vit.png}
+	\vspace{10pt}
+	\caption{Tổng quan kiến trúc phân loại hình ảnh Vision Transformer (ViT)}
+	\label{fig:vit-architecture}
+\end{figure}
+
+\subsubsubsection{Cơ chế Phân mảnh và Biểu diễn Tuyến tính (Patch Embedding)}
+
+Khác biệt cốt lõi của ViT so với CNN nằm ở cách tiếp cận hình ảnh. ViT xử lý bức ảnh đầu vào dưới dạng một chuỗi (sequence) các mảnh ảnh nhỏ (patches) tương tự như các chuỗi từ vựng trong văn bản. Cụ thể, với dữ liệu ảnh đầu vào được chuẩn hóa lên không gian $224 \times 224$ và 3 kênh màu, kiến trúc \texttt{ViT\_B\_16} sẽ chia nhỏ bức ảnh thành các mảnh không chồng chéo có kích thước cố định là $16 \times 16$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{Images/vit-patch.png}
+	\vspace{10pt}
+	\caption{Minh họa quá trình cắt hình ảnh gốc thành hệ lưới các mảnh ảnh}
+	\label{fig:vit-patch}
+\end{figure}
+
+Giả sử bức ảnh đầu vào được ký hiệu là $\mathbf{x} \in \mathbb{R}^{H \times W \times C}$, nó sẽ được phân rã thành $N = \frac{HW}{P^2}$ mảnh ảnh $\mathbf{x}_p \in \mathbb{R}^{N \times (P^2 \cdot C)}$, với $(P, P)$ là độ phân giải của mỗi mảnh.
+Mỗi mảnh ảnh sau đó được làm phẳng và đi qua một phép chiếu tuyến tính (linear projection) $E$ để chuyển đổi thành một vector nhúng 1D có kích thước $D$ bất biến xuyên suốt các lớp của mạng lưới. Phương trình tạo chuỗi vector nhúng được biểu diễn như sau:
+\begin{equation}
+	\mathbf{z}_0 = [\mathbf{x}_{class}; \mathbf{x}_{p}^1 E; \mathbf{x}_{p}^2 E; \dots; \mathbf{x}_{p}^N E] + \mathbf{E}_{pos}
+\end{equation}
+Trong đó, $\mathbf{x}_{class}$ là một tham số học thuyết (Learnable Classification Token - thường được gọi là \texttt{[CLS] token}) được gắn vào đầu chuỗi. Vai trò của token này là tổng hợp và nén thông tin từ toàn bộ các mảnh ảnh để phục vụ cho tác vụ phân loại ở đầu ra cuối cùng. $\mathbf{E}_{pos}$ là ma trận mã hóa vị trí (Positional Encoding) dạng 1D, được cộng trực tiếp vào các vector nhúng để giúp mô hình bù đắp lại thông tin cấu trúc không gian đã bị mất khi phân mảnh ảnh.
+
+\subsubsubsection{Khối Mã hóa Transformer (Transformer Encoder) và Cơ chế Tự chú ý}
+
+Cốt lõi sức mạnh của ViT nằm ở bộ mã hóa Transformer (Encoder) với kiến trúc xếp chồng nhiều tầng. Trái tim của mỗi khối Encoder là cơ chế Tự chú ý nhiều luồng (Multi-Head Self-Attention - MHSA). MHSA cho phép mạng nơ-ron đánh giá và tính toán mối tương quan giữa một mảnh ảnh bất kỳ với toàn bộ các mảnh ảnh khác, tạo ra một trường nhìn toàn cục (global receptive field) ngay từ những lớp trích xuất đầu tiên.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{Images/transformer.png}
+	\vspace{10pt}
+	\caption{Kiến trúc Transformer nguyên bản với khối Encoder và Cơ chế Attention}
+	\label{fig:transformer-encoder}
+\end{figure}
+
+Quá trình tính toán hệ số chú ý (Attention) được thực hiện thông qua ba ma trận biến đổi tuyến tính: Truy vấn (Query - $Q$), Khóa (Key - $K$), và Giá trị (Value - $V$). Ma trận điểm số chú ý (Attention score) được tính toán theo phương trình:
+\begin{equation}
+	\text{Attention}(Q, K, V) = \text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+\end{equation}
+Trong đó, $d_k$ là số chiều của vector khóa, hoạt động như một hệ số điều chuẩn (scaling factor) nhằm ngăn chặn hiện tượng bão hòa đạo hàm khi lan truyền qua hàm Softmax. Đầu ra của cơ chế MHSA sau đó được đưa qua Mạng nơ-ron truyền thẳng (Feed-Forward Network) kết hợp với các lớp Chuẩn hóa tầng (Layer Normalization). Trong thực nghiệm phân tích khả năng diễn giải bằng Grad-CAM, chính lớp chuẩn hóa \texttt{ln\_1} thuộc khối mã hóa cuối cùng (\texttt{encoder.layers[-1].ln\_1}) đã được cô lập làm lớp mục tiêu để trích xuất bản đồ nhiệt, phản ánh các khu vực không gian mang tính quyết định. Do đầu ra của ViT là chuỗi 1D, một hàm biến đổi hình dáng (reshape transform) đã được định nghĩa để ánh xạ chuỗi này ngược về không gian lưới 2D kích thước $14 \times 14$ trước khi nội suy.
+
+\subsubsubsection{Áp dụng ViT trong Thực nghiệm Học chuyển giao (Transfer Learning)}
+
+Trong khuôn khổ báo cáo, mô hình \texttt{ViT\_B\_16} được khởi tạo với tập trọng số tối ưu từ ImageNet (\texttt{IMAGENET1K\_V1}). Thay vì thực hiện tinh chỉnh toàn bộ hệ thống (Fine-tuning), nghiên cứu áp dụng chiến lược Học chuyển giao đặc trưng tĩnh (Frozen Backbone). Theo đó, toàn bộ các tham số cấu thành mạng bộ mã hóa đều bị đóng băng, vô hiệu hóa việc cập nhật thông qua lệnh \texttt{param.requires\_grad = False}.
+
+Mô hình chỉ tháo gỡ lớp phân loại nguyên bản (\texttt{heads.head}) và cấu trúc lại bằng một lớp tuyến tính mới (\texttt{nn.Linear}), ánh xạ trực tiếp từ không gian đặc trưng (\texttt{in\_features}) về 10 nơ-ron đầu ra tương ứng với 10 lớp đối tượng của tập CIFAR-10. Nhờ phương pháp cô lập này, mặc dù tổng dung lượng hệ thống khi triển khai qua cơ chế song song (DataParallel) báo cáo lên tới hơn 483 triệu tham số, số lượng tham số cần huấn luyện thực tế (Trainable params) được nén gọn chỉ còn 23,070 tham số. Thiết kế này tối ưu hóa cực đoan tài nguyên tính toán nhưng vẫn kế thừa trọn vẹn năng lực phân tích hình thái học đỉnh cao của mô hình Transformer.
+
+\subsection{Phương pháp nghiên cứu và mô hình đề xuất}
+
+Quá trình nghiên cứu được thiết kế thành một quy trình (pipeline) khép kín, từ khâu xử lý dữ liệu thô, thiết lập kiến trúc mạng nơ-ron, cho đến chiến lược huấn luyện. Đề tài triển khai ba hướng tiếp cận kiến trúc chính: xây dựng mạng tự thiết kế (Custom CNN), tinh chỉnh mô hình (Fine-tuning) và trích xuất đặc trưng tĩnh (Frozen Backbone).
+
+\subsubsection{Kỹ thuật Tiền xử lý và Tăng cường Dữ liệu (Data Preprocessing \& Augmentation)}
+
+\subsubsubsection{Giới thiệu tập dữ liệu CIFAR-10}
+Nghiên cứu sử dụng tập dữ liệu hình ảnh chuẩn mực CIFAR-10. Tập dữ liệu này bao gồm 10 lớp đối tượng cơ bản: Máy bay (Plane), Ô tô (Car), Chim (Bird), Mèo (Cat), Hươu (Deer), Chó (Dog), Ếch (Frog), Ngựa (Horse), Tàu thủy (Ship) và Xe tải (Truck). Để đảm bảo tính khách quan trong quá trình huấn luyện và xác thực chéo, tập dữ liệu gốc được phân chia ngẫu nhiên (sử dụng \texttt{random\_split} với \texttt{seed=42}) thành hai tập con: tập huấn luyện (Training Set) chứa $40,000$ mẫu và tập xác thực (Validation Set) chứa $10,000$ mẫu. Quá trình nạp dữ liệu (Data Loading) được cấu hình với kích thước lô (batch size) lớn là 512 mẫu/lô để tối ưu hóa việc tính toán gradient trên GPU, kết hợp với tham số \texttt{num\_workers=4} nhằm tăng tốc độ tiền xử lý song song.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{Images/cifar10.png}
+	\caption{Tập dữ liệu CIFAR-10 với 10 lớp vật thể}
+	\label{fig:cifar10}
+\end{figure}
+
+\subsubsubsection{Chiến lược Tăng cường Dữ liệu Ảnh}
+Để khắc phục hiện tượng quá khớp (overfitting) do giới hạn về số lượng dữ liệu, hai bộ tiền xử lý hình ảnh riêng biệt đã được lập trình để tương thích với cấu trúc không gian đầu vào của từng loại kiến trúc mạng bằng thư viện \texttt{torchvision.transforms}:
+
+\textbf{1. Bộ biến đổi cho Kiến trúc Custom ResNet ($32 \times 32$):}\\
+Mô hình tự thiết kế nhận đầu vào giữ nguyên độ phân giải gốc $32 \times 32$. Các phương pháp biến đổi ngẫu nhiên được áp dụng trong quá trình huấn luyện bao gồm xoay, lật ngang, điều chỉnh màu sắc, độ sắc nét và xóa ngẫu nhiên (Random Erasing):
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+train_transform_custom = transforms.Compose([
+    transforms.RandomRotation(15),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+    transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.1),
+    transforms.ToTensor(),
+    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    transforms.RandomErasing(p=0.5, scale=(0.02, 0.1), value=1.0, inplace=False)
+])
+\end{minted}
+
+\textbf{2. Bộ biến đổi cho Kiến trúc Pre-trained ($224 \times 224$):}\\
+Đối với các kiến trúc sử dụng học chuyển giao (ResNet18 và ViT), hình ảnh đầu vào bắt buộc phải được nội suy lên kích thước $224 \times 224$. Quá trình chuẩn hóa áp dụng trực tiếp thống kê kênh màu của tập dữ liệu ImageNet:
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+IMAGENET_MEAN, IMAGENET_STD = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+
+train_transform_pretrained = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomRotation(20), # Kích thước ảnh lớn (224x224), phép xoay 20 độ giúp tăng tính tổng quát hóa
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+    transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.1),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+    transforms.RandomErasing(p=0.5, scale=(0.02, 0.1), value=1.0, inplace=False)
+])
+\end{minted}
+
+\subsubsection{Cấu trúc Các Mô hình Đề xuất}
+
+\subsubsubsection{Kiến trúc Custom ResNet (Tự thiết kế)}
+Kiến trúc này được lập trình hướng đối tượng (OOP) thông qua \texttt{torch.nn.Module} nhằm phục vụ riêng cho ảnh kích thước $32 \times 32$. Điểm nhấn của kiến trúc là việc áp dụng cấu trúc Tiền kích hoạt (Pre-activation) thay vì thứ tự tiêu chuẩn.
+
+Khối Tiền kích hoạt (\texttt{PreActConvLayer}) thực hiện chuẩn hóa và kích hoạt trước khi tích chập:
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+class PreActConvLayer(nn.Sequential):
+    """Lop Pre-activation: Chuan hoa, Kich hoat va Tich chap"""
+    def __init__(self, channels):
+        super().__init__(
+            nn.BatchNorm2d(channels),
+            nn.ReLU(inplace=False),
+            conv3x3(channels, channels)
+        )
+\end{minted}
+
+Khối phần dư (\texttt{ResidualBlock}) áp dụng kết nối tắt (skip connection) bằng cách cộng trực tiếp tensor đầu vào \texttt{x} với đầu ra của mảng các lớp tiền kích hoạt:
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+class ResidualBlock(nn.Module):
+    """Khoi Residual voi co che ket noi tat (skip connections)."""
+    def __init__(self, channels, num_layers):
+        super().__init__()
+        self.layers = nn.ModuleList([PreActConvLayer(channels) for _ in range(num_layers)])
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x) + x
+        return x
+\end{minted}
+
+\subsubsubsection{Cấu hình Học chuyển giao (Transfer Learning) cho ResNet18 và ViT}
+Để tái sử dụng tri thức từ tập ImageNet nhưng giảm thiểu khối lượng tính toán, nghiên cứu tiến hành đóng băng (freeze) mạng xương sống và chỉ khởi tạo lại lớp phân loại tuyến tính cuối cùng.
+
+\textbf{Trích xuất đặc trưng tĩnh với Pre-trained ResNet18 Frozen:}\\
+Toàn bộ tham số được duyệt qua và vô hiệu hóa tính toán đạo hàm (\texttt{requires\_grad = False}). Lớp \texttt{fc} cuối cùng được thay thế bằng một lớp tuyến tính ánh xạ ra 10 lớp phân loại của CIFAR-10:
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+model_resnet_frozen = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)
+
+for param in model_resnet_frozen.parameters():
+    param.requires_grad = False
+
+in_features = model_resnet_frozen.fc.in_features
+model_resnet_frozen.fc = nn.Linear(in_features, 10)
+\end{minted}
+
+\textbf{Trích xuất đặc trưng tĩnh với Pre-trained ViT Frozen:}\\
+Tương tự, bộ mã hóa Transformer khổng lồ của \texttt{vit\_b\_16} bị đóng băng. Thay thế lớp \texttt{heads.head} thành \texttt{nn.Linear} để phân loại:
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+vit_model = models.vit_b_16(weights=models.ViT_B_16_Weights.IMAGENET1K_V1)
+
+for param in vit_model.parameters():
+    param.requires_grad = False
+
+in_features = vit_model.heads.head.in_features
+vit_model.heads.head = nn.Linear(in_features, 10)
+\end{minted}
+
+\subsubsection{Thiết lập Huấn luyện và Chiến lược Tối ưu hóa}
+
+Để đảm bảo thuật toán đạt được trạng thái hội tụ lý tưởng tại các điểm cực tiểu toàn cục, quá trình lan truyền ngược được điều hướng bởi bộ tối ưu hóa Adam, kết hợp với hàm Cross-Entropy Loss.
+
+Đặc biệt, kỹ thuật điều chỉnh tốc độ học động (dynamic learning rate) được triển khai thông qua hàm \texttt{ReduceLROnPlateau}. Thuật toán sẽ tự động cắt giảm một nửa tốc độ học hiện tại (\texttt{factor=0.5}) nếu Loss trên tập xác thực không có dấu hiệu suy giảm sau hai chu kỳ huấn luyện liên tiếp (\texttt{patience=2}):
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=lr)
+
+# mode='min': Theo doi val_loss (cang nho cang tot)
+# factor=0.5: Giam LR di mot nua (chia 2) moi lan kich hoat
+# patience=2: Cho 2 epochs, neu loss ko giam, giam LR
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, 
+    mode='min', 
+    factor=0.5, 
+    patience=2
+)
+\end{minted}
+
+Cơ chế này kết hợp cùng với thuật toán dừng sớm (Early Stopping) giúp kiểm soát chặt chẽ quá trình hội tụ, tối ưu hóa thời gian tính toán và ngăn chặn suy thoái mô hình.
+
+\subsubsection{Phương pháp Đánh giá và Khả năng Diễn giải (Evaluation \& Explainability)}
+
+Quá trình kiểm thử tính hiệu quả của các kiến trúc được xây dựng thông qua một tập hợp các phép đo chuẩn mực:
+\begin{itemize}
+	\item \textbf{Đo lường Định lượng:} Sử dụng thư viện \texttt{scikit-learn} để xuất báo cáo phân loại chi tiết (Classification Report) và Ma trận nhầm lẫn (Confusion Matrix). Các chỉ số đánh giá bao gồm: Độ chính xác tổng thể (Accuracy), Độ chuẩn xác (Precision), Độ bao phủ (Recall) và Điểm số F1 (F1-score) cho từng lớp trong không gian CIFAR-10.
+	\item \textbf{Phân tích Định tính và Khả năng Diễn giải (Grad-CAM):} Kỹ thuật Gradient-weighted Class Activation Mapping (Grad-CAM) được áp dụng nhằm trực quan hóa các khu vực hình ảnh mà mạng nơ-ron tập trung cường độ tính toán cao nhất. Bằng cách khai thác đạo hàm lan truyền về lớp \texttt{layer4[-1]} (đối với ResNet) hoặc lớp \texttt{encoder.layers[-1].ln\_1} (đối với ViT), thuật toán sinh ra các bản đồ nhiệt (heatmap) chèn lên ảnh gốc. Quá trình này giúp lý giải sự khác biệt trong tư duy hình học của CNN (tập trung đặc trưng viền cạnh, không gian cục bộ) so với tư duy cơ chế chú ý của ViT (tập trung vào cấu trúc ngữ cảnh toàn cục).
+\end{itemize}
+
+
+\subsection{Thực nghiệm và đánh giá kết quả}
+
+Chương này trình bày và phân tích chi tiết kết quả thực nghiệm đạt được từ bốn cấu hình mô hình học sâu trên tập dữ liệu CIFAR-10. Các đánh giá bao gồm khả năng hội tụ trong quá trình huấn luyện, hiệu năng định lượng trên tập kiểm thử thông qua các độ đo chuẩn mực, khả năng khái quát hóa trên dữ liệu thực tế và phân tích khả năng diễn giải hành vi mô hình bằng thuật toán Grad-CAM.
+
+\subsubsection{Đánh giá Quá trình Huấn luyện và Hội tụ (Training Analysis)}
+
+Quá trình huấn luyện sử dụng bộ tối ưu Adam với kích thước lô (batch size) là 512. Việc giám sát sự hội tụ được thực hiện thông qua biến thiên của hàm mất mát (Loss) và độ chính xác (Accuracy) trên cả tập huấn luyện và tập xác thực.
+
+\subsubsubsection{Phân tích đường cong học tập (Learning Curves)}
+Hệ thống sử dụng hàm \texttt{plot\_models\_comparison} để trực quan hóa lịch sử huấn luyện:
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+def plot_models_comparison(histories_dict):
+    fig, axes = plt.subplots(1, 2, figsize=(16,6))
+    # ... (Ma nguon ve bieu do so sanh Loss va Accuracy)
+\end{minted}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Images/image-trainning-loss.png}
+	\vspace{10pt}
+	\caption{Biểu đồ so sánh Loss và Accuracy của các mô hình trong quá trình huấn luyện}
+	\label{fig:learning-curves}
+\end{figure}
+
+\textbf{Kết quả ghi nhận:}
+\begin{itemize}
+	\item \textbf{Pre-trained ResNet18 (Fine-tuning):} Thể hiện ưu thế tuyệt đối về tốc độ hội tụ nhờ tri thức từ ImageNet. Mô hình đạt độ chính xác trên 90\% chỉ sau 2 epoch. Cơ chế dừng sớm (Early Stopping) đã ngắt quá trình tại epoch 29 khi Validation Loss đạt mức cực tiểu 0.1436.
+	\item \textbf{Custom ResNet ($32 \times 32$):} Do huấn luyện từ đầu (from scratch), mô hình yêu cầu trọn vẹn 50 epoch để đạt trạng thái ổn định. Tuy nhiên, mức Loss cuối cùng (0.5842) vẫn cao hơn đáng kể so với phương pháp Fine-tuning.
+	\item \textbf{Pre-trained ViT (Frozen Backbone):} Dù chỉ huấn luyện lớp phân loại (23,070 tham số), mô hình đạt sự ổn định rất nhanh. Tại epoch 20, mô hình đạt Validation Accuracy ấn tượng là 91.82\%.
+	\item \textbf{Pre-trained ResNet18 (Frozen Backbone):} Đây là mô hình có hiệu suất thấp nhất, dừng lại ở mức 70.78\% accuracy tại epoch 40. Điều này cho thấy bộ trích xuất đặc trưng của CNN khi bị đóng băng không linh hoạt bằng Transformer đối với dữ liệu CIFAR-10.
+\end{itemize}
+
+\subsubsection{Hiệu năng Định lượng trên Tập Kiểm thử (Test Evaluation)}
+
+Sau khi nạp lại bộ trọng số tốt nhất từ các checkpoint lưu trữ, các mô hình được đánh giá trên 10,000 mẫu ảnh kiểm thử chưa từng xuất hiện.
+
+\subsubsubsection{Phân tích Báo cáo Phân loại (Classification Reports)}
+Dữ liệu từ ma trận nhầm lẫn và báo cáo chi tiết cho thấy sự phân hóa rõ rệt:
+
+\begin{table}[H]
+	\centering
+	\caption{So sánh hiệu năng các mô hình trên tập kiểm thử CIFAR-10}
+	\begin{tabular}{|l|c|c|c|c|}
+		\hline
+		\textbf{Mô hình}              & \textbf{Accuracy (\%)} & \textbf{F1-Score (Macro Avg)} & \textbf{Lớp tốt nhất (F1)} & \textbf{Lớp kém nhất (F1)} \\
+		\hline
+		\textbf{ResNet18 Fine-tuning} & \textbf{96\%}          & \textbf{0.96}                 & Ship (0.98)                & Cat (0.91)                 \\
+		\hline
+		\textbf{ViT Frozen}           & \textbf{93\%}          & \textbf{0.93}                 & Car (0.97)                 & Cat (0.87)                 \\
+		\hline
+		\textbf{Custom ResNet}        & \textbf{84\%}          & \textbf{0.84}                 & Car (0.93)                 & Cat (0.66)                 \\
+		\hline
+		\textbf{ResNet18 Frozen}      & \textbf{77\%}          & \textbf{0.77}                 & Ship (0.84)                & Cat (0.64)                 \\
+		\hline
+	\end{tabular}
+	\label{tab:cifar10-results}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{Images/confusionmatrix-custon.png}
+		\caption{Custom ResNet}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{Images/confusionmatrix-pretrain-resnent18.png}
+		\caption{ResNet18 Fine-tuning}
+	\end{subfigure}
+
+	\vspace{0.5cm}
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{Images/confusionmatrix-resnet18-fronze.png}
+		\caption{ResNet18 Frozen}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.48\textwidth}
+		\includegraphics[width=\textwidth]{Images/confusionmatrix-vit.png}
+		\caption{ViT Frozen}
+	\end{subfigure}
+	\vspace{10pt}
+	\caption{Ma trận nhầm lẫn của các mô hình đánh giá trên tập Kiểm thử}
+	\label{fig:confusion-matrices-cifar}
+\end{figure}
+
+\subsubsubsection{Insights và Giải thích chuyên sâu}
+\begin{enumerate}
+	\item \textbf{Sự nhầm lẫn giữa các lớp tương đồng (Semantic Confusion):} Ma trận nhầm lẫn của Custom ResNet chỉ ra rằng lớp \textbf{Cat (Mèo)} thường bị dự đoán nhầm thành \textbf{Dog (Chó)} (158 mẫu). Điều này giải thích tại sao F1-score của lớp Cat luôn thấp nhất. Ở độ phân giải thấp ($32 \times 32$), các đặc trưng phân biệt như tai, mũi, hay lông bị mờ nhòe, khiến mô hình dựa vào hình dáng tổng thể vốn rất giống nhau giữa hai loài.
+	\item \textbf{Tầm quan trọng của bối cảnh:} Các lớp như \textbf{Ship (Tàu thủy)} và \textbf{Plane (Máy bay)} đạt độ chính xác rất cao vì mô hình dễ dàng nhận diện dựa trên phông nền (nước biển xanh hoặc bầu trời) thay vì chỉ tập trung vào thực thể.
+\end{enumerate}
+
+\subsubsection{Suy luận Thực tế và Độ bền vững (In-the-wild Inference)}
+
+Nghiên cứu tiến hành suy luận trên một hình ảnh thực tế (ảnh chú chó Beagle) để kiểm chứng khả năng thích ứng miền (Domain Adaptation).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{Images/image-test.png}
+	\vspace{10pt}
+	\caption{Kết quả dự đoán nhãn cho ảnh chụp thực tế (Out-of-distribution)}
+	\label{fig:inference}
+\end{figure}
+
+\textbf{Kết quả suy luận thực tế:}
+\begin{itemize}
+	\item \textbf{ResNet18 Fine-tuning:} Dự đoán đúng lớp Chó (Dog) với độ tự tin \textbf{99.78\%}.
+	\item \textbf{Custom ResNet:} Dự đoán đúng lớp Chó (Dog) với độ tự tin \textbf{96.73\%}.
+	\item \textbf{ViT Frozen:} Dự đoán đúng lớp Chó (Dog) nhưng độ tự tin chỉ đạt \textbf{66.71\%}.
+\end{itemize}
+
+\textbf{Giải thích:} Mặc dù ViT có độ chính xác trên tập Test rất cao (93\%), nhưng khi gặp dữ liệu thực tế ngoài phân bố (Out-of-distribution), độ tự tin giảm mạnh. Ngược lại, việc tinh chỉnh toàn bộ trọng số (Fine-tuning) giúp mô hình ResNet18 sở hữu không gian đặc trưng "mềm dẻo" hơn, dẫn đến độ tự tin cực cao khi suy luận thực tế.
+
+\subsubsection{Phân tích Khả năng Diễn giải Mô hình (Explainable AI - Grad-CAM)}
+
+Trong lĩnh vực Học sâu, các mô hình thường được coi là "hộp đen" (black-box) do sự phức tạp của hàng triệu tham số và các phép biến đổi phi tuyến tính. Để nâng cao tính minh bạch và độ tin cậy, nghiên cứu đã áp dụng kỹ thuật Grad-CAM (Gradient-weighted Class Activation Mapping). Phương pháp này sử dụng dòng gradient chảy ngược từ lớp đầu ra về các lớp không gian cuối cùng để xác định mức độ đóng góp của từng vùng pixel đối với kết quả dự đoán.
+
+\subsubsubsection{Cài đặt Kỹ thuật và Lựa chọn Lớp Mục tiêu}
+
+Hiệu quả của Grad-CAM phụ thuộc trực tiếp vào việc lựa chọn lớp mục tiêu (target layer). Do đặc thù kiến trúc, các lớp được cô lập để trích xuất bản đồ nhiệt như sau:
+\begin{itemize}
+	\item \textbf{Đối với ResNet-18:} Mục tiêu là lớp tích chập sâu nhất \texttt{layer4[-1]}, nơi chứa các đặc trưng ngữ nghĩa phức tạp nhất về mặt không gian.
+	\item \textbf{Đối với Vision Transformer (ViT):} Do ViT xử lý dữ liệu dưới dạng chuỗi (sequence), lớp mục tiêu được chọn là lớp chuẩn hóa \texttt{encoder.layers[-1].ln\_1} thuộc khối mã hóa cuối cùng. Một hàm biến đổi hình dáng (\texttt{reshape\_transform}) được định nghĩa để ánh xạ chuỗi 1D về không gian lưới 2D ($14 \times 14$) trước khi nội suy lên kích thước ảnh gốc.
+\end{itemize}
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+# Ma nguon hien thuc hoa bo trich xuat Grad-CAM cho hai truong phai kien truc
+from pytorch_grad_cam import GradCAM
+
+# 1. Cau hinh cho ResNet
+target_layer_res = [model_res.layer4[-1]]
+cam_res = GradCAM(model=model_res, target_layers=target_layer_res)
+
+# 2. Cau hinh cho ViT (kem theo reshape_transform)
+target_layer_vit = [vit_model.encoder.layers[-1].ln_1]
+cam_vit = GradCAM(model=vit_model, target_layers=target_layer_vit, 
+                  reshape_transform=reshape_transform_vit)
+\end{minted}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1.0\linewidth]{Images/image-focus.png}
+	\vspace{10pt}
+	\caption{Bản đồ nhiệt Grad-CAM thể hiện vùng tập trung không gian của các mô hình (Mỗi cột biểu diễn một mô hình, mỗi hàng đại diện cho một mẫu ảnh)}
+	\label{fig:gradcam}
+\end{figure}
+
+\subsubsubsection{Phân tích các trường hợp điển hình và Insights chuyên sâu}
+
+Quá trình đối chiếu bản đồ nhiệt giữa ResNet và ViT trên các mẫu ảnh khó đã mang lại những phát hiện quan trọng về cách thức trích xuất đặc trưng của từng mô hình:
+
+\begin{itemize}
+	\item \textbf{Trường hợp "Ếch" (Frog):}
+	      \begin{itemize}
+		      \item \textbf{ResNet:} Dự đoán sai thành lớp \textbf{Chim (Bird)} với độ tin cậy $33.6\%$. Bản đồ nhiệt cho thấy mô hình tập trung vào các đường viền sắc nét ở phía trên, nhầm lẫn đó là hình dáng của mỏ hoặc cánh chim.
+		      \item \textbf{ViT:} Dự đoán chính xác lớp \textbf{Ếch (Frog)} với độ tin cậy $52.1\%$. Vùng chú ý của ViT bao quát toàn bộ cơ thể vật thể, chứng minh khả năng nhận diện dựa trên hình thái tổng thể tốt hơn trong điều kiện thiếu chi tiết kết cấu.
+	      \end{itemize}
+	\item \textbf{Trường hợp "Tàu thủy" (Ship):}
+	      \begin{itemize}
+		      \item \textbf{ResNet:} Dự đoán sai thành lớp \textbf{Xe tải (Truck)} với xác suất cao $84.3\%$. Phân tích Grad-CAM chỉ ra rằng ResNet bị "đánh lừa" bởi phần cabin vuông vức của con tàu, vốn có các đặc trưng hình học rất giống với thùng xe tải. Điều này minh chứng cho tính cục bộ (locality) của CNN: chỉ cần một phần của vật thể giống lớp khác, mô hình dễ dàng đưa ra kết luận sai.
+		      \item \textbf{ViT:} Dự đoán đúng lớp \textbf{Tàu thủy (Ship)} với độ tự tin áp đảo $95.0\%$. Bản đồ nhiệt trải rộng ra cả phần mặt nước xung quanh, cho thấy ViT đã sử dụng ngữ cảnh (context) để khẳng định vật thể này không thể là xe tải.
+	      \end{itemize}
+	\item \textbf{Trường hợp "Mèo" (Cat) và "Ô tô" (Car):}
+	      \begin{itemize}
+		      \item Ở cả hai trường hợp này, ViT đều thể hiện sự vượt trội về độ tự tin ($87.4\%$ cho Mèo và $98.4\%$ cho Ô tô). Bản đồ chú ý của ViT cho thấy nó "nhìn" vào trung tâm khối của vật thể, trong khi ResNet thường bị phân tán bởi các chi tiết nhỏ như bánh xe hoặc tai mèo.
+	      \end{itemize}
+\end{itemize}
+
+\subsubsubsection{Nhận định về sự khác biệt trong tư duy hình học}
+
+Từ các kết quả trực quan trên, ta có thể rút ra các nhận định sau về khả năng diễn giải:
+\begin{enumerate}
+	\item \textbf{Tính Cục bộ của CNN (Local Patterns):} ResNet hoạt động như một bộ dò tìm kết cấu. Quyết định của nó dựa trên sự xuất hiện của các tổ hợp cạnh và viền. Điều này giúp mô hình mạnh mẽ với các ảnh có kết cấu rõ ràng nhưng dễ bị sai lệch nếu một bộ phận của vật thể mang đặc điểm của lớp khác.
+	\item \textbf{Tính Ngữ cảnh của Transformer (Global Context):} ViT ra quyết định dựa trên mối tương quan toàn cục. Nhờ cơ chế Self-Attention, nó không chỉ xem xét vật thể mà còn đánh giá sự tương thích của vật thể với bối cảnh xung quanh. Chính tư duy này giúp ViT đạt độ chính xác cao ngay cả khi không được tinh chỉnh toàn bộ trọng số (Frozen Backbone), vì không gian đặc trưng của nó mang tính ngữ nghĩa rất cao.
+	\item \textbf{Giải thích hiện tượng nhầm lẫn:} Các vùng màu đỏ trên bản đồ nhiệt Grad-CAM đã giải mã tại sao lớp Mèo thường có điểm số thấp: mô hình thường tập trung vào các vùng pixel nhiễu xung quanh thay vì cô lập được chính xác chủ thể, đặc biệt là trong các ảnh có độ tương phản thấp.
+\end{enumerate}
+
+Việc tích hợp Grad-CAM vào quy trình đánh giá không chỉ giúp xác nhận độ chính xác của con số, mà còn cung cấp bằng chứng trực quan để các nhà nghiên cứu tin tưởng vào quy trình ra quyết định của mô hình trước khi triển khai vào các ứng dụng thực tiễn.
+
+
+\subsubsection{Nhận định Tổng quát}
+
+Thực nghiệm cho thấy một nghịch lý thú vị: Mặc dù \textbf{ViT} có cấu trúc tham số khổng lồ (hơn 483 triệu tham số), nhưng khi áp dụng chiến lược đóng băng, nó vẫn cực kỳ hiệu quả và vượt trội so với \textbf{ResNet18 Frozen} trong việc trích xuất đặc trưng ngữ nghĩa. Tuy nhiên, để đạt được độ chính xác tối thượng và độ tin cậy trong thực tế, kỹ thuật \textbf{Fine-tuning} toàn bộ mạng vẫn là "tiêu chuẩn vàng" không thể thay thế.
+
+
+\subsection{Kết luận}
+
+Sau quá trình thực hiện nghiên cứu, thiết kế kiến trúc và triển khai thực nghiệm trên tập dữ liệu CIFAR-10, đề tài đã đạt được các kết quả quan trọng sau:
+
+\begin{itemize}
+	\item \textbf{Hiệu năng vượt trội của Học chuyển giao (Transfer Learning):} Kết quả thực nghiệm khẳng định sức mạnh của việc tái sử dụng tri thức từ các tập dữ liệu lớn. Mô hình \textbf{ResNet18 Fine-tuning} đạt độ chính xác cao nhất với \textbf{96\%}, vượt xa việc huấn luyện từ đầu một mạng tùy chỉnh (\textbf{84\%}). Điều này chứng minh rằng việc khởi tạo trọng số bằng ImageNet giúp mô hình hội tụ nhanh hơn và đạt được điểm tối ưu sâu hơn trong không gian hàm mất mát.
+	\item \textbf{Tiềm năng của Vision Transformer (ViT):} Mặc dù chỉ được sử dụng dưới dạng bộ trích xuất đặc trưng tĩnh (Frozen Backbone) với chỉ \textbf{23,070} tham số huấn luyện trên tổng số hơn \textbf{483 triệu} tham số, ViT vẫn đạt được độ chính xác ấn tượng là \textbf{93\%}. Kết quả này cho thấy không gian đặc trưng của Transformer có tính phân tách ngữ nghĩa rất cao, vượt trội hơn hẳn so với việc đóng băng mạng CNN truyền thống (ResNet18 Frozen chỉ đạt \textbf{77\%}).
+	\item \textbf{Hạn chế của dữ liệu phân giải thấp:} Thực nghiệm chỉ ra rằng lớp \textbf{Mèo (Cat)} luôn là đối tượng khó nhận diện nhất đối với tất cả các kiến trúc, thường xuyên bị nhầm lẫn với lớp \textbf{Chó (Dog)} (ví dụ: mô hình Custom ResNet có 158 mẫu nhầm lẫn). Điều này do các đặc trưng tinh vi bị mất đi ở độ phân giải $32 \times 32$, tạo ra sự chồng lấn trong không gian đặc trưng giữa các lớp có hình thái học tương đồng.
+	\item \textbf{Tính minh bạch của mô hình qua Grad-CAM:} Việc áp dụng thuật toán giải thích mô hình đã xác nhận sự khác biệt về bản chất học đặc trưng: trong khi CNN tập trung vào các kết cấu cục bộ (như bánh xe, tai vật thể), ViT lại có xu hướng xem xét toàn cục và mối tương quan giữa vật thể với bối cảnh xung quanh.
+\end{itemize}
+
+\subsubsection{Hạn chế và Điểm mù của thực nghiệm (Limitations)}
+Bên cạnh các điểm sáng, quá trình thực nghiệm bộc lộ một điểm mù kỹ thuật đáng lưu ý liên quan đến độ phân giải: \textbf{Nhiễu nội suy (Interpolation artifacts)}. Do giới hạn hình học của các mô hình tiền huấn luyện lớn (ResNet18 và ViT), toàn bộ ảnh CIFAR-10 ($32 \times 32$) phải trải qua quá trình phóng đại lên $224 \times 224$. Việc phóng to kích thước ảnh lên gấp 7 lần chắc chắn sinh ra nhiễu và làm mờ các kết cấu nguyên bản. Độ chính xác của kiến trúc ViT ($93\%$) có thể đã bị kìm hãm một phần bởi chất lượng nội suy này, thay vì phản ánh toàn bộ nội lực thực sự của cơ chế Self-Attention.
+
+\subsubsection{Nhận xét và Đánh giá}
+
+Nghiên cứu đã cung cấp một cái nhìn đối sánh trực quan giữa các trường phái kiến trúc khác nhau. Việc lựa chọn mô hình không chỉ dựa trên độ chính xác đơn thuần mà còn phụ thuộc vào tài nguyên tính toán và mục tiêu ứng dụng.
+
+\begin{itemize}
+	\item Nếu ưu tiên \textbf{độ chính xác tối đa}, việc \textbf{Fine-tuning} các mạng CNN sâu là lựa chọn hàng đầu.
+	\item Nếu ưu tiên \textbf{tiết kiệm tài nguyên huấn luyện} nhưng vẫn đảm bảo hiệu suất tốt, việc sử dụng \textbf{Frozen ViT} là một hướng đi cực kỳ hiệu quả nhờ khả năng trích xuất đặc trưng mạnh mẽ mà không cần cập nhật hàng triệu tham số.
+	\item Việc sử dụng các kỹ thuật như \textbf{ReduceLROnPlateau} và \textbf{Early Stopping} là then chốt để đảm bảo mô hình hội tụ ổn định và tránh lãng phí tài nguyên tính toán.
+\end{itemize}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PHẦN MỚI: Phân loại Đa phương thức với CLIP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{multimodal}
+
+\section{Tổng kết Bài tập lớn}
+Bài tập lớn "Học sâu và ứng dụng trong thị giác máy tính" đã hoàn thành trọn vẹn mục tiêu đánh giá và đối sánh toàn diện năng lực của các nền tảng kiến trúc mạng nơ-ron tiêu biểu hiện nay. Xuyên suốt quá trình thực hiện, nhóm đã tiến hành khảo sát trên ba miền dữ liệu đặc thù, ứng dụng thành công các kỹ thuật học chuyển giao (Transfer Learning), tinh chỉnh (Fine-tuning) và đánh giá khả năng mô hình hóa:
+
+\begin{itemize}
+	\item \textbf{Phân loại Văn bản (Text Classification):} Đối sánh hiệu năng giữa kiến trúc truy hồi truyền thống \textbf{Bi-LSTM} (kết hợp không gian nhúng từ phân tán GloVe) và Mô hình ngôn ngữ lớn \textbf{BERT}. Kết quả làm nổi bật sự chênh lệch về năng lực biểu diễn ngữ cảnh toàn cục của cơ chế Tự chú ý (Self-Attention) bên trong Transformer so với khả năng đọc chuỗi tuần tự của LSTM.
+	\item \textbf{Phân loại Ảnh (Image Classification):} Tiến hành thực nghiệm đối chiếu ba trường phái: xây dựng mạng \textbf{Custom CNN (Pre-activation ResNet)} từ đầu, tinh chỉnh toàn bộ mạng sâu \textbf{ResNet18 Fine-tuning}, và sử dụng \textbf{Vision Transformer (ViT)} như một bộ trích xuất đặc trưng tĩnh (Frozen Backbone). Kết quả khẳng định việc tinh chỉnh toàn bộ mô hình (Fine-tuning) đóng vai trò sống còn đối với độ phân giải thấp ($32 \times 32$), trong khi ViT thể hiện tiềm năng không gian biểu diễn cực cao kể cả khi bị đóng băng.
+	\item \textbf{Phân loại Đa phương thức (Multimodal Classification):} Khai thác sức mạnh của mô hình nền tảng \textbf{CLIP (Contrastive Language-Image Pretraining)}. Việc đánh giá ba chiến lược: \textbf{Zero-shot, Few-shot} và \textbf{Full Fine-Tuning} đã chứng minh nguyên lý hội tụ của không gian biểu diễn ngôn ngữ-thị giác, mở ra tiềm năng thiết lập các hệ thống tìm kiếm và nhận dạng vật thể dựa trên văn bản với lượng dữ liệu gắn nhãn tối thiểu.
+\end{itemize}
+
+Bên cạnh việc hoàn thiện các tiêu chuẩn kỹ thuật cốt lõi (60\% yêu cầu), báo cáo còn tích hợp nhiều khía cạnh mở rộng mang tính học thuật cao (40\% yêu cầu), cụ thể:
+\begin{enumerate}
+	\item \textbf{Khả năng diễn giải mô hình (Explainable AI):} Kỹ thuật \textbf{Grad-CAM} được áp dụng thành công trên dữ liệu hình ảnh nhằm trực quan hóa "điểm nhìn" của hai kiến trúc CNN và ViT. Quá trình này đã lý giải thành công hiện tượng "nhầm lẫn ngữ nghĩa" do tính cục bộ của các mạng tích chập.
+	\item \textbf{Đánh giá dựa trên Ma trận nhầm lẫn (Confusion Matrix Profiling):} Ở từng bài toán, báo cáo đi sâu vào các lớp phân loại dễ gây nhiễu nhằm minh họa việc đạt độ chính xác cao không đồng nghĩa với khả năng bắt nhịp mọi dạng phân bố của dữ liệu.
+	\item \textbf{Tối ưu hóa chiến lược huấn luyện:} Triển khai thành công các thuật toán bổ trợ tự động như Bộ giảm tốc độ học động (\texttt{ReduceLROnPlateau}) và Dừng sớm (\texttt{Early Stopping}), kết hợp cùng kỹ thuật tăng cường dữ liệu (Data Augmentation) mạnh mẽ để kiểm soát Quá khớp (Overfitting).
+\end{enumerate}
+
+Tựu chung lại, nghiên cứu này không chỉ đáp ứng hoàn chỉnh các yêu cầu kỹ thuật tiên quyết được giao mà còn góp phần nâng cao tư duy thiết kế, xử lý lỗi và đào sâu đánh giá chất lượng mô hình. Kết quả thu được tạo tiền đề vững chắc cho việc học tập, thiết kế hệ thống AI Đa phương thức trong quá trình nghiên cứu sâu hơn.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tài liệu tham khảo
