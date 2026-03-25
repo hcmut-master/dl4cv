@@ -105,7 +105,7 @@
 \setcounter{tocdepth}{3}
 \makeatletter
 \newcounter {subsubsubsection}[subsubsection]
-\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\renewcommand\thesubsubsubsection{\thesubsubsection .\arabic{subsubsubsection}}
 \newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
                                      {-3.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.5ex \@plus .2ex}%
@@ -201,58 +201,79 @@
 \tableofcontents
 \newpage
 
-\section{Giới thiệu đề tài}\label{motivation}
-\subsection{Tổng quan về dự án}
 
-\subsubsection*{Mục tiêu và định hướng}
-Đề tài "OCR Currency Converter" nhằm phát triển một hệ thống thông minh, có khả năng \textbf{tự động nhận diện, trích xuất và chuyển đổi giá trị tiền tệ} từ các ảnh chụp (hoặc scan) trong điều kiện thực tế đa dạng và phức tạp. Hệ thống không chỉ cần đạt độ chính xác cao mà còn phải đáp ứng yêu cầu về tốc độ, độ tin cậy, và khả năng xử lý các trường hợp biên (edge cases) như ảnh bị mờ, méo, che khuất một phần.
+\section{Giới thiệu đề tài}
 
-Ứng dụng kỳ vọng phục vụ nhiều đối tượng người dùng:
+\subsection{Ngữ cảnh và Mục tiêu}
+Trong khuôn khổ môn học Học sâu và ứng dụng trong thị giác máy tính, nhóm chúng em thực hiện Bài tập lớn số 1 với chủ đề tập trung vào bài toán phân loại (classification). Mục tiêu cốt lõi của đề tài là vận dụng và đánh giá hiệu năng của các kiến trúc mạng nơ-ron học sâu tiên tiến trên ba loại dữ liệu khác biệt: ảnh, văn bản và đa phương thức (ảnh kết hợp văn bản).
+
+Thông qua quá trình triển khai, nhóm hướng tới việc đạt được các mục tiêu cụ thể sau:
 \begin{itemize}
-	\item \textbf{Người dùng cá nhân:} Chuyên du lịch hoặc thương mại điện tử, cần tra cứu nhanh giá trị tiền tệ.
-	\item \textbf{Doanh nghiệp:} Cần xử lý hàng loạt ảnh hóa đơn, biên nhận để tự động hóa quy trình kế toán.
-	\item \textbf{Hệ thống thanh toán:} Tích hợp OCR để xác thực giá trị tiền trong các giao dịch quốc tế.
+	\item Chuẩn bị dữ liệu và thiết lập quy trình huấn luyện, đánh giá chuẩn xác.
+	\item Vận dụng các mô hình pretrained đa dạng để giải quyết bài toán phân loại.
+	\item So sánh, phân tích kết quả giữa các họ mô hình học sâu khác nhau thông qua bảng số liệu và biểu đồ trực quan.
 \end{itemize}
 
-\subsubsection*{Kiến trúc hệ thống và luồng xử lý}
-Hệ thống tuân theo mô hình pipeline xử lý tuần tự gồm 5 lớp chính:
+\subsection{Phương pháp và Mô hình thực nghiệm}
+Để thực hiện so sánh một cách toàn diện theo yêu cầu của Bài tập lớn, nhóm tiến hành xây dựng và huấn luyện (fine-tune) các mô hình sau:
+\begin{itemize}
+	\item \textbf{Với dữ liệu ảnh:} Đối chiếu hiệu năng giữa mạng tích chập truyền thống CNN (Convolutional Neural Networks) và kiến trúc ViT (Vision Transformer).
+	\item \textbf{Với dữ liệu văn bản:} Đánh giá sự khác biệt giữa mạng nơ-ron hồi quy RNN (cụ thể là cấu trúc LSTM) và kiến trúc Transformer.
+	\item \textbf{Với dữ liệu đa phương thức:} Khảo sát khả năng phân loại thông qua hai chiến lược tiếp cận là Zero-shot classification và Few-shot classification.
+\end{itemize}
 
-\begin{enumerate}
-	\item \textbf{Tiền xử lý ảnh (Image Preprocessing):}
-	      Ảnh đầu vào được chuẩn hóa về kích thước chuẩn ($32 \times 128$ pixels), cân bằng histogram để tăng độ tương phản, áp dụng các kỹ thuật khử noise (median filter, bilateral filter), và sửa các biến dạng hình học (deskew, perspective correction) bằng các phương pháp như Hough Transform hoặc CNN-based geometric correction. Bước này là nền tảng để nâng cao chất lượng đầu vào cho mô hình OCR.
+\subsection{Tập dữ liệu sử dụng}
+Nhằm đảm bảo các mô hình được đánh giá một cách thuyết phục nhất, nhóm đã lựa chọn ba tập dữ liệu đáp ứng tiêu chí về độ phân biệt lớp và số lượng mẫu huấn luyện từ vài nghìn mẫu trở lên:
+\begin{itemize}
+	\item \textbf{Tập dữ liệu ảnh - CIFAR-10:} Đây là một trong những tập dữ liệu tiêu chuẩn và được gợi ý sử dụng cho bài toán phân loại ảnh.
+	\item \textbf{Tập dữ liệu văn bản - IMDB:} Được lựa chọn cho tác vụ phân loại văn bản (text classification). \\
+	\item \textbf{Tập dữ liệu đa phương thức - COCO-caption 2017:} Đây là tập dữ liệu cung cấp các cặp ảnh và văn bản thực sự, cùng mô tả một thực thể hoặc sự kiện, đáp ứng đúng yêu cầu của bài toán phân loại đa phương thức.
+\end{itemize}
+\subsubsection{Tập dữ liệu ảnh: CIFAR-10}
+Tập dữ liệu CIFAR-10 bao gồm 60.000 ảnh màu có kích thước 32x32 pixel, được phân bổ đều vào 10 lớp vật thể và động vật khác nhau (như máy bay, ô tô, chó, mèo,...).
 
-	\item \textbf{Nhận diện ký tự và số (Character Recognition via Deep Learning):}
-	      Sử dụng mô hình CRNN (Convolutional Recurrent Neural Network) được huấn luyện trên tập dữ liệu đa dạng để trích xuất chuỗi ký tự từ ảnh. Mô hình kết hợp khả năng trích xuất đặc trưng không gian của CNN với khả năng mô hình hóa chuỗi của RNN (Bi-LSTM), cho phép nhận diện không chỉ các ký tự số mà còn các loại tiền tệ phổ biến (USD, EUR, JPY, VND, ...). Mỗi ký tự được gán một \textit{confidence score} phản ánh mức độ tin cậy của dự đoán.
+\begin{itemize}
+	\item \textbf{Đáp ứng tiêu chí:} Tập dữ liệu có 50.000 ảnh dùng để huấn luyện, thỏa mãn hoàn toàn yêu cầu có từ vài nghìn mẫu trở lên (lớn hơn 5.000 mẫu). Đồng thời, với 10 lớp phân biệt, CIFAR-10 vượt mức tối thiểu 5 lớp mà đề bài bắt buộc.
 
-	\item \textbf{Nhận diện ký tự và số (Character Recognition via Deep Learning):}
-	      Sử dụng mô hình CRNN (Convolutional Recurrent Neural Network) được huấn luyện trên tập dữ liệu đa dạng để trích xuất chuỗi ký tự từ ảnh. Mô hình kết hợp khả năng trích xuất đặc trưng không gian của CNN với khả năng mô hình hóa chuỗi của RNN (Bi-LSTM), cho phép nhận diện không chỉ các ký tự số mà còn các loại tiền tệ phổ biến (USD, EUR, JPY, VND, ...). Mỗi ký tự được gán một \textit{confidence score} phản ánh mức độ tin cậy của dự đoán.
-	\item \textbf{Chuẩn hóa và giải nghĩa logic (Normalization \& Semantic Disambiguation):}
-	      Bước này là nơi xử lý \textbf{business logic} phức tạp. Chuỗi ký tự thô từ OCR được phân tích để:
-	      \begin{itemize}
-		      \item Tách riêng \textbf{số tiền} (numeric part) và \textbf{đơn vị tiền tệ} (currency unit).
-		      \item Xác định đơn vị tiền tệ dựa trên ký hiệu (ví dụ: ký hiệu '\$' tương ứng USD, ký hiệu '€' tương ứng EUR) hoặc mã quốc gia.
-		      \item Xử lý các quy tắc ngàn phân cách (grouping): ví dụ '1,000' (dạng Mỹ) vs. '1.000' (dạng Châu Âu).
-		      \item Xử lý tiền tệ \textbf{không dùng thập phân} (JPY, KRW, VND) vs. tiền tệ \textbf{dùng 2 chữ số thập phân} (USD, EUR).
-		      \item Gán \textbf{confidence score tổng hợp} cho toàn bộ kết quả dựa trên các điểm tin cậy từ OCR, độ chắc chắn của phân tích logic, và dữ liệu lịch sử.
-	      \end{itemize}
+	\item \textbf{Lý do lựa chọn:} Đây là một tập dữ liệu có độ khó vừa phải, các lớp có sự đa dạng về góc chụp và bối cảnh, khắc phục được sự đơn giản quá mức của tập MNIST. Điều này tạo ra một môi trường thử nghiệm hoàn hảo để nhóm đánh giá và so sánh năng lực trích xuất đặc trưng không gian của mạng tích chập (CNN) so với khả năng nắm bắt ngữ cảnh toàn cục của kiến trúc Vision Transformer (ViT).
+\end{itemize}
 
-	\item \textbf{Tra cứu tỷ giá và chuyển đổi (FX Lookup \& Currency Conversion):}
-	      Nếu người dùng yêu cầu chuyển đổi, hệ thống sẽ:
-	      \begin{itemize}
-		      \item Gọi API tỷ giá thực tế (ví dụ: Open Exchange Rates, Fixer.io) để lấy tỷ giá hiện hành.
-		      \item Thực hiện phép tính chuyển đổi: $\text{Giá trị mới} = \text{Giá trị gốc} \times \text{Tỷ giá}$.
-		      \item Cached tỷ giá trong một khoảng thời gian (ví dụ 1 ngày) để tối ưu hiệu năng và giảm chi phí API.
-	      \end{itemize}
+\subsubsection{Tập dữ liệu văn bản: IMDB Movie Reviews}
+Tập dữ liệu IMDB chứa 50.000 văn bản đánh giá phim tiếng Anh, với độ dài và cấu trúc ngữ nghĩa phong phú, đa dạng. Kích thước tập dữ liệu này hoàn toàn đáp ứng điều kiện về số lượng mẫu huấn luyện.
 
-	\item \textbf{Giao diện người dùng và phản hồi (User Interface \& Feedback):}
-	      Kết quả cuối cùng được hiển thị kèm:
-	      \begin{itemize}
-		      \item Giá trị đã nhận diện, đơn vị tiền, và giá trị chuyển đổi (nếu có).
-		      \item \textit{Confidence score} (dạng phần trăm hoặc thanh tiến trình) để người dùng biết mức độ tin cậy.
-		      \item Nút sửa/xác nhận: cho phép người dùng điều chỉnh thủ công nếu kết quả không chính xác.
-		      \item Lịch sử chuyển đổi để tiện tham khảo lại.
-	      \end{itemize}
-\end{enumerate}
+\begin{itemize}
+	\item \textbf{Cách đáp ứng ràng buộc 5 lớp:} Thông thường, IMDB được dùng cho bài toán phân loại nhị phân (Tích cực/Tiêu cực). Tuy nhiên, vì đề bài quy định rõ bài toán nhị phân là không hợp lệ để so sánh mô hình và phải có ít nhất 5 lớp, nhóm đã tiến hành tiền xử lý (preprocessing) lại nhãn của tập dữ liệu. Dựa trên điểm số rating gốc của người dùng (từ 1 đến 10 sao), nhóm đã phân loại lại tập dữ liệu thành 5 lớp cảm xúc tương ứng (ví dụ: Rất tiêu cực, Tiêu cực, Trung lập, Tích cực, Rất tích cực).
+
+	\item \textbf{Lý do lựa chọn:} Các đoạn đánh giá trên IMDB thường có cấu trúc câu dài và phức tạp. Việc phân loại thành 5 mức độ cảm xúc yêu cầu mô hình phải hiểu được các từ khóa nhấn mạnh và ngữ cảnh đảo ngược. Nhờ đó, nhóm có thể thấy rõ sự chênh lệch về hiệu năng khi xử lý chuỗi dài giữa mạng nơ-ron hồi quy RNN (LSTM) và cơ chế tự chú ý của Transformer.
+\end{itemize}
+
+\subsubsection{Tập dữ liệu đa phương thức: COCO Captions 2017}
+COCO (Common Objects in Context) Captions là bộ dữ liệu tiêu chuẩn quy mô lớn dùng để nghiên cứu mối liên hệ giữa hình ảnh và ngôn ngữ tự nhiên.
+
+\begin{itemize}
+	\item \textbf{Đáp ứng tiêu chí:} Tập dữ liệu cung cấp các cặp ảnh - văn bản thực sự. Mỗi bức ảnh đi kèm với khoảng 5 câu mô tả (captions) do con người trực tiếp chú thích, đảm bảo sự liên kết chặt chẽ về mặt thực thể và sự kiện, tuân thủ tuyệt đối quy định không được phép ghép ảnh và văn bản một cách ngẫu nhiên. Đây cũng là một trong những tập dữ liệu được gợi ý trực tiếp trong hướng dẫn.
+
+	\item \textbf{Lý do lựa chọn:} Sự đa dạng và độ phức tạp cao của COCO Captions cung cấp một nền tảng thử nghiệm lý tưởng để nhóm đánh giá sức mạnh của các mô hình đa phương thức. Cụ thể, nhóm sử dụng bộ dữ liệu này để đối chiếu hiệu quả của hai phương pháp tiếp cận: Zero-shot classification (khả năng mô hình nhận diện các lớp chưa từng thấy trong quá trình huấn luyện) và Few-shot classification (khả năng học nhanh từ một lượng rất nhỏ dữ liệu mẫu).
+\end{itemize}
+
+\subsection{Metric đánh giá (Evaluation Metrics)}
+
+Để đảm bảo sự công bằng và khách quan khi đối chiếu kết quả giữa các kiến trúc mô hình khác nhau (CNN vs. ViT, RNN vs. Transformer), nhóm thống nhất sử dụng chung một hệ thống các độ đo (metrics).
+
+\begin{itemize}
+	\item \textbf{Accuracy (Độ chính xác toàn cục):} Đây là metric bắt buộc được sử dụng để đánh giá tổng quan tỷ lệ dự đoán đúng trên toàn bộ tập dữ liệu.
+	      \begin{equation}
+		      \text{Accuracy}=\frac{TP+TN}{TP+TN+FP+FN}
+	      \end{equation}
+
+	\item \textbf{F1-Score:} Trong các trường hợp các lớp dữ liệu có sự phân bổ không đồng đều (mất cân bằng lớp), F1-Score được bổ sung để đánh giá mô hình một cách toàn diện hơn, tránh sai lệch do độ chính xác ảo. F1-Score là trung bình điều hòa của Precision (Độ xác thực) và Recall (Độ bao phủ):
+	      \begin{equation}
+		      F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+	      \end{equation}
+
+	\item \textbf{Ma trận nhầm lẫn (Confusion Matrix):} Nhóm bổ sung thêm ma trận này nhằm trực quan hóa các trường hợp mô hình nhận diện sai, từ đó phục vụ cho việc phân tích lỗi sâu hơn ở phần sau.
+\end{itemize}
+
 
 \section{Giới thiệu về thuật toán CNN}\label{sec:dataset}
 
@@ -400,460 +421,385 @@ Mạng RNN truyền thống cập nhật trạng thái ẩn $h_t$ dựa trên đ
 
 Tuy nhiên, RNN thường gặp vấn đề \textit{biến mất đạo hàm} (vanishing gradient) khi xử lý các chuỗi dài, khiến nó không thể học được sự phụ thuộc xa. Để khắc phục, kiến trúc \textbf{Long Short-Term Memory (LSTM)} được đề xuất với cơ chế cổng (gating mechanism) bao gồm: cổng quên ($f_t$), cổng vào ($i_t$) và cổng ra ($o_t$), giúp điều tiết dòng thông tin qua các trạng thái tế bào ($c_t$).
 
-\subsection{Bi-LSTM (Bidirectional LSTM) trong OCR}
-Trong nhận dạng văn bản, ngữ cảnh của một ký tự không chỉ phụ thuộc vào các ký tự đứng trước (quá khứ) mà còn phụ thuộc vào các ký tự đứng sau (tương lai). Ví dụ, để phân biệt chữ cái trong từ vựng khó, việc nhìn thấy toàn bộ từ là rất quan trọng.
+\section{Phân loại văn bản với RNN \& Transformer}
+\subsection{Tổng quan về Xử lý ngôn ngữ tự nhiên và Phân tích cảm xúc}
+Xử lý Ngôn ngữ Tự nhiên (Natural Language Processing - NLP) là một nhánh của Trí tuệ Nhân tạo (AI) tập trung vào việc tương tác giữa máy tính và ngôn ngữ của con người. Trong giới hạn của nghiên cứu này, tác vụ cốt lõi được giải quyết là Phân tích cảm xúc (Sentiment Analysis) hay Phân loại văn bản (Text Classification).
 
-Do đó, kiến trúc \textbf{Bi-LSTM (LSTM hai chiều)} được sử dụng phổ biến. Nó bao gồm hai lớp LSTM riêng biệt:
-\begin{itemize}
-	\item Một lớp xử lý xuôi chiều: $\vec{h}_t = \text{LSTM}(x_t, \vec{h}_{t-1})$
-	\item Một lớp xử lý ngược chiều: $\overleftarrow{h}_t = \text{LSTM}(x_t, \overleftarrow{h}_{t+1})$
-\end{itemize}
+Về mặt toán học, bài toán phân loại cảm xúc nhị phân có thể được định nghĩa như sau: Cho một tập hợp các văn bản (đánh giá phim) $D = \{d_1, d_2, \dots, d_N\}$ và tập nhãn phân lớp $Y = \{0, 1\}$, trong đó $0$ đại diện cho cảm xúc tiêu cực (Negative) và $1$ đại diện cho cảm xúc tích cực (Positive). Mục tiêu của mô hình học máy là tìm ra một hàm ánh xạ $f: D \rightarrow Y$ sao cho hàm mục tiêu (thường là sự sai lệch giữa dự đoán và thực tế) đạt giá trị nhỏ nhất.
 
-Vector ngữ cảnh đầu ra $y_t$ tại thời điểm $t$ là sự kết hợp (thường là nối - concatenation) của cả hai chiều:
+\subsection{Cơ sở lý thuyết}
 
+\subsubsection{Tiền xử lý dữ liệu và Không gian nhúng từ (Word Embeddings)}
+
+\subsubsubsection{Tiền xử lý và Mã hóa (Tokenization)}
+Máy tính không thể trực tiếp xử lý văn bản dạng chuỗi ký tự. Do đó, dữ liệu thô cần được làm sạch (loại bỏ nhiễu như thẻ HTML, ký tự đặc biệt) và phân rã thành các đơn vị cơ sở gọi là \textit{token} (từ, cụm từ, hoặc ký tự phụ). Mỗi token sau đó được ánh xạ thành một số nguyên duy nhất (ID) tạo thành một từ điển (Vocabulary). Tuy nhiên, việc biểu diễn bằng ID hay One-hot Encoding mang lại những ma trận thưa (sparse matrix) khổng lồ và hoàn toàn triệt tiêu mối quan hệ ngữ nghĩa giữa các từ.
+
+\subsubsubsection{Biểu diễn từ phân tán với GloVe (Global Vectors for Word Representation)}
+Để giải quyết hạn chế của One-hot Encoding, các kỹ thuật Word Embeddings ánh xạ mỗi từ vào một không gian vector thực liên tục (continuous vector space) nhiều chiều, nơi các từ có nghĩa tương đồng sẽ nằm gần nhau. Trong nghiên cứu này, thuật toán GloVe (cụ thể là ma trận GloVe 100 chiều) được sử dụng cho mô hình LSTM.
+
+GloVe là một mô hình học không giám sát được phát triển bởi Đại học Stanford, kết hợp lợi thế của ma trận phân tích nhân tử toàn cục (global matrix factorization) và các phương pháp trượt cửa sổ ngữ cảnh cục bộ (local context window). Giả sử $X$ là ma trận đồng xuất hiện (co-occurrence matrix), trong đó phần tử $X_{ij}$ thể hiện số lần từ $j$ xuất hiện trong ngữ cảnh của từ $i$. Gọi $X_i = \sum_k X_{ik}$ là tổng số lần bất kỳ từ nào xuất hiện trong ngữ cảnh của $i$. Xác suất đồng xuất hiện được định nghĩa là $P_{ij} = P(j|i) = \frac{X_{ij}}{X_i}$.
+
+GloVe thiết lập một hàm mục tiêu dựa trên bình phương sai số có trọng số (weighted least squares) nhằm tối thiểu hóa sự chênh lệch giữa tích vô hướng của hai vector nhúng và logarit xác suất đồng xuất hiện của chúng:
 \begin{equation}
-	y_t = [\vec{h}_t; \overleftarrow{h}_t]
+	J = \sum_{i,j=1}^{V} f(X_{ij}) \left( w_i^T \tilde{w}_j + b_i + \tilde{b}_j - \log X_{ij} \right)^2
 \end{equation}
-
-Việc sử dụng Bi-LSTM giúp mô hình nắm bắt ngữ cảnh toàn cục của dòng văn bản, nâng cao đáng kể độ chính xác so với việc chỉ dùng CNN.
-
-\subsection{Kiến trúc lai CRNN (Convolutional Recurrent Neural Network)}
-
-CRNN là sự kết hợp hoàn chỉnh giữa khả năng trích xuất đặc trưng không gian của CNN và khả năng xử lý chuỗi của RNN, tạo nên một hệ thống OCR End-to-End mạnh mẽ.
-
-\subsubsection{Cấu trúc tổng thể}
-Kiến trúc CRNN bao gồm ba tầng xử lý chính, xếp chồng lên nhau:
-
-\begin{enumerate}
-	\item \textbf{Tầng Tích chập (Convolutional Layers):}
-	      Nhận ảnh đầu vào $I$ và trích xuất chuỗi đặc trưng $X$. Tại đây, kiến trúc VGG hoặc ResNet thường được sử dụng làm backbone, nhưng lớp Fully Connected bị loại bỏ để giữ nguyên cấu trúc không gian 2D, sau đó được chuyển đổi thành chuỗi 1D (Map-to-Sequence).
-
-	\item \textbf{Tầng Hồi quy (Recurrent Layers):}
-	      Sử dụng Deep Bi-LSTM (thường là 2 lớp chồng lên nhau) để dự đoán phân phối xác suất của ký tự cho mỗi khung hình (frame) $x_t$. Đầu ra là một chuỗi xác suất $Y = [y_1, y_2, ..., y_T]$, trong đó $y_t \in \mathbb{R}^{|C|}$ với $|C|$ là số lượng ký tự trong từ điển (bao gồm cả ký tự trống - blank).
-
-	\item \textbf{Tầng phiên mã (Transcription Layer):}
-	      Để chuyển đổi chuỗi xác suất $Y$ (per-frame predictions) thành chuỗi ký tự kết quả cuối cùng, kỹ thuật \textbf{CTC (Connectionist Temporal Classification)} được áp dụng.
-\end{enumerate}
-
-\subsubsection{Vai trò của CTC Loss}
-Một thách thức lớn trong OCR là số lượng vector đặc trưng $T$ (chiều rộng của Feature Map) thường lớn hơn số lượng ký tự thực tế trong ảnh, và chúng ta không có thông tin căn chỉnh (alignment) chính xác từng ký tự nằm ở pixel nào.
-
-CTC giải quyết vấn đề này bằng cách đưa vào một ký tự đặc biệt gọi là \textit{blank token} (-). Hàm CTC tính toán xác suất của tất cả các đường đi (alignment paths) có thể dẫn đến nhãn đích, cho phép huấn luyện mô hình mà không cần gán nhãn vị trí từng ký tự.
-
-Công thức xác suất của một chuỗi nhãn $l$ với đầu vào $y$ được tính bằng tổng xác suất của tất cả các đường dẫn $\pi$ tương ứng với $l$:
-
-\begin{equation}
-	p(l | y) = \sum_{\pi: \mathcal{B}(\pi)=l} p(\pi | y)
-\end{equation}
-
-Trong đó $\mathcal{B}$ là hàm loại bỏ các ký tự trùng lặp liên tiếp và ký tự blank.
-
-\section{Giới thiệu về tập dữ liệu}\label{requirement}
-\subsection{Khó khăn trong việc lựa chọn dataset}
-Hiện nay, cộng đồng nghiên cứu OCR mã nguồn mở (như Kaggle, UCI, hoặc các bộ dữ liệu hàn lâm kinh điển như MNIST, EMNIST) chủ yếu tập trung vào bài toán Phân loại Ký tự (Character Classification). Nên quá trình phát triển hệ thống OCR Currency Converter gặp phải một số thách thức kỹ thuật:
-
-\begin{enumerate}
-	\item \textbf{Hạn chế của Dataset gốc:} Tập dữ liệu đầu vào chỉ chứa các hình ảnh đơn lẻ của từng ký tự số (isolated digits, 0-9). Dữ liệu này thiếu hoàn toàn thông tin về ngữ cảnh không gian và sự liên kết giữa các ký tự.
-	      \begin{itemize}
-		      \item Tức là: Đầu vào là 1 ảnh → Đầu ra là nhãn của ký tự đó (ví dụ: ảnh số "5" → nhãn "5").
-		      \item Hầu hết các bộ dữ liệu public đều ở dạng "đóng gói" từng ký tự riêng biệt, đã được cắt (cropped) và căn chỉnh (centered) sẵn.
-	      \end{itemize}
-	\item \textbf{Đặc thù của Mệnh giá tiền tệ:} Trong thực tế, một nhãn giá (price tag) không bao giờ đứng một mình mà là một chuỗi ký tự (sequence). Quan trọng hơn, giá tiền chứa các ký tự đặc biệt như dấu chấm (.) hoặc dấu phẩy (,) để phân cách hàng nghìn hoặc phần thập phân (ví dụ: 19.000, 5,99). Vị trí của các dấu này quyết định hoàn toàn giá trị của con số.
-	\item Các bộ dữ liệu scene text (như SVHN hay COCO-Text) tuy có chuỗi số nhưng lại quá tạp nham (biển số nhà, biển báo...), không tập trung vào đặc thù của giá tiền (có dấu phẩy, dấu chấm, ký hiệu tiền tệ) và thường thiếu sự đa dạng về font chữ in trên tem giá siêu thị.
-
-\end{enumerate}
-\textbf{Giải pháp:} Do đó, hệ thống bắt buộc phải thực hiện bước sinh dữ liệu (Generate Data). Thay vì đưa từng ảnh đơn lẻ vào mô hình, chúng tôi sử dụng thuật toán để ghép nối (stitch) các ảnh ký số rời rạc và chèn thêm các dấu câu ngẫu nhiên. Việc này giúp mô hình học được cấu trúc của một chuỗi giá tiền hoàn chỉnh thay vì chỉ nhận diện mặt chữ số đơn lẻ.
-
-\subsection{Mô tả Datasets}
-
-Tôi sẽ kết hợp hai bộ dữ liệu mở từ Kaggle nhằm tối đa hóa khả năng tổng quát hóa của mô hình.
-
-\subsubsection{OCR Dataset (Hariyh)}
+Trong đó:
 \begin{itemize}
-	\item \textbf{Nguồn:} \href{https://www.kaggle.com/datasets/harieh/ocr-dataset}{Kaggle - Hariyh OCR Dataset}
-	\item \textbf{Quy mô:} Hơn 210.000 ảnh ký tự đơn lẻ.
-	\item \textbf{Đặc điểm kỹ thuật:} Dữ liệu được tổng hợp từ \textbf{3.475 font chữ} khác nhau (Google Fonts).
-	\item \textbf{Mục đích sử dụng:} Cung cấp độ đa dạng cao về kiểu chữ (font styles/weight). Vì nhãn giá thực tế thường sử dụng nhiều loại font từ đơn giản đến cách điệu, tập dữ liệu này giúp mô hình học được các đặc trưng bất biến của ký số thay vì ghi nhớ một font cụ thể.
+	\item $V$ là kích thước tập từ vựng.
+	\item $w_i, \tilde{w}_j \in \mathbb{R}^d$ là các vector biểu diễn của từ mục tiêu và từ ngữ cảnh.
+	\item $b_i, \tilde{b}_j$ là các hệ số chệch (bias).
+	\item $f(X_{ij})$ là hàm trọng số nhằm giới hạn sự ảnh hưởng của các từ xuất hiện quá thường xuyên và ngăn chặn hàm $\log(0)$ khi $X_{ij} = 0$.
 \end{itemize}
 
-\subsubsection{Standard OCR Dataset (Preatcher)}
-\begin{itemize}
-	\item \textbf{Nguồn:} \href{https://www.kaggle.com/datasets/preatcher/standard-ocr-dataset}{Kaggle - Standard OCR Dataset}
-	\item \textbf{Cấu trúc:} Phân loại thành 36 lớp ký tự (0-9, A-Z) với các định dạng in ấn tiêu chuẩn.
-	\item \textbf{Mục đích sử dụng:} Đóng vai trò là tập dữ liệu nền tảng (baseline), đảm bảo độ chính xác cao đối với các nhãn giá sử dụng font chữ in máy thông dụng (sans-serif, serif chuẩn).
-\end{itemize}
+\subsubsection{Mạng Nơ-ron Hồi quy tiến hóa: Từ RNN đến Bi-LSTM}
 
-\textbf{Xử lý tích hợp:} Toàn bộ ảnh từ hai nguồn này được chuẩn hóa và nạp vào từ điển \code{self.digit\_paths}. Đây là nguồn nguyên liệu thô (raw glyphs) để thuật toán \code{DataProvider} thực hiện ghép nối thành các chuỗi giá tiền hoàn chỉnh trong giai đoạn huấn luyện.
+\subsubsubsection{Mạng LSTM (Long Short-Term Memory)}
+Mạng Nơ-ron Hồi quy (RNN) truyền thống gặp phải bài toán triệt tiêu đạo hàm (Vanishing Gradient) khi chuỗi quá dài. LSTM giải quyết vấn đề này thông qua kiến trúc tế bào (cell) phức tạp chứa "trạng thái ô" (cell state - $C_t$), cùng với ba "cổng" (gates) để kiểm soát luồng thông tin:
+
+\begin{itemize}
+	\item \textbf{Cổng quên (Forget gate - $f_t$):}
+	      \begin{equation} f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f) \end{equation}
+	\item \textbf{Cổng đầu vào (Input gate - $i_t$) và Trạng thái ứng viên ($\tilde{C}_t$):}
+	      \begin{equation} i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i) \end{equation}
+	      \begin{equation} \tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C) \end{equation}
+	\item \textbf{Cập nhật trạng thái ô ($C_t$):}
+	      \begin{equation} C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t \end{equation}
+	\item \textbf{Cổng đầu ra (Output gate - $o_t$) và Trạng thái ẩn ($h_t$):}
+	      \begin{equation} o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o) \end{equation}
+	      \begin{equation} h_t = o_t \odot \tanh(C_t) \end{equation}
+\end{itemize}
+\textit{(Trong đó: $\odot$ là ký hiệu cho phép nhân từng phần tử - element-wise multiplication).}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Images/data_gen_2.png}
-	\caption{Tổng quan về dataset}
-	\label{fig:dataset}
-\end{figure}
-
-\subsection{Xây dựng bộ dữ liệu (Dataset Construction)}
-Do chi phí gán nhãn dữ liệu thực tế (Real Data) rất cao và khó thu thập đủ các biến thể hiếm gặp, chúng tôi áp dụng chiến lược \textbf{Hybrid Learning} kết hợp giữa dữ liệu thực và dữ liệu giả lập (Synthetic Data):
-\begin{itemize}
-	\item \textbf{Mô-đun:} Lớp \code{DataProvider}
-	\item \textbf{Mục đích:} Tạo, tổng hợp và tiền xử lý dữ liệu hình ảnh đầu vào cho mô hình huấn luyện OCR (Optical Character Recognition), tối ưu hóa cho các chuỗi ký tự giá tiền (Price strings).
-	\item \textbf{Công nghệ sử dụng:} TensorFlow, OpenCV, PIL (Python Imaging Library), NumPy.
-\end{itemize}
-
-\subsubsection{Thông số Kỹ thuật \& Cấu hình}
-Mô-đun được thiết lập với các tham số cố định nhằm đảm bảo tính nhất quán cho đầu vào của mạng nơ-ron (CRNN):
-
-\begin{itemize}
-	\item \textbf{Kích thước ảnh đầu vào:} $280 \times 32$ pixels (Rộng $\times$ Cao).
-	\item \textbf{Bộ từ vựng (Vocab):} \code{"0123456789.,"} (Bao gồm số và các dấu phân cách tiền tệ).
-	\item \textbf{Độ dài nhãn tối đa:} $12$ ký tự.
-	\item \textbf{Hệ thống nhãn (Labeling):} Sử dụng từ điển \code{char\_map} để ánh xạ ký tự sang số nguyên.
-\end{itemize}
-
-\subsubsection{Chiến lược Dữ liệu Lai (Hybrid Data Strategy)}
-Hệ thống áp dụng chiến lược kết hợp giữa dữ liệu thực và tổng hợp thông qua tham số \code{synth\_ratio}.
-
-\subsubsection{Dữ liệu Tổng hợp (Synthetic Generation)}
-\begin{itemize}
-	\item \textbf{Quy trình:} Hệ thống tự động sinh chuỗi giá tiền ngẫu nhiên thông qua hàm \code{generate\_price\_string}.
-	\item \textbf{Đa dạng hóa:} Sử dụng thư viện PIL để render văn bản (render text) với font chữ ngẫu nhiên, giúp mô hình học được nhiều kiểu chữ (font styles) khác nhau.
-\end{itemize}
-
-\subsubsection{Dữ liệu Thực ghép nối (Real Data Stitching)}
-\begin{itemize}
-	\item \textbf{Quy trình:} Trong trường hợp không dùng dữ liệu tổng hợp, hệ thống lấy mẫu các ảnh ký tự đơn lẻ từ dataset thực và ghép nối chúng theo chiều ngang (\code{np.hstack}).
-	\item \textbf{Xử lý:} Các ảnh con được resize về chiều cao 32px trước khi ghép để đảm bảo đồng bộ.
-\end{itemize}
-
-\subsubsection{Quy trình Tiền xử lý Ảnh (Image Preprocessing)}
-Hàm \code{smart\_resize\_pad} đóng vai trò trung tâm trong việc chuẩn hóa dữ liệu, đảm bảo văn bản luôn nằm ở trung tâm và không bị méo.
-
-\begin{enumerate}
-	\item \textbf{Cắt vùng quan trọng (Smart Cropping):}
-	      \begin{itemize}
-		      \item Chuyển ảnh sang nhị phân và dùng \code{cv2.findContours} để tìm đường bao văn bản.
-		      \item Cắt bỏ các vùng trắng thừa (whitespace removal).
-	      \end{itemize}
-
-	\item \textbf{Thay đổi kích thước bảo toàn tỷ lệ:}
-	      \begin{itemize}
-		      \item Chiều cao được resize về mức tối ưu (khoảng $85\%$ chiều cao khung hình, tức $\approx 27$px).
-		      \item Chiều rộng được tính toán lại theo tỷ lệ gốc (scale) để tránh làm méo chữ số.
-	      \end{itemize}
-
-	\item \textbf{Padding (Chèn đệm):}
-	      \begin{itemize}
-		      \item Ảnh sau resize được đặt vào trung tâm khung hình $280 \times 32$.
-		      \item Phần dư thừa được lấp đầy bằng giá trị $255$ (màu trắng).
-	      \end{itemize}
-\end{enumerate}
-
-\subsubsection{Tăng cường Dữ liệu (Data Augmentation)}
-Khi cờ \code{augment=True} được kích hoạt, các kỹ thuật sau được áp dụng để giảm thiểu overfitting:
-
-\begin{itemize}
-	\item \textbf{Nhiễu hạt (Noise):} Cộng thêm ma trận nhiễu ngẫu nhiên vào ảnh (giá trị trong khoảng $[-15, 15]$).
-	\item \textbf{Làm mờ (Blur):} Áp dụng \code{cv2.GaussianBlur} với kernel $(3,3)$ để mô phỏng ảnh chụp mất nét.
-\end{itemize}
-
-\subsubsection{Định dạng Đầu ra (Output Formatting)}
-Hàm \code{get\_single\_sample} trả về 4 thành phần chuẩn hóa cho CTC Loss:
-
-\begin{enumerate}
-	\item \textbf{\code{img\_out}:} Ảnh đã xử lý, chuẩn hóa về khoảng $[0, 1]$, chuyển vị thành tensor có kích thước $(280, 32, 1)$.
-	\item \textbf{\code{label\_out}:} Mảng nhãn số nguyên, được đệm (pad) bằng giá trị \code{num\_classes} cho đủ độ dài 25.
-	\item \textbf{\code{input\_len\_out}:} Độ dài đặc trưng đầu vào cho CTC loss.
-	\item \textbf{\code{label\_len\_out}:} Độ dài thực tế của chuỗi ký tự trong ảnh.
-\end{enumerate}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.95\linewidth]{Images/data_gen_1.png}
+	\includegraphics[width=0.75\linewidth]{Images/lstm.png}
 	\vspace{10pt}
-	\caption{Dữ liệu sample từ tập trainning}
-	\label{fig:trainning_sample}
+	\caption{Cấu trúc chi tiết của một tế bào LSTM (LSTM cell)}
+	\label{fig:lstm}
 \end{figure}
 
-Tập dữ liệu được chia thành ba phần:
-\begin{table}[H]
+\subsubsubsection{Mạng LSTM hai chiều (Bidirectional LSTM) và Cơ chế Gộp (Pooling)}
+Ngôn ngữ tự nhiên có tính phụ thuộc hai chiều. Bi-LSTM vận hành hai lớp LSTM song song: chiều xuôi ($\overrightarrow{h_t}$) và chiều ngược ($\overleftarrow{h_t}$). Trạng thái ẩn tổng hợp là sự ghép nối:
+\begin{equation} h_t = [\overrightarrow{h_t} \oplus \overleftarrow{h_t}] \end{equation}
+
+Để trích xuất đặc trưng toàn cục, mô hình sử dụng kết hợp hai phép toán Pooling:
+\begin{itemize}
+	\item \textbf{Average Pooling ($h_{avg}$):} Nắm bắt ngữ nghĩa tổng thể.
+	\item \textbf{Max Pooling ($h_{max}$):} Phát hiện các từ khóa mang ý nghĩa quyết định.
+\end{itemize}
+Vector đặc trưng cuối cùng: $v_{out} = [h_{avg} \oplus h_{max}]$.
+
+\subsubsection{Kiến trúc Transformer và Mô hình BERT}
+
+\subsubsubsection{Cơ chế Tự chú ý (Self-Attention)}
+Cơ chế này cho phép mô hình tính toán mức độ quan tâm của một từ đến tất cả các từ khác trong câu thông qua ba vector: Query ($Q$), Key ($K$) và Value ($V$):
+\begin{equation}
+	\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+\end{equation}
+
+\subsubsubsection{Mô hình BERT}
+BERT (Bidirectional Encoder Representations from Transformers) dựa trên các khối Encoder của Transformer. Nghiên cứu áp dụng phiên bản \texttt{bert-base-uncased} (12 layers, hidden size 768). Đồ án sử dụng phương pháp Học chuyển giao (Transfer Learning) bằng cách Tinh chỉnh (Fine-tuning) lớp phân loại trên token đặc biệt \texttt{[CLS]}.
+
+\begin{figure}[H]
 	\centering
-	\caption{Phân chia tập dữ liệu}
-	\begin{tabular}{|l|r|r|}
+	\includegraphics[width=0.6\linewidth]{Images/bert.png}
+	\vspace{10pt}
+	\caption{Khái quát kiến trúc mô hình BERT}
+	\label{fig:bert}
+\end{figure}
+
+\subsubsection{Hàm mất mát và Kỹ thuật Tối ưu hóa}
+
+\subsubsubsection{Hàm mất mát (Loss Functions)}
+Đối với bài toán phân loại nhị phân, hàm Binary Cross-Entropy Loss được áp dụng:
+\begin{equation}
+	\mathcal{L}_{BCE} = -\frac{1}{N} \sum_{i=1}^N \left[ y_i \log(\sigma(\hat{y}_i)) + (1 - y_i) \log(1 - \sigma(\hat{y}_i)) \right]
+\end{equation}
+
+\subsubsubsection{Kỹ thuật chống Quá khớp (Overfitting)}
+\begin{itemize}
+	\item \textbf{Dropout:} Vô hiệu hóa ngẫu nhiên nơ-ron (tỷ lệ $p=0.3$).
+	\item \textbf{Gradient Clipping:} Giới hạn $\text{max\_norm}=1.0$ để ngăn bùng nổ đạo hàm.
+	\item \textbf{Tối ưu hóa:} Sử dụng thuật toán \textbf{AdamW} (cho BERT) và \textbf{Adam} (cho Bi-LSTM).
+\end{itemize}
+
+\subsubsection{Các độ đo đánh giá (Evaluation Metrics)}
+Dựa trên ma trận nhầm lẫn (Confusion Matrix) với các giá trị $TP, TN, FP, FN$, các chỉ số được xác định như sau:
+
+\begin{itemize}
+	\item \textbf{Accuracy:} $\frac{TP + TN}{TP + TN + FP + FN}$
+	\item \textbf{Precision:} $\frac{TP}{TP + FP}$
+	\item \textbf{Recall:} $\frac{TP}{TP + FN}$
+	\item \textbf{F1-Score:} $2 \times \frac{Precision \times Recall}{Precision + Recall}$
+\end{itemize}
+
+\subsection{Mô hình đề xuất}
+
+Để giải quyết bài toán phân loại cảm xúc trên văn bản một cách hiệu quả, nghiên cứu này đề xuất và đối sánh hai quy trình hoàn chỉnh (end-to-end pipelines): một phương pháp dựa trên kiến trúc hồi quy truyền thống (Bi-LSTM kết hợp GloVe) và một phương pháp dựa trên học chuyển giao (Fine-tuning BERT). Chương này trình bày chi tiết về luồng xử lý dữ liệu, kiến trúc mạng nơ-ron và các chiến lược tối ưu hóa.
+
+\subsubsection{Phân tích Khám phá và Phân chia Dữ liệu (EDA \& Data Splitting)}
+Tập dữ liệu được sử dụng là \textit{IMDb Reviews Dataset}, bao gồm $50,000$ đánh giá điện ảnh được dán nhãn nhị phân. Tập dữ liệu thể hiện tính cân bằng hoàn hảo với tỷ lệ 50\% cho mỗi lớp (Tích cực và Tiêu cực), giúp loại bỏ rủi ro thiên lệch (class imbalance bias).
+
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{Images/imdb-1.png}
+		\vspace{10pt}
+		\caption{Phân phối nhãn tập dữ liệu}
+		\label{fig:imdb-1}
+	\end{minipage}\hfill
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{Images/imdb-word.png}
+		\vspace{10pt}
+		\caption{Từ khóa phổ biến trong các đánh giá}
+		\label{fig:imdb-word}
+	\end{minipage}
+\end{figure}
+
+Phân tích phân phối chỉ ra rằng 92.6\% số lượng đánh giá có độ dài $\le 512$ từ. Do đó, ngưỡng giới hạn chiều dài chuỗi (\textit{max sequence length}) được thiết lập như sau:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Images/imdb-2.png}
+	\vspace{10pt}
+	\caption{Phân phối chiều dài các đánh giá trong tập dữ liệu}
+	\label{fig:imdb-2}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\linewidth]{Images/imdb-3.png}
+	\vspace{10pt}
+	\caption{Tỷ lệ đánh giá nằm trong giới hạn 512 từ của mô hình BERT}
+	\label{fig:imdb-3}
+\end{figure}
+\begin{itemize}
+	\item \textbf{Mô hình BERT:} 512 token (tối đa hóa ngữ nghĩa).
+	\item \textbf{Mô hình Bi-LSTM:} 256 token (tối ưu hóa tốc độ tính toán).
+\end{itemize}
+
+Dữ liệu được phân chia theo chiến lược phân tầng (\textit{stratified split}) với tỷ lệ 80-10-10:
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|c|l|}
 		\hline
-		\textbf{Tập}       & \textbf{Số lượng ảnh} & \textbf{Tỷ lệ} \\
-		\hline
-		Training Set       & 50000                 & 86\%           \\
-		\hline
-		Validation Set     & 5000                  & 9\%            \\
-		\hline
-		Test Set           & 3000                  & 5\%            \\
-		\hline
-		\textbf{Tổng cộng} & \textbf{58000}        & \textbf{100\%} \\
-		\hline
+		\textbf{Tập dữ liệu} & \textbf{Số lượng mẫu} & \textbf{Mục đích}                          \\ \hline
+		Training Set         & $40,000$              & Cập nhật trọng số mạng.                    \\ \hline
+		Validation Set       & $5,000$               & Tinh chỉnh siêu tham số và lưu checkpoint. \\ \hline
+		Test Set             & $5,000$               & Đánh giá độ tổng quát hóa cuối cùng.       \\ \hline
 	\end{tabular}
-	\label{tab:dataset}
+	\caption{Phân chia tập dữ liệu nghiên cứu}
 \end{table}
 
-\section{Hiện thực và quy trình huấn luyện (Implementation \& Training)}
-Dựa trên yêu cầu thực tế của bài toán nhận diện giá tiền trên menu/thẻ giá, chúng tôi đã xây dựng một pipeline huấn luyện chuyên biệt. Quy trình này được thiết kế để xử lý các thách thức chính: sự đa dạng của font chữ, điều kiện ánh sáng kém, và sự biến đổi hình học (nghiêng, mờ).
+\subsubsection{Tiền xử lý Văn bản và Biểu diễn Dữ liệu}
+Nghiên cứu xây dựng quy trình chuẩn hóa văn bản thông qua hàm \texttt{clean\_text} sử dụng biểu thức chính quy (Regex) để: chuyển chữ thường, loại bỏ thẻ HTML (ví dụ: \texttt{<br />}), tách dấu câu và chuẩn hóa khoảng trắng.
 
-\subsection{Cấu hình Huấn luyện và Mô hình (Training Configuration)}
-\subsubsection{Data Pipeline với TensorFlow tf.data}
-Để loại bỏ nút thắt cổ chai (bottleneck) khi I/O đọc ảnh từ đĩa cứng, pipeline sử dụng API \texttt{tf.data} với các tối ưu hóa:
+\subsubsubsection{Biểu diễn cho mô hình Bi-LSTM}
+Văn bản được tách từ dựa trên khoảng trắng và ánh xạ vào ma trận nhúng \textbf{GloVe 100 chiều} (\texttt{glove.6B.100d.txt}).
 \begin{itemize}
-	\item \textbf{Parallel Mapping:} Sử dụng \texttt{num\_parallel\_calls=tf.data.AUTOTUNE} để tận dụng đa luồng CPU cho việc giải mã ảnh và tiền xử lý.
-	\item \textbf{Memory Caching:} Sử dụng \texttt{.cache()} để lưu trữ dữ liệu đã tiền xử lý vào RAM sau epoch đầu tiên.
-	\item \textbf{Prefetching:} Kỹ thuật \texttt{.prefetch(buffer\_size=AUTOTUNE)} giúp CPU chuẩn bị batch $n+1$ trong khi GPU đang huấn luyện batch $n$.
+	\item Kích thước từ vựng thực tế: $111,798$ token.
+	\item Tỷ lệ bao phủ (\textit{Coverage}): 66.40\%.
+	\item Các chuỗi ngắn hơn 256 được đệm (\textit{padding}) bằng ID 0.
 \end{itemize}
 
-\subsubsection{Siêu tham số (Hyperparameters)}
-\begin{itemize}
-	\item \textbf{Batch Size:} 1024 (Tận dụng bộ nhớ VRAM lớn để ổn định gradient).
-	\item \textbf{Optimizer:} Adam (Adaptive Moment Estimation) với learning rate ban đầu là $0.001$.
-	\item \textbf{Loss Function:} ctc\_loss
-	\item \textbf{Callbacks:}
-	      \begin{itemize}
-		      \item \texttt{EarlyStopping:} Dừng huấn luyện nếu \texttt{val\_loss} không giảm sau \texttt{patience=10} epochs.
-		      \item \texttt{ModelCheckpoint:} Chỉ lưu lại bộ trọng số (weights) tốt nhất dựa trên \texttt{val\_loss}.
-	      \end{itemize}
-\end{itemize}
+\subsubsubsection{Biểu diễn cho mô hình BERT}
+Sử dụng bộ \texttt{BertTokenizer} từ kiến trúc \texttt{bert-base-uncased} với thuật toán \textbf{WordPiece}. Kích thước từ vựng đạt $30,522$ token. Các chuỗi được xử lý tự động để đạt độ dài cố định \texttt{MAX\_LEN = 512}.
 
-\subsection{Tổng quan Kiến trúc (Architecture Overview)}
-Mô hình được xây dựng dựa trên kiến trúc CRNN (Convolutional Recurrent Neural Network), bao gồm ba thành phần chính hoạt động tuần tự:
+\subsubsection{Kiến trúc Đề xuất 1: Mạng Bi-LSTM tích hợp Gộp đặc trưng (Pooling)}
+Mô hình \texttt{LSTMClassifier} bao gồm các tầng chức năng sau:
+
 \begin{enumerate}
-	\item \textbf{Convolutional Layers (CNN):} Trích xuất đặc trưng hình ảnh (feature extraction).
-	\item \textbf{Recurrent Layers (RNN):} Dự đoán chuỗi ký tự dựa trên ngữ cảnh (sequence modeling).
-	\item \textbf{Transcription Layer (CTC):} Chuyển đổi đầu ra của RNN thành chuỗi nhãn cuối cùng.
-\end{enumerate}
-
-\subsection{Chi tiết Triển khai (Implementation Details)}
-
-\subsubsection{Tầng trích xuất đặc trưng (CNN Backbone)}
-Khối CNN chịu trách nhiệm chuyển đổi ảnh đầu vào (Input Image) thành các bản đồ đặc trưng (feature maps).
-\begin{itemize}
-	\item \textbf{Input:} Ảnh xám (Grayscale) kích thước $(IMG\_WIDTH, IMG\_HEIGHT, 1)$.
-	\item \textbf{Lớp Conv2D:} Sử dụng 2 lớp tích chập với số lượng bộ lọc lần lượt là 32 và 64, kernel $3 \times 3$, hàm kích hoạt ReLU để giới thiệu tính phi tuyến.
-	\item \textbf{Lớp Pooling:} Sử dụng 2 lớp \texttt{MaxPooling2D} kích thước $2 \times 2$. Điều này giúp giảm chiều không gian của ảnh, giảm chi phí tính toán và tăng vùng cảm nhận (receptive field).
-	\item \textbf{Hệ số giảm chiều (Downsampling factor):} Sau 2 lần pooling, kích thước không gian giảm đi 4 lần ($2 \times 2 = 4$).
-\end{itemize}
-
-\subsubsection{Tầng xử lý chuỗi (Sequence Modeling)}
-Để xử lý dữ liệu chuỗi từ đặc trưng ảnh, mô hình sử dụng kỹ thuật \textbf{Map-to-Sequence}:
-\begin{itemize}
-	\item \textbf{Reshape Layer:} Chuyển đổi tensor 3D từ CNN thành tensor 2D.
-	      \\ \textit{Công thức:} $(W/4, H/4, 64) \rightarrow (W/4, H/4 \times 64)$.
-	      \\ Tại đây, chiều rộng của ảnh ($W/4$) đóng vai trò là các bước thời gian (timesteps) cho mạng RNN.
-	\item \textbf{Bidirectional LSTM:} Sử dụng 2 lớp Bi-LSTM (128 units và 64 units). Cơ chế hai chiều (Bidirectional) cho phép mô hình học ngữ cảnh từ cả hai phía (trái sang phải và phải sang trái), rất quan trọng trong việc nhận diện các chuỗi số hoặc văn bản.
-	\item \textbf{Dropout:} Áp dụng tỷ lệ 0.2 và 0.25 để tránh hiện tượng Overfitting.
-\end{itemize}
-
-\subsubsection{Transcription \& Loss}
-\begin{itemize}
-	\item \textbf{Output Layer:} Lớp \texttt{Dense} với hàm kích hoạt \texttt{Softmax}. Số lượng đầu ra là $len(VOCAB) + 1$. Giá trị $+1$ đại diện cho \textit{Blank Token} (ký tự rỗng) bắt buộc trong thuật toán CTC.
-	\item \textbf{CTC Loss (Connectionist Temporal Classification):}
-	      Được triển khai thông qua lớp tùy chỉnh \texttt{CTCLayer}.
-	      \begin{itemize}
-		      \item CTC giải quyết vấn đề nhận diện chuỗi khi không biết vị trí chính xác của từng ký tự trong ảnh (alignment-free).
-		      \item Hàm \texttt{K.ctc\_batch\_cost} tính toán xác suất của chuỗi nhãn dựa trên đầu ra của mạng RNN.
-	      \end{itemize}
-\end{itemize}
-
-\begin{minted}[linenos, breaklines]{python}
-from tensorflow.keras import layers, models, backend as K
-
-class CTCLayer(layers.Layer):
-    def __init__(self, name=None):
-        super().__init__(name=name)
-        self.loss_fn = K.ctc_batch_cost
-
-    def call(self, y_true, y_pred, input_length, label_length):
-        y_pred = tf.cast(y_pred, tf.float32)
-        loss = self.loss_fn(y_true, y_pred, input_length, label_length)
-        self.add_loss(loss)
-        return y_pred
-
-def build_model():
-    input_img = layers.Input(shape=(IMG_WIDTH, IMG_HEIGHT, 1), name="image", dtype="float32")
-    labels = layers.Input(name="label", shape=(None,), dtype="float32")
-    input_length = layers.Input(name="input_length", shape=(1,), dtype="int64")
-    label_length = layers.Input(name="label_length", shape=(1,), dtype="int64")
-
-    x = layers.Conv2D(32, (3, 3), activation="relu", padding="same")(input_img)
-    x = layers.MaxPooling2D((2, 2), name="pool1")(x)
-    x = layers.Conv2D(64, (3, 3), activation="relu", padding="same")(x)
-    x = layers.MaxPooling2D((2, 2), name="pool2")(x)
-
-    new_shape = ((IMG_WIDTH // 4), (IMG_HEIGHT // 4) * 64)
-    x = layers.Reshape(target_shape=new_shape, name="reshape")(x)
-    x = layers.Dense(64, activation="relu", name="dense1")(x)
-    x = layers.Dropout(0.2)(x)
-    x = layers.Bidirectional(layers.LSTM(128, return_sequences=True, dropout=0.25))(x)
-    x = layers.Bidirectional(layers.LSTM(64, return_sequences=True, dropout=0.25))(x)
-    y_pred = layers.Dense(len(VOCAB) + 1, activation="softmax", name="dense2", dtype="float32")(x)
-
-    prediction_model = models.Model(inputs=input_img, outputs=y_pred, name="inference")
-
-    output_loss = CTCLayer(name="ctc_loss")(labels, y_pred, input_length, label_length)
-    training_model = models.Model(
-        inputs=[input_img, labels, input_length, label_length],
-        outputs=output_loss, name="training"
-    )
-    return training_model, prediction_model
-
-def ctc_loss_dummy(y_true, y_pred):
-    return 0.0
-
-model, prediction_model = build_model()
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=ctc_loss_dummy)
-
-model.summary()
-\end{minted}
-\begin{center}
-	\captionof{listing}{CNN network implementation}
-	\label{lst:CNN}
-\end{center}
-
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\linewidth]{Images/CNN.png}
-	\vspace{10pt}
-	\caption{Kiến trúc mạng CNN}
-	\label{fig:CNN}
-\end{figure}
-
-Mô hình CRNN trên khoảng 415,309 tham số.
-
-\subsection{Chiến lược Huấn luyện (Training Strategy)}
-Mô hình được biên dịch với hai phiên bản phục vụ hai mục đích khác nhau:
-\begin{enumerate}
-	\item \textbf{Training Model:}
-	      \begin{itemize}
-		      \item \textbf{Input:} \texttt{[input\_img, labels, input\_length, label\_length]}.
-		      \item \textbf{Output:} Giá trị Loss từ lớp CTC.
-		      \item \textbf{Loss Function:} Sử dụng \texttt{dummy\_loss} (trả về 0) vì loss thực sự đã được tính toán và cộng dồn bên trong \texttt{CTCLayer} thông qua phương thức \texttt{self.add\_loss}.
-		      \item \textbf{Optimizer:} Adam với learning rate 0.001.
-	      \end{itemize}
-	\item \textbf{Prediction Model (Inference):}
-	      \begin{itemize}
-		      \item \textbf{Input:} Chỉ cần \texttt{input\_img}.
-		      \item \textbf{Output:} Lớp Softmax dự đoán xác suất các ký tự.
-		      \item Được sử dụng để dự đoán thực tế sau khi huấn luyện xong.
-	      \end{itemize}
+	\item \textbf{Embedding Layer:} Nhận đầu vào kích thước $(B \times 256)$, ánh xạ qua trọng số GloVe đã được đóng băng (\texttt{freeze=True}).
+	\item \textbf{Bi-LSTM Layer:} Kích thước trạng thái ẩn (\textit{hidden size}) là $128$. Đầu ra tại mỗi bước thời gian $t$ là $h_t \in \mathbb{R}^{256}$ (do kết hợp hai chiều).
+	\item \textbf{Multi-pooling Strategy:} Trích xuất đặc trưng toàn cục bằng cách nối kết (\textit{concatenate}) kết quả của Average Pooling và Max Pooling:
+	      \begin{equation}
+		      v_{concat} = \left[ \frac{1}{L} \sum_{t=1}^{L} h_t \right] \oplus \left[ \max_{t=1}^{L} h_t \right]
+	      \end{equation}
+	      Kết quả thu được vector đặc trưng $512$ chiều.
+	\item \textbf{Classification Head:} Đi qua lớp Dropout ($p=0.3$) và một tầng tuyến tính (\texttt{nn.Linear(512, 1)}).
 \end{enumerate}
 
 
 
-\begin{minted}[linenos, breaklines]{python}
+\subsubsection{Kiến trúc Đề xuất 2: Tinh chỉnh Mô hình BERT (Fine-tuning)}
+Nghiên cứu sử dụng biến thể \texttt{bert-base-uncased} (12 layers, 12 heads, 768 hidden size). Chiến lược \textbf{Học chuyển giao} được thực hiện bằng cách thêm một lớp phân loại tuyến tính lên trên token đầu ra \texttt{[CLS]}. Toàn bộ 109 triệu tham số sẽ được cập nhật nhẹ trong quá trình Fine-tuning.
 
-history = model.fit(
-    train_ds,
-    validation_data=valid_ds,
-    epochs=200,
-    callbacks=callbacks("crnn"),
-    verbose=1
-)
-\end{minted}
-\begin{center}
-	\captionof{listing}{Code trainning}
-	\label{lst:tranning}
-\end{center}
+
+
+\subsubsection{Cấu hình Huấn luyện và Chiến lược Tối ưu hóa}
+
+\subsubsubsection{Tối ưu hóa Mô hình Bi-LSTM}
+\begin{itemize}
+	\item \textbf{Hàm mất mát:} Binary Cross Entropy with Logits.
+	\item \textbf{Optimizer:} Adam ($\eta = 10^{-3}$).
+	\item \textbf{Batch size:} 16; \textbf{Epochs:} 100.
+	\item \textbf{Gradient Clipping:} \texttt{max\_norm=1.0}.
+\end{itemize}
+
+\subsubsubsection{Tối ưu hóa Mô hình BERT}
+Quá trình Fine-tuning áp dụng các kỹ thuật đặc thù:
+\begin{itemize}
+	\item \textbf{Optimizer:} AdamW ($\eta = 2 \times 10^{-5}$, $\lambda = 0.01$).
+	\item \textbf{Scheduler:} \textit{Linear Schedule with Warmup}. Tốc độ học tăng dần trong 10\% số bước đầu tiên (\textit{warmup ratio} = 0.1) sau đó giảm dần về 0.
+	\item \textbf{Quy mô:} 3 epoch (tương đương 7,500 bước huấn luyện).
+\end{itemize}
+
+
+
+\subsubsubsection{Tóm tắt siêu tham số thực nghiệm}
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\textbf{Thông số} & \textbf{Bi-LSTM + GloVe} & \textbf{BERT (Fine-tuning)} \\ \hline
+		Learning Rate     & $10^{-3}$                & $2 \times 10^{-5}$          \\ \hline
+		Optimizer         & Adam                     & AdamW                       \\ \hline
+		Max Length        & 256                      & 512                         \\ \hline
+		Batch Size        & 16                       & 16                          \\ \hline
+		Epochs            & 100 (Early Stopping)     & 3                           \\ \hline
+	\end{tabular}
+	\caption{So sánh cấu hình huấn luyện của hai mô hình}
+\end{table}
+
+\subsection{Kết quả Thực nghiệm và Đánh giá}
+
+Phần này trình bày chi tiết các kết quả đạt được sau quá trình huấn luyện hai kiến trúc mạng học sâu: Bi-LSTM kết hợp không gian nhúng GloVe và mô hình ngôn ngữ lớn BERT. Các phân tích được thực hiện dựa trên sự biến thiên của hàm mất mát, các độ đo phân loại chuẩn mực trên tập kiểm thử (Test Set) và đánh giá định tính qua các ca kiểm thử thực tế (Inference).
+
+\subsubsection{Môi trường Thực nghiệm và Cấu hình Siêu tham số}
+Nhằm đảm bảo tính công bằng và khả năng tái lập kết quả (reproducibility), toàn bộ các thực nghiệm được tiến hành trên cùng một môi trường phần cứng và phần mềm:
+\begin{itemize}
+	\item \textbf{Tài nguyên điện toán:} Bộ xử lý đồ họa (GPU) Tesla T4 với dung lượng bộ nhớ khả dụng xấp xỉ $15.6\text{ GB}$.
+	\item \textbf{Cấu hình BERT:} Sử dụng biến thể \texttt{bert-base-uncased}. Thuật toán tối ưu AdamW được áp dụng với tốc độ học $\eta = 2 \times 10^{-5}$, hệ số suy giảm trọng số (weight decay) $0.01$ và tỷ lệ hâm nóng (warmup ratio) $0.1$. Quy mô lô (batch size) là 16. Quá trình tinh chỉnh (fine-tuning) diễn ra trong 3 epoch (tương đương 7,500 bước huấn luyện).
+	\item \textbf{Cấu hình Bi-LSTM:} Đầu vào được giới hạn 256 token, đi qua ma trận nhúng GloVe 100 chiều. Thuật toán tối ưu Adam với $\eta = 10^{-3}$, batch size 16. Quá trình huấn luyện được thiết lập chạy tối đa 100 epoch để quan sát rõ ranh giới hội tụ và quá khớp.
+\end{itemize}
+
+\subsubsection{Phân tích Động lực học Quá trình Huấn luyện}
+Sự biến thiên của hàm suy hao (Loss) và độ chính xác (Accuracy) qua các kỷ nguyên là cơ sở để đánh giá khả năng tổng quát hóa của mô hình.
+
+\subsubsubsection{Động lực học của Mô hình BERT}
+Quá trình tinh chỉnh BERT cho thấy sự hội tụ cực kỳ nhanh chóng. Ngay tại Kỷ nguyên 1 (Epoch 1), hàm mất mát trên tập huấn luyện (Train Loss) đã giảm xuống mức $0.2669$, đồng thời độ chính xác (Train Acc) đạt $89.35\%$. Tương ứng, độ chính xác trên tập kiểm định (Validation) đạt $93.22\%$.
+
+Tuy nhiên, biểu đồ huấn luyện cho thấy dấu hiệu của hiện tượng quá khớp vi mô (micro-overfitting) bắt đầu xuất hiện từ Kỷ nguyên 2:
+\begin{itemize}
+	\item Train Loss tiếp tục giảm mạnh xuống $0.0744$ và Train Acc đạt đỉnh $98.16\%$.
+	\item Ngược lại, Validation Loss bắt đầu tăng ngược trở lại lên mức $0.2696$, dù Validation Acc vẫn cải thiện nhẹ lên $93.88\%$.
+\end{itemize}
+Hệ thống đã tự động lưu lại điểm kiểm tra (checkpoint) tại Kỷ nguyên 2 với chỉ số $Best\ Val\ F1 = 0.9388$ làm mô hình dự đoán chính thức.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\linewidth]{Images/trainning.png}
+	\includegraphics[width=\linewidth]{Images/bert-training.png}
 	\vspace{10pt}
-	\caption{Quá trình tranning}
-	\label{fig:CNN}
+	\caption{Đồ thị hàm mất mát và độ chính xác của mô hình BERT qua 3 epoch}
+	\label{fig:bert-training}
 \end{figure}
 
+\subsubsubsection{Động lực học của Mô hình Bi-LSTM}
+Trái ngược với khả năng hội tụ ổn định của BERT, Bi-LSTM bộc lộ rõ rệt đặc tính khó kiểm soát của mạng hồi quy khi đối mặt với dữ liệu nhiễu trong thời gian dài.
+\begin{itemize}
+	\item Xuyên suốt 100 kỷ nguyên, Train Loss của LSTM tiệm cận về 0 (đạt $0.0146$ ở Epoch 100) và Train Acc gần như hoàn hảo ở mức $99.62\%$.
+	\item Dẫu vậy, bắt đầu từ khoảng Epoch 10-15, Validation Loss bắt đầu phân kỳ và tăng theo cấp số nhân, đạt mức $1.3039$ ở Epoch cuối cùng, kéo theo Validation Acc suy giảm xuống $88.90\%$.
+\end{itemize}
+Sự phân kỳ sâu sắc này là minh chứng toán học kinh điển cho hiện tượng quá khớp (Overfitting) nghiêm trọng. Mạng LSTM, do hạn chế về dung lượng bộ nhớ ngữ cảnh xa, đã chọn cách "học vẹt" các đặc trưng cục bộ của tập huấn luyện thay vì rút ra quy luật ngôn ngữ tổng quát. Điểm $Best\ Val\ F1$ tối ưu nhất được ghi nhận là $0.8994$ trước khi mô hình trượt dài vào vùng quá khớp.
 
-\subsection{Kết quả đánh giá (Evaluation Results)}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{Images/lstm-training.png}
+	\vspace{10pt}
+	\caption{Động lực học của mô hình Bi-LSTM trong suốt 100 epoch với hiện tượng quá khớp}
+	\label{fig:lstm-training}
+\end{figure}
 
-\subsubsection*{Chỉ số hiệu năng chính (Key Metrics)}
+\subsubsection{Đánh giá Định lượng trên Tập Kiểm thử (Test Set)}
+Để đưa ra kết luận khách quan, hai mô hình tốt nhất (Best Checkpoints) được tải lên và suy diễn trên tập Test hoàn toàn độc lập gồm 5,000 mẫu (2,500 Tiêu cực và 2,500 Tích cực).
 
-Dữ liệu được tính toán để tạo các metrics sau:
+\begin{table}[H]
+	\centering
+	\caption{Báo cáo phân loại (Classification Report) chi tiết của hai mô hình}
+	\begin{tabular}{|l|l|c|c|}
+		\hline
+		\textbf{Chỉ số}                                   & \textbf{Lớp (Class)} & \textbf{Bi-LSTM} & \textbf{BERT (Fine-tuned)} \\
+		\hline
+		\multirow{2}{*}{\textbf{Độ xác thực (Precision)}} & Negative (0)         & $0.90$           & $\mathbf{0.95}$            \\
+		                                                  & Positive (1)         & $0.89$           & $\mathbf{0.93}$            \\
+		\hline
+		\multirow{2}{*}{\textbf{Độ bao phủ (Recall)}}     & Negative (0)         & $0.89$           & $\mathbf{0.93}$            \\
+		                                                  & Positive (1)         & $0.90$           & $\mathbf{0.95}$            \\
+		\hline
+		\multirow{2}{*}{\textbf{F1-Score}}                & Negative (0)         & $0.90$           & $\mathbf{0.94}$            \\
+		                                                  & Positive (1)         & $0.89$           & $\mathbf{0.94}$            \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Tổng hợp hiệu suất tổng thể (Overall Performance)}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Độ đo (Metric)}          & \textbf{Bi-LSTM} & \textbf{BERT (Fine-tuned)} & \textbf{Khoảng cách} \\
+		\hline
+		\textbf{Accuracy (Độ chính xác)} & $89.50\%$        & $\mathbf{94.32\%}$         & $+4.82\%$            \\
+		\hline
+		\textbf{Test Loss}               & $0.3089$         & $\mathbf{0.2511}$          & $-0.0578$            \\
+		\hline
+		\textbf{Macro Avg F1-Score}      & $0.8950$         & $\mathbf{0.9432}$          & $+0.0482$            \\
+		\hline
+	\end{tabular}
+\end{table}
+
+Dữ liệu từ hai bảng trên khẳng định sự ưu việt toàn diện của kiến trúc Transformer. BERT đạt mức F1-Score đồng đều $0.94$ cho cả hai lớp cảm xúc, trong khi Độ xác thực (Precision) của lớp Negative lên tới $0.95$, đồng nghĩa với việc khi BERT dự đoán một đánh giá là "Tiêu cực", khả năng sai sót chỉ ở mức $5\%$. Bi-LSTM duy trì mức hiệu suất dao động quanh biên độ $0.89 - 0.90$, một kết quả đáng khích lệ đối với kiến trúc tuần tự nhưng vẫn bộc lộ khoảng cách công nghệ rõ nét.
+
+\subsubsection{Phân tích Ma trận Nhầm lẫn (Confusion Matrix)}
+Phân tích 4 thành phần $TP, TN, FP, FN$ cung cấp góc nhìn vi mô về các điểm mù của thuật toán.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{Images/text-confusionmatrix.png}
+	\vspace{10pt}
+	\caption{Ma trận nhầm lẫn (Confusion Matrix) của hai mô hình trên tập kiểm thử}
+	\label{fig:text-confusionmatrix}
+\end{figure}
 
 \begin{enumerate}
-	\item \textbf{Character Error Rate (CER):}
-	      \[
-		      CER = \frac{\sum \text{Số ký tự sai}}{\sum \text{Tổng số ký tự}} \times 100\%
-	      \]
-	      Tính bằng cách so sánh \texttt{predicted\_text} (từ ocr\_logs) với \texttt{text} (từ feedback).
-	      Target: < 5\%.
-
-	\item \textbf{Word Accuracy:}
-	      \[
-		      WA = \frac{\text{Số chuỗi hoàn chỉnh đúng}}{\text{Tổng số chuỗi}} \times 100\%
-	      \]
-	      Nếu predicted hoàn toàn bằng ground truth, accuracy = 100\%. Ngược lại = 0\%.
-	      Target: > 95\%.
-
-	\item \textbf{Average Confidence:} Trung bình của tất cả \texttt{confidence\_sc...} trong \texttt{ocr\_logs} (ngày/tuần/tháng).
+	\item \textbf{Mô hình BERT:}
 	      \begin{itemize}
-		      \item Nếu trending down (giảm dần), có thể model performance đang suy giảm → cần investigate.
+		      \item True Negatives ($TN$): $2,333$ mẫu.
+		      \item True Positives ($TP$): $2,383$ mẫu.
+		      \item False Positives ($FP$): $167$ mẫu.
+		      \item False Negatives ($FN$): $117$ mẫu.
 	      \end{itemize}
+	      Phân phối lỗi của BERT khá cân bằng và được nén ở mức tối thiểu. Việc $FN$ ($117$) thấp hơn $FP$ ($167$) cho thấy BERT có xu hướng "nhạy" hơn một chút trong việc phát hiện cảm xúc tích cực, đôi khi dán nhãn nhầm các câu chê bai tinh vi thành khen ngợi.
 
-	\item \textbf{End-to-End Latency (p50, p95, p99):} Phân tích \texttt{latency\_ms} từ \texttt{api\_requests}:
+	\item \textbf{Mô hình Bi-LSTM:}
 	      \begin{itemize}
-		      \item p50 (median): 50\% request nhanh hơn giá trị này.
-		      \item p95: 95\% request nhanh hơn → quan trọng cho UX.
-		      \item p99: 99\% request nhanh hơn → worst case.
-		      \item Target: p95 < 500ms.
+		      \item True Negatives ($TN$): $2,263$ mẫu.
+		      \item True Positives ($TP$): $2,212$ mẫu.
+		      \item False Positives ($FP$): $272$ mẫu.
+		      \item False Negatives ($FN$): $253$ mẫu.
 	      \end{itemize}
-
-	\item \textbf{Error Rate:} Tỷ lệ API requests trả về status code != 200:
-	      \[
-		      \text{Error Rate} = \frac{\text{Count(status\_code != 200)}}{\text{Total requests}} \times 100\%
-	      \]
-
-	\item \textbf{Model Version Performance Comparison:} So sánh CER, WA, avg confidence giữa các phiên bản model từ \texttt{model\_...} field.
+	      Tổng số mẫu bị phân loại sai của LSTM là $525$ mẫu, cao hơn $84.8\%$ so với tổng số lỗi của BERT ($284$ mẫu). LSTM gặp khó khăn lớn đối với các cấu trúc ngữ pháp đảo ngược hoặc châm biếm. Khi khoảng cách vật lý giữa hư từ (như "not", "never") và tính từ gốc (như "good", "masterpiece") quá xa, lớp RNN dần quên đi bối cảnh phủ định, dẫn đến các sai số $FP$ và $FN$ gia tăng mạnh. Cơ chế Self-Attention của BERT đã khắc phục triệt để nhược điểm này bằng cách tính toán trọng số tương quan trực tiếp giữa mọi cặp từ bất chấp khoảng cách.
 \end{enumerate}
 
-% Detailed quantitative and qualitative summary from the test report image
-\subsubsection{Kết quả trainning}
+\subsubsection{Đánh giá Định tính: Thử nghiệm Suy diễn (Inference Case Studies)}
+Để kiểm chứng năng lực ngữ nghĩa thực tế, 5 mẫu văn bản giả định mang các sắc thái cực đoan và hỗn hợp được đưa vào hệ thống suy diễn (inference pipeline) để quan sát sự tự tin (confidence scores) của hai mô hình.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{Images/result.jpg}
-	\vspace{10pt}
-	\caption{Kết quả kiểm thử cho tập 3000 mẫu}
-	\label{fig:result}
-\end{figure}
-
-Theo báo cáo kiểm thử trên tập kiểm thử độc lập gồm \textbf{3000} mẫu:
 \begin{itemize}
-	\item \textbf{Accuracy (Tuyệt đối):} 81.07\% — tỷ lệ chuỗi (strings) được nhận diện hoàn toàn chính xác.
-	\item \textbf{Character Error Rate (CER):} 21.06\% — tỷ lệ ký tự nhận diện sai so với tổng số ký tự.
-	\item \textbf{Thời gian trung bình:} 2.75s, thời gian này phản ánh pipeline huấn luyện/đánh giá offline hoặc cấu hình inference chưa tối ưu (ví dụ: chạy trên CPU hoặc batch kích thước lớn).
+	\item \textbf{Ca kiểm thử số 1 (Tích cực mạnh):} \textit{"An absolute masterpiece. The cinematography is stunning..."} Cả hai mô hình đều trích xuất thành công các tính từ mạnh ("masterpiece", "stunning"). BERT tự tin dự đoán POSITIVE với $99.9\%$, LSTM tự tin tuyệt đối $100.0\%$.
+	\item \textbf{Ca kiểm thử số 2 (Tiêu cực mạnh):} \textit{"What a complete waste of time and money..."} Các ngữ nghĩa "waste", "wooden" giúp hai mô hình dễ dàng dán nhãn NEGATIVE với sự tự tin cực đại (BERT $99.9\%$, LSTM $100.0\%$).
+	\item \textbf{Ca kiểm thử số 3 (Cảm xúc hỗn hợp/Phân cực chìm):} \textit{"It was okay, nothing special. Some scenes were interesting but the pacing felt off. Probably wouldn't watch it again."} \\
+	      Đây là một mẫu văn bản bẫy thuật toán (adversarial example) khi đan xen các từ có vẻ tích cực ("okay", "interesting") bên trong một đánh giá tiêu cực tổng thể.
+	      \begin{itemize}
+		      \item Mô hình BERT xử lý xuất sắc, triệt tiêu nhiễu từ các từ tích cực và dán nhãn NEGATIVE với xác suất $99.8\%$.
+		      \item Mô hình Bi-LSTM, do bị tác động bởi các hàm lượng thông tin tích cực xuất hiện rải rác, đã bị giảm độ tự tin xuống còn $97.8\%$, phân bổ $2.2\%$ xác suất cho lớp POSITIVE. Sự dao động này phản ánh hạn chế trong việc tổng hợp ngữ nghĩa toàn cục của mạng quy hồi.
+	      \end{itemize}
+	\item \textbf{Ca kiểm thử số 4 và 5:} Cả hai mô hình tiếp tục thể hiện sự ổn định khi nhận diện chính xác câu khen ngợi đạo diễn Nolan (POSITIVE) và câu chê bai CGI tệ hại (NEGATIVE) với độ tin cậy gần như tuyệt đối.
 \end{itemize}
 
-\subsubsection{Phân tích hình ảnh mẫu (Qualitative)}
-Ta chia thành các trường hợp là \textbf{CORRECT} và \textbf{ERROR}. Với các mẫu \textit{CORRECT}, mô hình trả về chuỗi chính xác với confidence cao (ví dụ conf $\approx$1.0). Các mẫu \textit{ERROR} cho thấy các nguyên nhân phổ biến:
-\begin{itemize}
-	\item \textbf{Nhầm lẫn ký tự tương tự:} ký tự có hình dạng gần giống (ví dụ '3' vs '8', '1' vs 'l'/'I').
-	\item \textbf{Vấn đề phân tách ký tự / spacing:} Ký tự quá gần hoặc lệch dẫn đến giải mã CTC sai vị trí.
-	\item \textbf{Nhiễu và biến dạng ảnh:} nhiễu, mờ, hoặc font không chuẩn làm giảm confidence ở một số ký tự.
-	\item \textbf{Ghi tắt / shorthand value:} Với tiền tệ như VND, người bán có thể ghi tắt (ví dụ "50" thay cho "50.000"), đây là lỗi ngữ nghĩa mà OCR thuần ký tự không thể giải quyết.
-\end{itemize}
-
-\subsubsection{Đường hội tụ Loss: Training vs Validation}
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1\linewidth]{Images/performance.jpg}
-	\vspace{10pt}
-	\caption{CRNN Training VS. Validation Performance}
-	\label{fig:performance}
-\end{figure}
-
-Đồ thị cho thấy cả training loss và validation loss giảm rất nhanh trong giai đoạn đầu (0–20 epochs) và sau đó duy trì ở mức rất thấp gần 0 tới hơn 140 epochs. Hai đường loss gần như chồng khít nhau trong suốt quá trình huấn luyện.
-
-Nhận xét:
-\begin{itemize}
-	\item Sự hội tụ nhanh và giá trị loss xuống gần 0 chỉ ra rằng mô hình học rất tốt theo hàm loss đã chọn.
-	\item Đường training và validation sát nhau cho thấy hiện tại không có dấu hiệu rõ ràng của overfitting theo loss; tuy nhiên cần kiểm tra thêm metrics thực tế (CER, word accuracy) vì loss thấp không luôn tương ứng với chất lượng nhận diện ký tự cao.
-	\item Giá trị loss ban đầu rất lớn gợi ý scale của loss có thể cao do cách tính CTC loss hoặc presence của outlier trong batch đầu.
-\end{itemize}
+\subsubsection{Tiểu kết}
+Kết quả thực nghiệm đã minh chứng định lượng sức mạnh biểu diễn vượt trội của mô hình BERT. Bằng cách tận dụng cơ chế Tự chú ý và không gian kiến thức học chuyển giao, BERT không chỉ thiết lập mức hiệu suất $94.32\%$ mà còn duy trì độ bền vững tuyệt đối trước các văn bản có cấu trúc đánh lừa. Về phần mình, kiến trúc Bi-LSTM với ma trận GloVe, dù có hiện tượng quá khớp và độ chính xác thấp hơn ($89.50\%$), vẫn chứng minh được giá trị thực tiễn trong các bài toán yêu cầu chi phí tham số thấp và tốc độ suy diễn nhanh.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PHẦN MỚI: Phân loại Đa phương thức với CLIP
@@ -867,26 +813,26 @@ Nhận xét:
 \begin{thebibliography}{99999}
 	\bibitem{radford2021learning}
 	Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., ... \& Sutskever, I. (2021).
-	{\em Learning transferable visual models from natural language supervision.}
+		{\em Learning transferable visual models from natural language supervision.}
 	In International Conference on Machine Learning (pp. 8748-8763). PMLR.
 
 	\bibitem{lin2014microsoft}
 	Lin, T. Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., ... \& Zitnick, C. L. (2014).
-	{\em Microsoft COCO: Common objects in context.}
+		{\em Microsoft COCO: Common objects in context.}
 	In European conference on computer vision (pp. 740-755). Springer, Cham.
 
 	\bibitem{snell2017prototypical}
 	Snell, J., Swersky, K., \& Zemel, R. (2017).
-	{\em Prototypical networks for few-shot learning.}
+		{\em Prototypical networks for few-shot learning.}
 	Advances in neural information processing systems, 30.
 
-% 	\bibitem[Dal]{Dal}{Dalgaard, P.} {\em Introductory Statistics with R.}  Springer 2008.
+	% 	\bibitem[Dal]{Dal}{Dalgaard, P.} {\em Introductory Statistics with R.}  Springer 2008.
 
-% 	\bibitem[K-Z]{K-Z}{Kenett, R. S. and Zacks, S.}
-% 	{\em Modern Industrial Statistics: with applications in R, MINITAB and JMP,} 2nd ed.,  John Wiley and Sons, 2014.
+	% 	\bibitem[K-Z]{K-Z}{Kenett, R. S. and Zacks, S.}
+	% 	{\em Modern Industrial Statistics: with applications in R, MINITAB and JMP,} 2nd ed.,  John Wiley and Sons, 2014.
 
-% 	\bibitem[Ker]{Ker}{Kerns, G. J.}
-% 	{\em Introduction to Probability and Statistics Using R,} 2nd ed., CRC 2015.
+	% 	\bibitem[Ker]{Ker}{Kerns, G. J.}
+	% 	{\em Introduction to Probability and Statistics Using R,} 2nd ed., CRC 2015.
 
 \end{thebibliography}
 \end{document}
