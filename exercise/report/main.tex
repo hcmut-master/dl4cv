@@ -1,0 +1,802 @@
+\documentclass[a4paper]{article}
+\usepackage{vntex}
+
+\usepackage{a4wide,amssymb,epsfig,latexsym,array,hhline,fancyhdr}
+\usepackage[normalem]{ulem}
+\usepackage{caption}
+\usepackage[makeroom]{cancel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol,longtable,amscd}
+\usepackage{diagbox}
+\usepackage{booktabs}
+\usepackage{alltt}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{caption,subcaption}
+\usepackage{minted}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphics}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{epsfig}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows,snakes,backgrounds,positioning,calc,fit}
+\usepackage[unicode]{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true}
+\usepackage{listings}
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green},
+    morecomment=[l][\color{magenta}]{\#},
+    breaklines=true,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+\newcommand{\code}[1]{\texttt{\textcolor{blue!80!black}{#1}}}
+
+\newtheorem{theorem}{{\bf Định lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
+\theoremstyle{definition}
+\newtheorem{exer}{Bài toán}
+
+\def\thesislayout{
+	\geometry{
+		a4paper,
+		total={160mm,240mm},
+		left=30mm,
+		top=30mm,
+	}
+}
+\thesislayout
+
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{
+ \begin{tabular}{rl}
+    \begin{picture}(25,15)(0,0)
+    \put(0,-8){\includegraphics[width=8mm, height=8mm]{Images/hcmut.png}}
+   \end{picture}&
+	\begin{tabular}{l}
+		\textbf{\bf \ttfamily Trường Đại Học Bách Khoa Tp.Hồ Chí Minh}\\
+		\textbf{\bf \ttfamily Khoa Khoa Học \& Kỹ Thuật Máy Tính}
+	\end{tabular}
+ \end{tabular}
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf
+	\end{tabular}  }
+\fancyfoot{}
+\fancyfoot[L]{\scriptsize \ttfamily Bài tập môn Học sâu và ứng dụng trong thị giác máy tính - Niên khóa 2025-2026}
+\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\arabic{subsubsubsection}}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+\sloppy
+\captionsetup[figure]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=-9pt}
+\captionsetup[table]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=7pt}
+
+\setlength{\floatsep}{5pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+\thesislayout
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+		ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH \\
+		TRƯỜNG ĐẠI HỌC BÁCH KHOA \\
+		KHOA KHOA HỌC \& KỸ THUẬT MÁY TÍNH
+	\end{center}
+
+	\vspace{1cm}
+
+	\begin{figure}[h!]
+		\begin{center}
+			\includegraphics[width=3cm]{Images/hcmut.png}
+		\end{center}
+	\end{figure}
+
+	\vspace{1cm}
+
+	\begin{center}
+		\begin{tabular}{c}
+			\multicolumn{1}{l}{\textbf{{\Large HỌC SÂU VÀ ỨNG DỤNG TRONG THỊ GIÁC MÁY TÍNH}}} \\
+			~~                                                                                \\
+			\hline
+			\\
+			\multicolumn{1}{l}{\textbf{{\large Bài tập -- Nhóm 4}}}                   \\
+			\textbf{\Large Phần 5: Mô hình phân loại dựa trên LSTM/GRU}                                                  \\
+			\\
+			\hline
+		\end{tabular}
+	\end{center}
+
+	\vspace{1.5cm}
+
+	\begin{table}[h]
+		\begin{tabular}{rrl}
+			\hspace{5 cm} & GVHD:         & TS. Lê Thành Sách            \\
+
+			              & SV thực hiện: & Nguyễn Hữu Trưởng - 2470573  \\
+			              &               & Nguyễn Nhật Thanh - 2570316  \\
+			              &               & Võ Thị Bích Phượng - 2470570 \\
+		\end{tabular}
+	\end{table}
+	\vspace{1.5cm}
+	\begin{center}
+		\vfill
+		{\footnotesize Tp. Hồ Chí Minh, Tháng 03/2026}
+	\end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PHẦN 1: MẠNG NƠ-RON HỒI QUY (RNN)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mạng Nơ-ron Hồi quy (Recurrent Neural Networks)}
+
+\subsection{Giới thiệu và Động lực}
+Trong các bài toán xử lý dữ liệu tuần tự (sequential data) như xử lý ngôn ngữ tự nhiên, nhận dạng giọng nói, hay phân tích chuỗi thời gian, thông tin tại mỗi bước thời gian có mối tương quan mật thiết với các bước trước đó. Các mạng nơ-ron truyền thẳng (Feedforward Neural Networks) truyền thống không có khả năng ghi nhớ ngữ cảnh trước đó vì chúng xử lý mỗi đầu vào một cách độc lập.
+
+Mạng Nơ-ron Hồi quy (Recurrent Neural Network - RNN) được thiết kế để giải quyết hạn chế này. Ý tưởng cốt lõi của RNN là duy trì một \textit{trạng thái ẩn} (hidden state) $h_t$ hoạt động như bộ nhớ ngắn hạn, lưu trữ thông tin đã xử lý từ các bước thời gian trước. Tại mỗi bước $t$, mạng nhận đồng thời đầu vào hiện tại $x_t$ và trạng thái ẩn từ bước trước $h_{t-1}$ để tính toán trạng thái ẩn mới $h_t$.
+
+Đặc điểm quan trọng của RNN là \textbf{chia sẻ tham số} (parameter sharing): cùng một bộ trọng số $W_{xh}$, $W_{hh}$ được sử dụng lặp đi lặp lại tại mọi bước thời gian, giúp mô hình có thể xử lý các chuỗi có độ dài bất kỳ mà không làm tăng số lượng tham số.
+
+\subsection{Kiến trúc RNN}
+Kiến trúc của một RNN cơ bản có thể được hình dung rõ ràng nhất khi "trải" (unfolding) mạng theo chiều thời gian. Mỗi bước thời gian là một bản sao (copy) của cùng một khối xử lý, chia sẻ chung tập trọng số.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{Images/rnn.png}
+	\vspace{10pt}
+	\caption{Kiến trúc mạng RNN trải theo thời gian (Unfolded RNN) (Nguồn: Colah's Blog \cite{colah2015lstm})}
+	\label{fig:rnn-architecture}
+\end{figure}
+
+\subsubsection{Công thức toán học}
+Tại mỗi bước thời gian $t$, RNN thực hiện hai phép biến đổi chính:
+
+\textbf{Cập nhật trạng thái ẩn (Hidden state update):}
+\begin{equation}
+	h_t = \phi\left(W_{xh} \cdot x_t + W_{hh} \cdot h_{t-1} + b_h\right)
+	\label{eq:rnn-hidden}
+\end{equation}
+
+\textbf{Tính toán đầu ra (Output computation):}
+\begin{equation}
+	o_t = W_{hq} \cdot h_t + b_q
+	\label{eq:rnn-output}
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+	\item $x_t \in \mathbb{R}^d$ là vector đầu vào tại bước thời gian $t$.
+	\item $h_t \in \mathbb{R}^h$ là trạng thái ẩn tại bước $t$ (bộ nhớ ngắn hạn).
+	\item $h_{t-1} \in \mathbb{R}^h$ là trạng thái ẩn từ bước trước.
+	\item $W_{xh} \in \mathbb{R}^{h \times d}$ là ma trận trọng số đầu vào.
+	\item $W_{hh} \in \mathbb{R}^{h \times h}$ là ma trận trọng số hồi quy (recurrent weights).
+	\item $W_{hq} \in \mathbb{R}^{q \times h}$ là ma trận trọng số đầu ra.
+	\item $b_h, b_q$ là các vector hệ số chệch (bias).
+	\item $\phi$ là hàm kích hoạt phi tuyến (thường là $\tanh$).
+\end{itemize}
+
+\subsection{Lan truyền ngược qua thời gian (Backpropagation Through Time)}
+Để huấn luyện RNN, thuật toán \textbf{Lan truyền ngược qua thời gian} (Backpropagation Through Time - BPTT) được áp dụng. BPTT "trải" mạng RNN thành một chuỗi các lớp theo chiều thời gian, sau đó áp dụng thuật toán lan truyền ngược (backpropagation) tiêu chuẩn trên đồ thị tính toán đã trải.
+
+Quá trình tính đạo hàm yêu cầu nhân liên tiếp các ma trận Jacobian $\frac{\partial h_t}{\partial h_{t-1}}$ qua nhiều bước thời gian. Cụ thể, gradient của hàm mất mát $\mathcal{L}$ theo trọng số $W_{hh}$ chứa các tích chuỗi dạng:
+\begin{equation}
+	\frac{\partial \mathcal{L}}{\partial W_{hh}} = \sum_{t=1}^{T} \frac{\partial \mathcal{L}}{\partial o_t} \frac{\partial o_t}{\partial h_t} \left(\prod_{k=t+1}^{T} \frac{\partial h_k}{\partial h_{k-1}}\right) \frac{\partial h_t}{\partial W_{hh}}
+	\label{eq:bptt}
+\end{equation}
+
+\subsection{Vấn đề Triệt tiêu và Bùng nổ Đạo hàm}
+Phép nhân chuỗi ma trận Jacobian trong Phương trình~\ref{eq:bptt} là nguồn gốc của hai vấn đề nghiêm trọng:
+
+\begin{enumerate}
+	\item \textbf{Triệt tiêu đạo hàm (Vanishing Gradient):} Khi các giá trị riêng (eigenvalues) của $W_{hh}$ nhỏ hơn 1, tích $\prod \frac{\partial h_k}{\partial h_{k-1}}$ suy giảm theo hàm mũ khi $T$ tăng. Hệ quả là gradient gần như bằng không khi truyền về các bước đầu tiên, khiến mạng \textit{không thể học} được các phụ thuộc dài hạn (long-range dependencies).
+
+	\item \textbf{Bùng nổ đạo hàm (Exploding Gradient):} Ngược lại, khi giá trị riêng lớn hơn 1, gradient tăng theo cấp số nhân, dẫn đến các bước cập nhật trọng số cực lớn, gây bất ổn định trong quá trình huấn luyện. Vấn đề này có thể được giảm thiểu bằng kỹ thuật \textbf{Gradient Clipping}.
+\end{enumerate}
+
+Chính các hạn chế cố hữu này đã thúc đẩy sự ra đời của các kiến trúc cải tiến như \textbf{LSTM} và \textbf{GRU}, được trình bày chi tiết trong phần tiếp theo.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PHẦN 2: LSTM VÀ GRU
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kiến trúc LSTM và GRU}
+
+\subsection{Mạng LSTM (Long Short-Term Memory)}
+
+\subsubsection{Động lực và Ý tưởng cốt lõi}
+Mạng LSTM (Long Short-Term Memory) được đề xuất bởi Hochreiter \& Schmidhuber (1997) \cite{hochreiter1997long} nhằm giải quyết triệt để vấn đề triệt tiêu đạo hàm của RNN truyền thống.
+
+Ý tưởng cốt lõi của LSTM là đưa vào một \textbf{trạng thái ô} (cell state - $C_t$) riêng biệt, hoạt động như một ``xa lộ thông tin'' (information highway). Trạng thái ô được cập nhật thông qua phép \textit{cộng} (additive update) thay vì phép \textit{nhân} (multiplicative) như trong RNN, cho phép gradient lan truyền ngược qua nhiều bước thời gian mà không bị suy giảm. Ba cơ chế ``cổng'' (gates) học được sẽ điều khiển luồng thông tin vào, ra và duy trì trong trạng thái ô.
+
+\subsubsection{Kiến trúc chi tiết}
+Một tế bào LSTM bao gồm ba cổng kiểm soát: Cổng quên (Forget Gate), Cổng đầu vào (Input Gate) và Cổng đầu ra (Output Gate), cùng với trạng thái ô $C_t$ và trạng thái ẩn $h_t$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\linewidth]{Images/lstm.png}
+	\vspace{10pt}
+	\caption{Cấu trúc chi tiết của một tế bào LSTM với ba cổng kiểm soát (Nguồn: Colah's Blog \cite{colah2015lstm})}
+	\label{fig:lstm-cell}
+\end{figure}
+
+\subsubsection{Công thức toán học}
+Tại mỗi bước thời gian $t$, LSTM thực hiện các phép tính sau:
+
+\textbf{Cổng quên (Forget Gate)} -- quyết định thông tin nào từ trạng thái ô cũ $C_{t-1}$ cần bị loại bỏ:
+\begin{equation}
+	f_t = \sigma\left(W_{xf} \cdot x_t + W_{hf} \cdot h_{t-1} + b_f\right)
+	\label{eq:lstm-forget}
+\end{equation}
+
+\textbf{Cổng đầu vào (Input Gate)} -- quyết định thông tin mới nào sẽ được ghi vào trạng thái ô:
+\begin{equation}
+	i_t = \sigma\left(W_{xi} \cdot x_t + W_{hi} \cdot h_{t-1} + b_i\right)
+	\label{eq:lstm-input}
+\end{equation}
+
+\textbf{Trạng thái ứng viên (Candidate Cell State):}
+\begin{equation}
+	\tilde{C}_t = \tanh\left(W_{xc} \cdot x_t + W_{hc} \cdot h_{t-1} + b_c\right)
+	\label{eq:lstm-candidate}
+\end{equation}
+
+\textbf{Cập nhật trạng thái ô} -- ``xa lộ gradient'':
+\begin{equation}
+	C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t
+	\label{eq:lstm-cell}
+\end{equation}
+
+\textbf{Cổng đầu ra (Output Gate):}
+\begin{equation}
+	o_t = \sigma\left(W_{xo} \cdot x_t + W_{ho} \cdot h_{t-1} + b_o\right)
+	\label{eq:lstm-output}
+\end{equation}
+
+\textbf{Trạng thái ẩn đầu ra:}
+\begin{equation}
+	h_t = o_t \odot \tanh(C_t)
+	\label{eq:lstm-hidden}
+\end{equation}
+
+Trong đó: $\sigma$ là hàm sigmoid, $\odot$ là phép nhân từng phần tử (element-wise multiplication hay Hadamard product). Tất cả các ma trận $W$ và vector $b$ đều là tham số học được.
+
+\textbf{Số lượng tham số:} Với kích thước đầu vào $d$ và kích thước trạng thái ẩn $h$, mỗi lớp LSTM có:
+\begin{equation}
+	\text{Params}_{\text{LSTM}} = 4 \times (d \times h + h \times h + h) = 4 \times (d \cdot h + h^2 + h)
+	\label{eq:lstm-params}
+\end{equation}
+Hệ số 4 tương ứng với bốn bộ trọng số cho: cổng quên, cổng đầu vào, trạng thái ứng viên và cổng đầu ra.
+
+\subsection{Mạng GRU (Gated Recurrent Unit)}
+
+\subsubsection{Động lực: Đơn giản hóa LSTM}
+Mạng GRU (Gated Recurrent Unit) được đề xuất bởi Cho et al. (2014) \cite{cho2014learning} như một phiên bản đơn giản hóa của LSTM. GRU hợp nhất trạng thái ô $C_t$ và trạng thái ẩn $h_t$ thành một trạng thái ẩn duy nhất, đồng thời gộp cổng quên và cổng đầu vào thành một \textbf{cổng cập nhật} (update gate) duy nhất. Kết quả là GRU có ít tham số hơn LSTM khoảng 25\% mà vẫn đạt hiệu năng tương đương trên nhiều bài toán.
+
+\subsubsection{Kiến trúc chi tiết}
+GRU chỉ sử dụng hai cổng: \textbf{Cổng cập nhật} (Update Gate - $z_t$) và \textbf{Cổng đặt lại} (Reset Gate - $r_t$). Không có trạng thái ô riêng biệt.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\linewidth]{Images/gru-colah.png}
+	\vspace{10pt}
+	\caption{Cấu trúc chi tiết của một tế bào GRU với Cổng cập nhật ($z_t$) và Cổng đặt lại ($r_t$) (Nguồn: Colah's Blog \cite{colah2015lstm})}
+	\label{fig:gru-cell}
+\end{figure}
+
+\subsubsection{Công thức toán học}
+Tại mỗi bước thời gian $t$, GRU thực hiện các phép tính sau:
+
+\textbf{Cổng cập nhật (Update Gate)} -- kiểm soát mức độ thông tin từ trạng thái cũ $h_{t-1}$ được giữ lại:
+\begin{equation}
+	z_t = \sigma\left(W_{xz} \cdot x_t + W_{hz} \cdot h_{t-1} + b_z\right)
+	\label{eq:gru-update}
+\end{equation}
+
+\textbf{Cổng đặt lại (Reset Gate)} -- kiểm soát mức độ trạng thái cũ được sử dụng để tính trạng thái ứng viên:
+\begin{equation}
+	r_t = \sigma\left(W_{xr} \cdot x_t + W_{hr} \cdot h_{t-1} + b_r\right)
+	\label{eq:gru-reset}
+\end{equation}
+
+\textbf{Trạng thái ẩn ứng viên (Candidate Hidden State):}
+\begin{equation}
+	\tilde{h}_t = \tanh\left(W_{xh} \cdot x_t + W_{hh} \cdot (r_t \odot h_{t-1}) + b_h\right)
+	\label{eq:gru-candidate}
+\end{equation}
+
+\textbf{Cập nhật trạng thái ẩn:}
+\begin{equation}
+	h_t = z_t \odot h_{t-1} + (1 - z_t) \odot \tilde{h}_t
+	\label{eq:gru-hidden}
+\end{equation}
+
+Phương trình~\ref{eq:gru-hidden} thể hiện cơ chế nội suy tuyến tính giữa trạng thái cũ và trạng thái ứng viên:
+\begin{itemize}
+	\item Khi $z_t \to 1$: mạng \textit{sao chép} trạng thái cũ $h_{t-1}$ (bảo toàn bộ nhớ dài hạn).
+	\item Khi $z_t \to 0$: mạng \textit{thay thế} bằng trạng thái ứng viên $\tilde{h}_t$ (cập nhật ngắn hạn).
+	\item Khi $r_t \to 0$: trạng thái ứng viên bỏ qua hoàn toàn trạng thái cũ (reset ngữ cảnh).
+\end{itemize}
+
+\textbf{Số lượng tham số:} Mỗi lớp GRU có:
+\begin{equation}
+	\text{Params}_{\text{GRU}} = 3 \times (d \times h + h \times h + h) = 3 \times (d \cdot h + h^2 + h)
+	\label{eq:gru-params}
+\end{equation}
+Hệ số 3 tương ứng với ba bộ trọng số cho: cổng cập nhật, cổng đặt lại, và trạng thái ứng viên. So với LSTM, GRU tiết kiệm xấp xỉ 25\% số lượng tham số.
+
+\subsection{So sánh LSTM và GRU}
+
+\begin{table}[H]
+	\centering
+	\caption{Bảng so sánh kiến trúc LSTM và GRU}
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\textbf{Đặc điểm}             & \textbf{LSTM}                      & \textbf{GRU}                     \\
+		\hline
+		Số cổng (Gates)                & 3 (Forget, Input, Output)           & 2 (Update, Reset)                \\
+		\hline
+		Vector trạng thái             & 2 ($C_t$ và $h_t$)                 & 1 ($h_t$ duy nhất)              \\
+		\hline
+		Bộ ma trận trọng số           & 4 bộ                               & 3 bộ                             \\
+		\hline
+		Tham số (1 lớp)               & $4(dh + h^2 + h)$                  & $3(dh + h^2 + h)$               \\
+		\hline
+		Chi phí tính toán             & Cao hơn                             & Thấp hơn $\sim$25\%             \\
+		\hline
+		Cơ chế bộ nhớ                 & Cell state riêng biệt               & Tích hợp vào hidden state        \\
+		\hline
+		Hiệu năng thực nghiệm        & Tương đương                         & Tương đương                      \\
+		\hline
+	\end{tabular}
+	\label{tab:lstm-vs-gru}
+\end{table}
+
+Theo nghiên cứu thực nghiệm của Chung et al. (2014) \cite{chung2014empirical}, GRU đạt hiệu năng \textit{tương đương} LSTM trên nhiều tác vụ mô hình hóa chuỗi, đồng thời hội tụ nhanh hơn nhờ cấu trúc gọn nhẹ hơn.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PHẦN 3: THỰC NGHIỆM
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Thực nghiệm: Phân loại ảnh CIFAR-10 với LSTM và GRU}
+
+\subsection{Biểu diễn ảnh dưới dạng chuỗi (Sequence Representation)}
+
+\subsubsection{Bài toán và Phương pháp tiếp cận}
+Khác với việc sử dụng CNN hay ViT, phần thực nghiệm này áp dụng mạng hồi quy (LSTM/GRU) để phân loại ảnh. Điều kiện tiên quyết là phải biến đổi ảnh 2D thành chuỗi 1D để phù hợp với đầu vào tuần tự của RNN. Có ba phương pháp biểu diễn phổ biến:
+
+\begin{itemize}
+	\item \textbf{Row-wise:} Mỗi \textit{hàng} của ảnh (flatten cả 3 kênh màu) trở thành một bước thời gian.
+	\item \textbf{Column-wise:} Mỗi \textit{cột} của ảnh trở thành một bước thời gian.
+	\item \textbf{Patch-wise:} Chia ảnh thành các khối nhỏ (patches), mỗi khối là một bước thời gian.
+\end{itemize}
+
+\subsubsection{Phương pháp Row-wise (được chọn)}
+Nhóm lựa chọn phương pháp \textbf{Row-wise} vì tính đơn giản và trực quan. Quá trình biến đổi được thực hiện như sau:
+
+Với ảnh CIFAR-10 đầu vào có kích thước $(B, 3, 32, 32)$ (batch, channels, height, width):
+\begin{enumerate}
+	\item \textbf{Permute:} Hoán đổi chiều để đưa kênh màu về cuối: $(B, 3, 32, 32) \to (B, 32, 32, 3)$
+	\item \textbf{Reshape:} Gộp chiều width và channels: $(B, 32, 32, 3) \to (B, 32, 96)$
+\end{enumerate}
+
+Kết quả thu được chuỗi có:
+\begin{itemize}
+	\item \textbf{Độ dài chuỗi} (sequence length): $32$ bước thời gian (mỗi bước là một hàng ảnh).
+	\item \textbf{Kích thước đặc trưng} (input size): $96 = 32 \text{ pixels} \times 3 \text{ channels}$.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{Images/row-wise-representation.png}
+	\vspace{10pt}
+	\caption{Minh họa quá trình biến đổi ảnh RGB thành chuỗi theo phương pháp Row-wise}
+	\label{fig:row-wise}
+\end{figure}
+
+Mã nguồn hiện thực:
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+def row_wise_sequence(images):
+    """
+    Bieu dien anh theo hang: moi hang (flatten 3 channels) la mot timestep.
+    Args: images - Tensor shape (batch, 3, 32, 32)
+    Returns: Tensor shape (batch, 32, 96)
+    """
+    batch_size = images.size(0)
+    # (batch, 3, 32, 32) -> (batch, 32, 32, 3) -> (batch, 32, 96)
+    images = images.permute(0, 2, 3, 1)  # (batch, H, W, C)
+    return images.reshape(batch_size, 32, -1)  # (batch, 32, 96)
+\end{minted}
+
+\subsection{Tiền xử lý Dữ liệu}
+
+\subsubsection{Tập dữ liệu CIFAR-10}
+Tập dữ liệu CIFAR-10 bao gồm 60.000 ảnh màu RGB có kích thước $32 \times 32$ pixel, phân bổ đều vào 10 lớp: máy bay (airplane), ô tô (automobile), chim (bird), mèo (cat), hươu (deer), chó (dog), ếch (frog), ngựa (horse), tàu thủy (ship) và xe tải (truck).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.65\linewidth]{Images/cifar10.png}
+	\vspace{10pt}
+	\caption{Ảnh mẫu từ 10 lớp trong tập dữ liệu CIFAR-10}
+	\label{fig:cifar10}
+\end{figure}
+
+\subsubsection{Chuẩn hóa dữ liệu (Normalization)}
+Dữ liệu ảnh được chuẩn hóa bằng phép biến đổi \texttt{transforms.Normalize} với giá trị trung bình (mean) và độ lệch chuẩn (std) chuẩn của CIFAR-10:
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=(0.4914, 0.4822, 0.4465),  # Mean cua CIFAR-10
+        std=(0.2470, 0.2435, 0.2616)    # Std cua CIFAR-10
+    )
+])
+\end{minted}
+
+\subsubsection{Phân chia dữ liệu}
+Tập dữ liệu được phân chia theo chiến lược sau để đảm bảo tính khách quan:
+
+\begin{table}[H]
+	\centering
+	\caption{Phân chia tập dữ liệu CIFAR-10}
+	\begin{tabular}{|l|c|c|l|}
+		\hline
+		\textbf{Tập dữ liệu} & \textbf{Số lượng mẫu} & \textbf{Tỷ lệ} & \textbf{Mục đích}                             \\ \hline
+		Training Set          & 45.000                & 90\%           & Huấn luyện và cập nhật trọng số               \\ \hline
+		Validation Set        & 5.000                 & 10\%           & Theo dõi hiệu suất, chọn mô hình tốt nhất     \\ \hline
+		Test Set              & 10.000                & --             & Đánh giá cuối cùng (tập hoàn toàn độc lập)     \\ \hline
+	\end{tabular}
+	\label{tab:data-split}
+\end{table}
+
+Việc phân chia sử dụng \texttt{random\_split} với \texttt{seed=42} để đảm bảo khả năng tái lập kết quả.
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+# Phan chia train/val (45000/5000) voi seed co dinh
+train_dataset, val_dataset = random_split(
+    train_dataset, [45000, 5000],
+    generator=torch.Generator().manual_seed(42)
+)
+
+# DataLoader voi batch_size=128
+train_loader = DataLoader(train_dataset, batch_size=128,
+                          shuffle=True, num_workers=2, pin_memory=True)
+\end{minted}
+
+\subsection{Kiến trúc Mô hình}
+
+\subsubsection{Mô hình LSTM Classifier}
+Mô hình \texttt{LSTMClassifier} bao gồm các tầng chức năng:
+
+\begin{enumerate}
+	\item \textbf{Row-wise Transformation:} Biến đổi ảnh $(B, 3, 32, 32)$ thành chuỗi $(B, 32, 96)$.
+	\item \textbf{Stacked LSTM:} 2 lớp LSTM xếp chồng, kích thước ẩn $128$, dropout $0.2$ giữa các lớp.
+	\item \textbf{Last Timestep Extraction:} Lấy đầu ra tại bước thời gian cuối cùng: \texttt{out[:, -1, :]}.
+	\item \textbf{Fully Connected Layer:} Lớp tuyến tính $\text{Linear}(128, 10)$ cho 10 lớp phân loại.
+\end{enumerate}
+
+\textbf{Tổng số tham số:} 249.098
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+class LSTMClassifier(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout=0.2):
+        super(LSTMClassifier, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.lstm = nn.LSTM(
+            input_size=input_size,    # 96
+            hidden_size=hidden_size,  # 128
+            num_layers=num_layers,    # 2
+            batch_first=True,
+            dropout=dropout           # 0.2
+        )
+        self.fc = nn.Linear(hidden_size, num_classes)  # 128 -> 10
+
+    def forward(self, x):
+        x = row_wise_sequence(x)        # (B,3,32,32) -> (B,32,96)
+        out, (h_n, c_n) = self.lstm(x)  # out: (B,32,128)
+        out = out[:, -1, :]             # Lay timestep cuoi: (B,128)
+        out = self.fc(out)              # (B,10)
+        return out
+\end{minted}
+
+\subsubsection{Mô hình GRU Classifier}
+Mô hình \texttt{GRUClassifier} có kiến trúc tương tự LSTM nhưng thay lớp LSTM bằng GRU:
+
+\textbf{Tổng số tham số:} 187.146 (ít hơn LSTM 24.9\%)
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+class GRUClassifier(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout=0.2):
+        super(GRUClassifier, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.gru = nn.GRU(
+            input_size=input_size,    # 96
+            hidden_size=hidden_size,  # 128
+            num_layers=num_layers,    # 2
+            batch_first=True,
+            dropout=dropout           # 0.2
+        )
+        self.fc = nn.Linear(hidden_size, num_classes)  # 128 -> 10
+
+    def forward(self, x):
+        x = row_wise_sequence(x)   # (B,3,32,32) -> (B,32,96)
+        out, h_n = self.gru(x)     # out: (B,32,128), GRU khong co cell state
+        out = out[:, -1, :]        # Lay timestep cuoi: (B,128)
+        out = self.fc(out)         # (B,10)
+        return out
+\end{minted}
+
+\subsubsection{Tóm tắt siêu tham số}
+
+\begin{table}[H]
+	\centering
+	\caption{So sánh cấu hình kiến trúc của hai mô hình}
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\textbf{Thông số}           & \textbf{LSTM Classifier} & \textbf{GRU Classifier} \\ \hline
+		Input Size                  & 96                       & 96                      \\ \hline
+		Sequence Length             & 32                       & 32                      \\ \hline
+		Hidden Size                 & 128                      & 128                     \\ \hline
+		Num Layers                  & 2                        & 2                       \\ \hline
+		Dropout                     & 0.2                      & 0.2                     \\ \hline
+		Output Classes              & 10                       & 10                      \\ \hline
+		\textbf{Total Parameters}   & \textbf{249.098}         & \textbf{187.146}        \\ \hline
+	\end{tabular}
+	\label{tab:model-config}
+\end{table}
+
+\subsection{Cấu hình Huấn luyện}
+
+Cả hai mô hình được huấn luyện với cùng cấu hình để đảm bảo tính công bằng khi so sánh:
+
+\begin{table}[H]
+	\centering
+	\caption{Cấu hình huấn luyện chung cho cả hai mô hình}
+	\begin{tabular}{|l|c|}
+		\hline
+		\textbf{Thông số}               & \textbf{Giá trị}       \\ \hline
+		Hàm mất mát (Loss Function)     & CrossEntropyLoss       \\ \hline
+		Thuật toán tối ưu (Optimizer)    & Adam                   \\ \hline
+		Tốc độ học (Learning Rate)       & $10^{-3}$              \\ \hline
+		Kích thước lô (Batch Size)       & 128                    \\ \hline
+		Số kỷ nguyên (Epochs)            & 15                     \\ \hline
+		Gradient Clipping                & max\_norm = 1.0        \\ \hline
+		Seed                             & 42                     \\ \hline
+		Thiết bị (Device)                & GPU Tesla T4 (15.64 GB)\\ \hline
+	\end{tabular}
+	\label{tab:training-config}
+\end{table}
+
+Kỹ thuật \textbf{Gradient Clipping} với \texttt{max\_norm=1.0} được áp dụng để ngăn chặn hiện tượng bùng nổ đạo hàm (exploding gradients), một vấn đề thường gặp khi huấn luyện các mạng hồi quy:
+
+\begin{minted}[linenos, breaklines, fontsize=\small]{python}
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Trong vong lap huan luyen:
+loss.backward()
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+optimizer.step()
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PHẦN 4: KẾT QUẢ VÀ ĐÁNH GIÁ
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kết quả Thực nghiệm và Đánh giá}
+
+\subsection{Phân tích Quá trình Huấn luyện}
+
+Biểu đồ đường cong học tập (Learning Curves) cho thấy sự khác biệt rõ nét trong động lực học hội tụ của hai kiến trúc:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{Images/training-curves.png}
+	\vspace{10pt}
+	\caption{Biểu đồ so sánh Loss và Accuracy trong quá trình huấn luyện LSTM và GRU qua 15 epoch}
+	\label{fig:training-curves}
+\end{figure}
+
+\subsubsection{Phân tích mô hình LSTM}
+\begin{itemize}
+	\item \textbf{Hội tụ:} Training Loss giảm liên tục từ $1.7512$ (Epoch 1) xuống $0.6303$ (Epoch 15), Training Accuracy tăng từ $35.21\%$ lên $77.88\%$.
+	\item \textbf{Quá khớp (Overfitting):} Validation Loss chạm đáy tại Epoch 8 ($1.1991$) sau đó bắt đầu tăng ngược lên $1.3264$ (Epoch 15). Khoảng cách giữa Training Accuracy ($77.88\%$) và Best Validation Accuracy ($59.10\%$) là \textbf{18.78\%}, minh chứng rõ ràng cho hiện tượng quá khớp.
+	\item \textbf{Best checkpoint:} Epoch 14 với Validation Accuracy $59.10\%$.
+	\item \textbf{Thời gian huấn luyện:} $110.46$ giây.
+\end{itemize}
+
+\subsubsection{Phân tích mô hình GRU}
+\begin{itemize}
+	\item \textbf{Hội tụ nhanh hơn:} GRU đạt Validation Accuracy $58.04\%$ ngay tại Epoch 5, trong khi LSTM cần đến Epoch 10 mới đạt $58.74\%$ tương đương.
+	\item \textbf{Quá khớp nhẹ hơn:} Validation Loss đạt cực tiểu tại Epoch 9 ($1.1430$), thấp hơn mức cực tiểu của LSTM ($1.1991$). Khoảng cách Train-Val Accuracy là $79.15\% - 61.50\% = 17.65\%$, nhỏ hơn so với LSTM.
+	\item \textbf{Best checkpoint:} Epoch 11 với Validation Accuracy $61.50\%$.
+	\item \textbf{Thời gian huấn luyện:} $108.23$ giây (nhanh hơn LSTM $2.23$ giây).
+\end{itemize}
+
+\subsubsection{Chi tiết kết quả qua từng epoch}
+
+\begin{table}[H]
+	\centering
+	\caption{Kết quả huấn luyện chi tiết của LSTM và GRU (các epoch đáng chú ý)}
+	\footnotesize
+	\begin{tabular}{|c|cc|cc|cc|cc|}
+		\hline
+		\multirow{2}{*}{\textbf{Epoch}} & \multicolumn{2}{c|}{\textbf{Train Loss}} & \multicolumn{2}{c|}{\textbf{Train Acc (\%)}} & \multicolumn{2}{c|}{\textbf{Val Loss}} & \multicolumn{2}{c|}{\textbf{Val Acc (\%)}} \\
+		\cline{2-9}
+		& LSTM & GRU & LSTM & GRU & LSTM & GRU & LSTM & GRU \\
+		\hline
+		1  & 1.7512 & 1.7138 & 35.21 & 36.72 & 1.5874 & 1.5213 & 41.06 & 44.12 \\
+		5  & 1.1625 & 1.0935 & 58.26 & 60.67 & 1.2668 & 1.1903 & 54.84 & 58.04 \\
+		8  & 0.9614 & 0.9094 & 65.51 & 67.54 & \textbf{1.1991} & 1.1585 & 57.70 & 60.10 \\
+		9  & 0.9074 & 0.8593 & 67.78 & 69.50 & 1.2129 & \textbf{1.1430} & 57.62 & 61.18 \\
+		11 & 0.8053 & 0.7609 & 71.42 & 73.10 & 1.2493 & 1.1669 & 58.26 & \textbf{61.50} \\
+		14 & 0.6697 & 0.6284 & 76.48 & 77.72 & 1.2962 & 1.2311 & \textbf{59.10} & 60.90 \\
+		15 & 0.6303 & 0.5934 & 77.88 & 79.15 & 1.3264 & 1.2522 & 58.80 & 61.12 \\
+		\hline
+	\end{tabular}
+	\label{tab:training-detail}
+\end{table}
+
+\subsection{Đánh giá trên Tập Kiểm thử (Test Set)}
+
+Hai mô hình tốt nhất (Best Checkpoints) được đánh giá trên tập Test hoàn toàn độc lập gồm 10.000 mẫu.
+
+\begin{table}[H]
+	\centering
+	\caption{So sánh tổng hợp hiệu suất LSTM vs GRU trên tập kiểm thử}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Độ đo (Metric)}          & \textbf{LSTM Row-wise} & \textbf{GRU Row-wise} & \textbf{Chênh lệch}  \\
+		\hline
+		\textbf{Test Accuracy (\%)}       & $59.24$                & $\mathbf{61.09}$      & $+1.85\%$            \\
+		\hline
+		\textbf{Test Loss}                & $1.3112$               & $\mathbf{1.2556}$     & $-0.0556$            \\
+		\hline
+		\textbf{Best Val Accuracy (\%)}   & $59.10$                & $\mathbf{61.50}$      & $+2.40\%$            \\
+		\hline
+		\textbf{Tổng tham số}             & $249.098$              & $\mathbf{187.146}$    & $-24.9\%$            \\
+		\hline
+		\textbf{Thời gian huấn luyện (s)} & $110.46$               & $\mathbf{108.23}$     & $-2.23$s             \\
+		\hline
+	\end{tabular}
+	\label{tab:test-results}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.65\linewidth]{Images/accuracy-comparison.png}
+	\vspace{10pt}
+	\caption{Biểu đồ cột so sánh Test Accuracy giữa LSTM và GRU}
+	\label{fig:accuracy-comparison}
+\end{figure}
+
+\subsection{Phân tích Ma trận Nhầm lẫn (Confusion Matrix)}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{Images/confusion-matrices.png}
+	\vspace{10pt}
+	\caption{Ma trận nhầm lẫn của LSTM (trái) và GRU (phải) trên tập kiểm thử CIFAR-10}
+	\label{fig:confusion-matrices}
+\end{figure}
+
+Phân tích ma trận nhầm lẫn cho thấy một số xu hướng nhất quán ở cả hai mô hình:
+
+\begin{enumerate}
+	\item \textbf{Nhầm lẫn giữa các lớp tương đồng hình thái:} Cặp lớp \textbf{Mèo (Cat)} và \textbf{Chó (Dog)} có tỷ lệ nhầm lẫn cao nhất. Ở độ phân giải thấp ($32 \times 32$), các đặc trưng phân biệt giữa hai loài (hình dạng tai, mũi) bị mờ nhòe, khiến cả hai mô hình đều gặp khó khăn.
+
+	\item \textbf{Nhầm lẫn theo cặp phương tiện:} Các cặp \textbf{Ô tô -- Xe tải} và \textbf{Máy bay -- Tàu thủy} cũng có tỷ lệ nhầm lẫn đáng kể do sự tương đồng về hình dạng tổng thể.
+
+	\item \textbf{Lớp dễ nhận diện:} Các lớp \textbf{Ô tô (Automobile)} và \textbf{Tàu thủy (Ship)} thường đạt F1-score cao nhất nhờ phông nền đặc trưng (đường phố, mặt nước).
+\end{enumerate}
+
+\subsection{So sánh và Đánh giá LSTM vs GRU}
+
+Dựa trên toàn bộ kết quả thực nghiệm, nhóm rút ra các nhận định sau:
+
+\begin{enumerate}
+	\item \textbf{GRU vượt trội hơn LSTM trong bài toán này:} GRU đạt Test Accuracy cao hơn $1.85\%$ ($61.09\%$ so với $59.24\%$), Test Loss thấp hơn ($1.2556$ so với $1.3112$), đồng thời hội tụ nhanh hơn và ổn định hơn trong suốt quá trình huấn luyện.
+
+	\item \textbf{Hiệu quả tham số:} GRU sử dụng ít hơn $24.9\%$ tham số ($187.146$ so với $249.098$) nhưng đạt hiệu suất cao hơn. Điều này cho thấy cơ chế hai cổng đơn giản hơn của GRU đủ sức nắm bắt các phụ thuộc tuần tự trong chuỗi ảnh 32 bước, trong khi cơ cấu phức tạp hơn của LSTM (với cell state riêng biệt) có thể dẫn đến hiện tượng quá tham số (over-parameterization).
+
+	\item \textbf{Tốc độ huấn luyện:} GRU hoàn thành huấn luyện nhanh hơn $2.23$ giây ($108.23$s so với $110.46$s), tương ứng giảm $\sim 2\%$ thời gian tính toán. Mặc dù chênh lệch không lớn trên 15 epoch, lợi thế này sẽ tích lũy đáng kể khi mở rộng quy mô.
+
+	\item \textbf{Cả hai mô hình đều bị quá khớp:} Khoảng cách lớn giữa Training Accuracy ($\sim 78$--$79\%$) và Validation Accuracy ($\sim 59$--$61\%$) cho thấy cả hai mô hình đều ghi nhớ (memorize) tập huấn luyện thay vì tổng quát hóa. Nguyên nhân chính là phương pháp biểu diễn Row-wise phá vỡ cấu trúc không gian 2D của ảnh, khiến mô hình mất đi thông tin về mối quan hệ giữa các hàng liền kề.
+
+	\item \textbf{Hạn chế cố hữu của cách tiếp cận tuần tự:} Mức accuracy $\sim 60\%$ thấp hơn đáng kể so với các kiến trúc chuyên dụng cho ảnh như CNN ($84$--$96\%$ trong Bài tập lớn 1). Nguyên nhân cốt lõi là RNN/LSTM/GRU được thiết kế cho dữ liệu tuần tự 1D, trong khi ảnh là dữ liệu không gian 2D. Phép biến đổi Row-wise buộc mô hình phải xử lý các hàng một cách tuần tự, triệt tiêu khả năng trích xuất đặc trưng không gian cục bộ (local spatial features) mà CNN thực hiện rất hiệu quả.
+\end{enumerate}
+
+\subsection{Kết luận}
+
+\subsubsection{Tóm tắt kết quả}
+Nghiên cứu đã hoàn thành mục tiêu xây dựng và đối sánh hai kiến trúc mạng hồi quy LSTM và GRU cho bài toán phân loại ảnh CIFAR-10. Các kết quả chính bao gồm:
+
+\begin{itemize}
+	\item Mô hình \textbf{GRU Row-wise} đạt hiệu suất tốt hơn LSTM trên mọi chỉ số: Test Accuracy cao hơn $1.85\%$, ít tham số hơn $24.9\%$, và thời gian huấn luyện ngắn hơn.
+	\item Phương pháp biểu diễn \textbf{Row-wise} cho phép áp dụng mạng hồi quy lên dữ liệu ảnh, tuy nhiên hiệu năng bị giới hạn đáng kể ($\sim 60\%$) do mất mát thông tin cấu trúc không gian 2D.
+	\item Cả hai mô hình đều thể hiện hiện tượng \textbf{quá khớp} rõ rệt, đặt ra yêu cầu về các kỹ thuật điều chuẩn mạnh hơn.
+\end{itemize}
+
+\subsubsection{Hạn chế và Hướng phát triển}
+\begin{itemize}
+	\item \textbf{Hạn chế:} Phương pháp Row-wise chỉ nắm bắt được mối quan hệ giữa các phần tử trong cùng một hàng (chiều ngang), bỏ sót hoàn toàn mối quan hệ theo chiều dọc (vertical dependencies). Ngoài ra, nhóm chưa thử nghiệm các phương pháp biểu diễn khác (Column-wise, Patch-wise) để đối sánh.
+	\item \textbf{Hướng phát triển:} Sử dụng Bidirectional LSTM/GRU để nắm bắt ngữ cảnh hai chiều, tích hợp cơ chế Attention, hoặc kết hợp CNN-RNN hybrid (trích xuất đặc trưng bằng CNN rồi phân loại bằng RNN) để cải thiện hiệu năng.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TÀI LIỆU THAM KHẢO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
+\begin{thebibliography}{99999}
+	\bibitem{hochreiter1997long}
+	Hochreiter, S. \& Schmidhuber, J. (1997).
+	{\em Long Short-Term Memory.}
+	Neural Computation, 9(8), 1735--1780.
+
+	\bibitem{cho2014learning}
+	Cho, K., van Merrienboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H. \& Bengio, Y. (2014).
+	{\em Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation.}
+	In Proceedings of EMNLP 2014. arXiv:1406.1078.
+
+	\bibitem{chung2014empirical}
+	Chung, J., Gulcehre, C., Cho, K. \& Bengio, Y. (2014).
+	{\em Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling.}
+	NIPS 2014 Deep Learning Workshop. arXiv:1412.3555.
+
+	\bibitem{krizhevsky2009learning}
+	Krizhevsky, A. (2009).
+	{\em Learning Multiple Layers of Features from Tiny Images.}
+	Technical Report, University of Toronto.
+
+	\bibitem{d2l}
+	Zhang, A., Lipton, Z. C., Li, M. \& Smola, A. J. (2023).
+	{\em Dive into Deep Learning.}
+	Cambridge University Press. \url{https://d2l.ai}
+
+	\bibitem{colah2015lstm}
+	Olah, C. (2015).
+	{\em Understanding LSTM Networks.}
+	Colah's Blog. \url{https://colah.github.io/posts/2015-08-Understanding-LSTMs/}
+\end{thebibliography}
+
+\end{document}
