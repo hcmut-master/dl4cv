@@ -220,7 +220,7 @@ Tập dữ liệu được chia sẵn thành 50.000 ảnh huấn luyện (traini
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.65\linewidth]{Images/cifar10.png}
+	\includegraphics[width=0.85\linewidth]{Images/cifar10-samples.png}
 	\vspace{10pt}
 	\caption{Ảnh mẫu từ 10 lớp trong tập dữ liệu CIFAR-10}
 	\label{fig:cifar10}
@@ -1141,6 +1141,18 @@ Custom ViT dừng tại \textbf{Epoch 71}, chậm hơn ViT PyTorch (Epoch 58).
 	\item \textbf{Hội tụ chậm hơn:} Custom ViT cần 71 epoch (so với 58), có thể do thiếu một số tối ưu hóa ở mức thấp mà PyTorch cung cấp.
 \end{itemize}
 
+\subsection{So sánh tổng hợp 5 mô hình (Phần 1--3)}
+
+Biểu đồ dưới đây so sánh Validation Accuracy và Validation Loss của 5 mô hình đã trình bày: Softmax, MLP, CNN, ViT (PyTorch API) và Custom ViT.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{Images/val-comparison-5models.png}
+	\vspace{10pt}
+	\caption{So sánh Validation Accuracy và Loss của Softmax, MLP, CNN, ViT và Custom ViT qua các epoch}
+	\label{fig:val-comparison-5models}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PHẦN 8: HYBRID CNN + TRANSFORMER
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1599,42 +1611,22 @@ Phân tích cho thấy cả hai mô hình đều nhầm lẫn nhiều nhất ở
 	\item GRU nhỉnh hơn LSTM: ít tham số hơn 25\%, hội tụ nhanh hơn, ít overfitting hơn.
 \end{itemize}
 
-\subsection{Biểu đồ so sánh Test Accuracy}
+\subsection{Biểu đồ so sánh tất cả các mô hình}
 
 \begin{figure}[H]
 	\centering
-	\begin{tikzpicture}
-		\begin{axis}[
-			ybar,
-			bar width=14pt,
-			width=\linewidth,
-			height=8cm,
-			ylabel={Test Accuracy (\%)},
-			symbolic x coords={Softmax, MLP, CNN, ViT, Custom ViT, Hybrid, Overlap, LSTM, GRU},
-			xtick=data,
-			x tick label style={rotate=30, anchor=east, font=\small},
-			ymin=30, ymax=95,
-			nodes near coords,
-			nodes near coords align={vertical},
-			every node near coord/.append style={font=\tiny},
-			grid=major,
-			grid style={dashed, gray!30},
-		]
-		\addplot coordinates {
-			(Softmax, 40.89)
-			(MLP, 58.91)
-			(CNN, 86.20)
-			(ViT, 72.52)
-			(Custom ViT, 70.0)
-			(Hybrid, 74.81)
-			(Overlap, 74.01)
-			(LSTM, 59.24)
-			(GRU, 61.09)
-		};
-		\end{axis}
-	\end{tikzpicture}
-	\caption{So sánh Test Accuracy của tất cả các mô hình trên CIFAR-10}
-	\label{fig:all-test-comparison}
+	\includegraphics[width=\linewidth]{Images/val-comparison-all-models.png}
+	\vspace{10pt}
+	\caption{So sánh Validation Accuracy và Loss của tất cả 6 mô hình (Softmax, MLP, CNN, ViT, Hybrid CNN-ViT, Overlapping ViT) cùng bảng Test Accuracy}
+	\label{fig:all-models-comparison}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{Images/val-comparison-all-models-2.png}
+	\vspace{10pt}
+	\caption{So sánh chi tiết Validation Accuracy và Loss giữa tất cả các mô hình qua các epoch}
+	\label{fig:all-models-comparison-2}
 \end{figure}
 
 \subsection{Nhận xét tổng quát}
