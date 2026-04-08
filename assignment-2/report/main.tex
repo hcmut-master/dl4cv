@@ -372,6 +372,13 @@ results = model.train(
 	\item \textbf{Hệ Thống Phân Tầng Học Đồng Nhất (Task-Aligned Assigner):} Thay thế việc lấy IOU tĩnh đối chiếu rập khuôn, bộ gán mác linh động đánh giá năng suất cả Loss hộp giao và dự đoán Confidence tốt ưu nhất để ấn định là 'mục tiêu cực thực', đồng thời phân tách nhiễu loạn của nền nhiễu ảnh tĩnh.
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PHẦN 5.3-5.6: SO SÁNH BACKBONE CNN vs TRANSFORMER (YOLOv8s vs DETR)
+% Nội dung: Kiến trúc DETR chuyên sâu, bảng so sánh CNN vs Transformer,
+%           cách thực hiện với code, tham số huấn luyện
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{backbone-comparison}
+
 \section{Kết quả Thực nghiệm và Phân tích}
 
 Khung đánh giá được triển khai chặt chẽ bằng cách thực thi hai mô hình tại mốc Validation Dataset với tham số $20 \text{ Epochs}$. Ở mô hình Faster R-CNN, thuật toán chạm mốc \textbf{Validation Loss tối ưu đạt 0.2659} tại Epoch thứ 18. Ở mô hình YOLOv8m, bảng tổng hợp Precision-Recall chi tiết được xuất như sau:
