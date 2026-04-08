@@ -1,0 +1,384 @@
+MARKDOWN:
+Chủ đề: Phát hiện đối tượng (Object Detection)
+
+So sánh: YOLOv8s (one-stage) vs Faster R-CNN ResNet50-FPN (two-stage)
+
+MARKDOWN:
+# Phân tích Dataset KITTI (Object Detection)
+
+## 1. Tổng quan
+KITTI là bộ dữ liệu tiêu chuẩn cho các bài toán Computer Vision trong xe tự lái. Phiên bản **Object Detection** bao gồm 7,481 ảnh huấn luyện (training) và 7,518 ảnh kiểm thử (testing). Dữ liệu được thu thập từ xe Mobile Platform tích hợp camera màu, camera xám, cảm biến Lidar và GPS.
+
+## 2. Cấu trúc tổ chức thư mục
+Sau khi giải nén các file `data_object_image_2.zip` và `data_object_label_2.zip`, bạn sẽ có cấu trúc thư mục chuẩn như sau:
+
+```text
+kitti_dataset/
+├── training/
+│   ├── image_2/        # 7,481 ảnh màu (PNG) - Tên file: 000000.png -> 007480.png
+│   └── label_2/        # 7,481 file nhãn (TXT) - Tên file: 000000.txt -> 007480.txt
+└── testing/
+    └── image_2/        # 7,518 ảnh màu dùng để test (không có label công khai)
+```
+
+> **Lưu ý:** Thư mục `image_2` đại diện cho camera màu phía bên trái (Left Color Camera). Đây là dữ liệu phổ biến nhất để huấn luyện các model 2D Object Detection.
+
+## 3. Phân tích 8 lớp đối tượng (Classes)
+Trong các file `.txt` ở thư mục `label_2`, cột đầu tiên xác định lớp của đối tượng. KITTI định nghĩa 8 lớp chính:
+
+| STT | Tên Lớp | Mô tả |
+|:---:|:---|:---|
+| 1 | **Car** | Xe ô tô con. |
+| 2 | **Van** | Xe tải nhỏ, xe 16 chỗ. |
+| 3 | **Truck** | Xe tải lớn. |
+| 4 | **Pedestrian** | Người đi bộ. |
+| 5 | **Person_sitting** | Người đang ngồi (trên ghế, vỉa hè...). |
+| 6 | **Cyclist** | Người đi xe đạp. |
+| 7 | **Tram** | Xe điện/Tàu điện chạy trên đường phố. |
+| 8 | **Misc** | Các phương tiện hoặc vật thể khác không thuộc các nhóm trên. |
+
+*Ngoài ra còn có nhãn **DontCare**: Dùng để đánh dấu các vùng có đối tượng nhưng quá xa hoặc bị che khuất mạnh, model không cần quan tâm khi tính loss.*
+
+## 4. Chi tiết định dạng File Nhãn (Label Format)
+Mỗi dòng trong file `.txt` tương ứng với một đối tượng trong ảnh, gồm 15 cột giá trị phân cách bởi dấu cách.
+
+**Ví dụ một dòng nhãn:**
+`Car 0.00 0 -1.57 588.62 182.73 673.28 230.51 1.48 1.48 4.31 2.56 1.45 24.54 -1.59`
+
+### Giải thích các cột dữ liệu:
+
+| Cột | Tên trường | Ý nghĩa |
+|:---:|:---|:---|
+| 1 | **Type** | Tên lớp (Car, Pedestrian, v.v.). |
+| 2 | **Truncated** | Độ bị cắt bởi mép ảnh ($0.0$: không bị cắt, $1.0$: bị cắt hoàn toàn). |
+| 3 | **Occluded** | Độ bị che khuất ($0$: không bị che, $1$: che ít, $2$: che nhiều, $3$: không thấy). |
+| 4 | **Alpha** | Góc quan sát vật thể (Observation angle) đơn vị Radian. |
+| 5-8 | **2D Bounding Box** | Tọa độ pixel: $x_{min}, y_{min}, x_{max}, y_{max}$. |
+| 9-11 | **3D Dimensions** | Kích thước vật thể: $height, width, length$ (mét). |
+| 12-14 | **3D Location** | Vị trí trọng tâm vật thể trong tọa độ camera: $x, y, z$ (mét). |
+| 15 | **Rotation y** | Góc xoay quanh trục $y$ của vật thể (Radian). |
+
+## 5. Đặc điểm kỹ thuật cần lưu ý
+* **Độ phân giải ảnh:** Ảnh thường có kích thước khoảng $1242 \times 375$ pixels. Tuy nhiên, kích thước này có thể thay đổi nhẹ giữa các ảnh, vì vậy khi đưa vào model (như YOLO hay Faster R-CNN), bạn cần thực hiện bước **Resize** hoặc **Padding**.
+* **Tọa độ 3D:** Nếu bạn chỉ làm bài toán 2D Detection, bạn chỉ cần quan tâm đến cột 1 (Type) và cột 5-8 (2D Bounding Box).
+* **Định dạng nhãn:** KITTI sử dụng tọa độ góc ($x_{min}, y_{min}, x_{max}, y_{max}$), khác với định dạng YOLO ($x_{center}, y_{center}, width, height$ và chuẩn hóa về $0-1$). Bạn sẽ cần một script chuyển đổi nếu dùng YOLO.
+
+## 6. Gợi ý tiền xử lý dữ liệu
+Vì KITTI chia 8 lớp nhưng có những lớp rất ít dữ liệu (như `Tram` hay `Person_sitting`), người ta thường thực hiện:
+1.  **Gộp lớp:** Gộp `Pedestrian` và `Person_sitting` thành một lớp `Person`. Gộp `Car`, `Van`, `Truck` thành `Vehicle`.
+2.  **Lọc dữ liệu:** Loại bỏ các đối tượng có độ che khuất (Occluded) quá cao hoặc kích thước Bounding Box quá nhỏ để cải thiện độ chính xác của model.
+
+Bạn có cần mình viết một script Python mẫu để chuyển đổi nhãn KITTI này sang định dạng **YOLO** để huấn luyện luôn không?
+
+Saved image 1 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_1.png
+Associated code cell snippet:
+# ============================================================
+# PHẦN 3: VISUALIZATION DASHBOARD
+# =...
+
+Saved image 2 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_2.png
+Associated code cell snippet:
+
+# --- Chart 2: Phân bổ Kích thước (Boxplot Area) ---
+fig2 = px.box(df, x="area", y="class", color="...
+
+Saved image 3 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_3.png
+Associated code cell snippet:
+
+# --- Chart 3: Heatmap vị trí tâm vật thể ---
+fig3 = px.density_heatmap(df, x="center_x", y="center...
+
+Saved image 4 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_4.png
+Associated code cell snippet:
+
+# --- Chart 4: Tỷ lệ Mức độ che khuất (100% Stacked Bar) ---
+occ_counts = df.groupby(['class', 'occ...
+
+Saved image 5 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_5.png
+Associated code cell snippet:
+# --- Chart 5: Treemap (Cơ cấu lớp & Diện tích) ---
+df['occ_str'] = df['occ'].astype(str)
+
+fig5 = px...
+
+Saved image 6 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_6.png
+Associated code cell snippet:
+
+# --- Chart 6: Interactive Histogram (Phân bổ khoảng cách 3D) ---
+fig6 = px.histogram(df, x="dist_3...
+
+Saved image 7 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_7.png
+Associated code cell snippet:
+
+# --- Chart 7: Scatter Plot (Tương quan Khoảng cách vs Chiều cao) ---
+fig7 = px.scatter(df.sample(m...
+
+Saved image 8 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_8.png
+Associated code cell snippet:
+
+# --- Chart 8: Phân bổ Tỷ lệ khung hình (Violin Plot) ---
+df_ar = df[df['aspect_ratio'] < 5].copy()...
+
+Saved image 9 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_9.png
+Associated code cell snippet:
+
+# --- Chart 9: Tỷ lệ Kích thước đối tượng theo chuẩn COCO ---
+size_counts = df.groupby(['class', 'c...
+
+Saved image 10 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_10.png
+Associated code cell snippet:
+
+# --- Chart 10: Mật độ phân bổ tọa độ chuẩn hóa (Normalized Density) ---
+fig10 = px.density_contour...
+
+MARKDOWN:
+### Chart 1: Treemap (Cơ cấu Dataset theo Lớp và Diện tích)
+* **Phân tích dữ liệu:** Biểu đồ này thể hiện rõ sự mất cân bằng dữ liệu cực kỳ nghiêm trọng (Long-tail distribution). Lớp `Car` chiếm không gian áp đảo cả về số lượng mẫu lẫn tổng diện tích pixel. Theo sau là `Pedestrian` và `Van`. Các lớp như `Tram`, `Person_sitting` hay `Misc` bị ép lại thành những ô vuông rất nhỏ.
+* **Insight & Hành động:**
+    * **Vấn đề:** Nếu train bằng hàm Loss thông thường (như Cross-Entropy), mô hình sẽ sinh ra "thiên kiến" (bias), auto đoán mọi thứ là `Car` để đạt độ chính xác tổng thể cao, trong khi bỏ qua các lớp hiếm.
+    * **Tối ưu:** Bắt buộc sử dụng **Focal Loss** để phạt nặng những dự đoán sai ở các lớp thiểu số. Hoặc dùng kỹ thuật **Class-Aware Sampling** (tăng tần suất bốc các ảnh có chứa Tram/Cyclist khi đưa vào batch).
+
+### Chart 2: Interactive Histogram (Phân bổ Khoảng cách 3D)
+* **Phân tích dữ liệu:** Đa số các đối tượng trong KITTI xuất hiện dày đặc nhất ở dải khoảng cách từ **5 mét đến 40 mét**. Sau mốc 50 mét, số lượng đối tượng giảm dốc đứng (chủ yếu do camera không nhìn rõ để gán nhãn). Lớp `Pedestrian` thường xuất hiện ở cự ly gần hơn so với `Car`.
+* **Insight & Hành động:**
+    * **Vấn đề:** Mô hình sẽ hoạt động rất tốt ở dải 10-30m nhưng độ tự tin (Confidence Score) sẽ tụt thê thảm khi xe ở khoảng cách xa (>50m).
+    * **Tối ưu:** Nếu bài toán thực tế của bạn (như xe tự lái trên cao tốc) cần nhìn xa, bộ KITTI là chưa đủ. Bạn cần thiết lập thuật toán để loại bỏ các nhãn có khoảng cách > 60m ra khỏi quá trình train (hoặc chuyển thành nhãn `DontCare`), tránh bắt model học những điểm ảnh quá mờ nhạt.
+
+### Chart 3: Scatter Plot (Tương quan Khoảng cách vs Chiều cao Bbox)
+* **Phân tích dữ liệu:** Có một quy luật vật lý hiển nhiên: Khoảng cách (Trục X) càng lớn thì Chiều cao Bbox (Trục Y) càng nhỏ. Tuy nhiên, trên biểu đồ Scatter sẽ xuất hiện những "điểm dị biệt" (Outliers) nằm văng ra khỏi cụm dữ liệu chung (ví dụ: khoảng cách 80m nhưng Bbox cao tới 150 pixels).
+* **Insight & Hành động:**
+    * **Vấn đề:** Các điểm Outliers này 99% là "Label Noise" (lỗi gán nhãn của con người). Việc giữ lại chúng sẽ làm hỏng hàm Loss của mô hình.
+    * **Tối ưu:** Dựa vào biểu đồ này, bạn có thể viết một đoạn code lọc: `df = df[~((df['dist_3d'] > 60) & (df['h_2d'] > 100))]`. Việc dọn dẹp dataset (Data Cleansing) từ Insight này giúp mAP của model tăng lên đáng kể.
+
+### Chart 4: Sunburst (Tỷ lệ Che khuất - Occlusion)
+* **Phân tích dữ liệu:** Biểu đồ Sunburst cho thấy tỷ lệ phân nhánh độ che khuất của từng lớp. Với `Car`, tỷ lệ bị che khuất một phần (Mức 1) hoặc che khuất nhiều (Mức 2) rất cao do xe cộ đỗ dọc đường hoặc nối đuôi nhau. Lớp `Pedestrian` có tỷ lệ nhìn rõ (Mức 0) cao hơn.
+* **Insight & Hành động:**
+    * **Vấn đề:** Khi bị che khuất, vật thể mất đi hình dáng nguyên bản (ví dụ xe ô tô chỉ còn thấy phần đuôi).
+    * **Tối ưu:** Áp dụng các kỹ thuật **Data Augmentation** nhắm vào việc che khuất, ví dụ như **Cutout** (khoét những hình vuông đen ngẫu nhiên trên ảnh) hoặc **MixUp** (trộn các ảnh với nhau). Điều này ép mạng CNN phải học các đặc trưng cục bộ (như bánh xe, đèn pha) thay vì chỉ học toàn bộ hình dáng xe.
+
+### Chart 5: Violin Plot (Phân bổ Tỷ lệ khung hình - Aspect Ratio)
+* **Phân tích dữ liệu:** Tỷ lệ khung hình (Width / Height) phân nhóm cực kỳ rõ nét:
+    * Nhóm `Pedestrian`, `Cyclist` có hình dáng "cao gầy" (Aspect Ratio tập trung ở **0.3 - 0.5**).
+    * Nhóm `Car`, `Van`, `Truck` có hình dáng "thấp lùn" (Aspect Ratio trải dài từ **1.2 - 2.5**).
+* **Insight & Hành động:**
+    * **Vấn đề:** Các mô hình Object Detection như YOLO hay SSD sử dụng các Anchor Boxes cố định làm khung tham chiếu. Nếu xài Anchor mặc định của COCO (vốn đo lường chó, mèo, cốc tách...), model sẽ "bọc" xe cộ và người đi bộ rất tệ.
+    * **Tối ưu:** Bạn **bắt buộc** phải sử dụng thuật toán **K-Means Clustering** trên cột Aspect Ratio này để tạo ra bộ Anchor Box riêng cho KITTI (gồm các hộp chữ nhật đứng cho người và hộp chữ nhật nằm ngang cho xe).
+
+### Chart 6: Bar Chart (Phân loại Kích thước chuẩn COCO)
+* **Phân tích dữ liệu:** Theo chuẩn COCO, một lượng cực lớn dữ liệu KITTI rơi vào nhóm **Small** (Diện tích < 32x32 pixels), đặc biệt là nhóm Người đi bộ và Người đi xe đạp. Nhóm **Large** (Diện tích > 96x96 pixels) chiếm tỷ lệ không cao.
+* **Insight & Hành động:**
+    * **Vấn đề:** Nhận diện vật thể nhỏ là yếu huyệt của Computer Vision. Khi qua các lớp tích chập (Convolution/Pooling), vật thể 32x32 px sẽ bị nén lại thành chưa tới 1 pixel, khiến mạng nơ-ron không thể nhìn thấy chúng.
+    * **Tối ưu:** Đừng thiết lập tham số `image_size` nhỏ (như 320 hoặc 416). Khuyến nghị dùng đầu vào tối thiểu **640x640**. Đồng thời, chọn các kiến trúc mạng có **FPN (Feature Pyramid Network)** để có nhánh dự đoán dành riêng cho vật thể nhỏ.
+
+### Chart 7: Density Contour (Bản đồ phân bổ Không gian)
+* **Phân tích dữ liệu:** Mô hình Contour cho thấy đặc điểm phân bổ địa lý trên bức ảnh:
+    * `Car` tụ tập thành một dải ngang ở chính giữa khung hình (điểm tụ của lòng đường).
+    * `Pedestrian` bị dạt sang hai bên mép trái/phải (vị trí của vỉa hè).
+    * Khoảng **30% diện tích ảnh phía trên** (bầu trời và ngọn cây) hoàn toàn trống rỗng, không có nhãn.
+* **Insight & Hành động:**
+    * **Vấn đề 1 (Bias vị trí):** Model sẽ lười biếng và sinh ra định kiến "vật nằm mép ảnh tự động đoán là người". Hãy dùng **Random Translation** (dịch chuyển ảnh) hoặc **Mosaic** để phá vỡ vị trí tuyệt đối của các đối tượng.
+    * **Vấn đề 2 (Lãng phí tính toán):** Bạn có thể viết code tiền xử lý **Crop thẳng 30%** phía trên của bức ảnh (giảm từ 1242x375 xuống còn 1242x260) trước khi đưa vào mạng. Điều này giúp giảm hàng tỷ phép tính (FLOPs) vô ích, tăng tốc độ FPS khi chạy thực tế mà độ chính xác mAP không hề suy giảm.
+
+Saved image 11 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_11.png
+Associated code cell snippet:
+# ============================================================
+# --- Biểu đồ 8: Số đối tượng trên mỗ...
+
+MARKDOWN:
+### Phân tích & Insight (Dành cho báo cáo EDA)
+
+Dựa vào các biểu đồ và chỉ số in ra, bạn có thể bổ sung các nhận định chuyên sâu sau vào Notebook:
+
+1. Phân tích đồ thị Trái (Histogram - Tổng quan)
+
+    Quan sát: Biểu đồ có dạng lệch phải (Right-skewed distribution). Giá trị Median (Trung vị) thấp hơn Mean (Trung bình), cho thấy phần lớn các bức ảnh chỉ có một số lượng đối tượng vừa phải (quanh mức 4-6 đối tượng/ảnh). Tuy nhiên, cái đuôi dài (long tail) kéo dài đến mức Max = ~20-30 cho thấy có những bức ảnh chụp những bối cảnh cực kỳ đông đúc (ví dụ: ngã tư vào giờ cao điểm hoặc bãi đỗ xe).
+
+    Insight (Tối ưu AI): Tham số max_detections (số vật thể tối đa mạng được phép dự đoán trong 1 ảnh) mặc định của đa số mô hình như YOLO/SSD thường là 100 hoặc 300. Với KITTI, giá trị Max chỉ nằm ở mức ~30, do đó bạn không cần tăng max_detections, việc giữ ở mức mặc định (100) là hoàn toàn an toàn và dư dả để bao quát hết bối cảnh.
+
+2. Phân tích đồ thị Phải (Boxplot - Tách theo Lớp)
+
+    Quan sát: * Lớp Car có phương sai (độ phân tán) và các điểm ngoại lai (outliers) lớn nhất. Một bức ảnh có thể không có xe nào, nhưng cũng có thể chứa đến hơn 15-20 chiếc xe cùng lúc.
+
+        Ngược lại, các lớp như Tram (Tàu điện), Truck (Xe tải), hoặc Person_sitting thường chỉ xuất hiện đơn lẻ (1 đến 2 đối tượng trên một khung hình).
+
+    Insight (Tối ưu AI):
+
+        Việc lớp Car có mật độ xuất hiện dày đặc (nhiều xe dính liền nhau) cảnh báo rằng thuật toán NMS (Non-Maximum Suppression) sẽ đóng vai trò sống còn. Nếu bạn thiết lập ngưỡng IoU threshold của NMS quá thấp (ví dụ 0.3), các xe đỗ nối đuôi hoặc song song sát nhau có thể bị model gộp chung thành 1 xe. Bạn nên tinh chỉnh ngưỡng NMS ở mức cao hơn một chút (khoảng 0.45 - 0.5) riêng cho lớp Car để bóc tách các xe đứng gần nhau hiệu quả hơn.
+
+Saved image 12 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_12.png
+Associated code cell snippet:
+
+# ============================================================
+# --- Biểu đồ 9: Scatter Plot kích t...
+
+Saved image 13 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_13.png
+Associated code cell snippet:
+
+# ============================================================
+# --- Biểu đồ 10: Lưới 2x4 Heatmap (...
+
+Saved image 14 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_14.png
+Associated code cell snippet:
+
+# ============================================================
+# --- Biểu đồ 11: Phân bố không gian...
+
+MARKDOWN:
+## Phân tích Tương quan Đặc trưng
+
+Saved image 15 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_15.png
+Associated code cell snippet:
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
+
+# ================...
+
+Saved image 16 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_16.png
+Associated code cell snippet:
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
+
+# ================...
+
+MARKDOWN:
+### BÁO CÁO PHÂN TÍCH ĐẶC TRƯNG
+
+**1. Phân tích Ma trận Tương quan (Biểu đồ 13: Correlation Heatmap)**
+
+* **Tương quan thuận chiều (Positive Correlation):** Dữ liệu ghi nhận hệ số tương quan dương ở mức độ cao giữa diện tích chuẩn hóa (`area_norm`) và tọa độ trục Y (`cy_norm`). 
+    * *Cơ sở vật lý:* Theo nguyên lý phối cảnh của camera hành trình, đối tượng nằm càng sát mép dưới của khung hình (`cy_norm` tiến về 1) sẽ có khoảng cách vật lý càng gần ống kính, kéo theo tỷ lệ diện tích Bounding Box tăng lên.
+* **Tương quan ngược chiều (Negative Correlation):** Quan sát thấy sự tương quan âm giữa các chỉ số biến dạng không gian gồm mức độ bị cắt xén (`trunc`), mức độ che khuất (`occ`) và diện tích vùng (`area_norm`).
+    * *Cơ sở vật lý:* Tình trạng che khuất hoặc cắt xén làm giảm thiểu đáng kể số lượng điểm ảnh (pixel) biểu diễn đối tượng trên khung hình, dẫn đến sự thu hẹp diện tích Bounding Box thực tế.
+
+**2. Phân tích Ma trận Phân tán và Cấu trúc Phân cụm (Biểu đồ 14: Pair Plot)**
+
+* **Đặc tính phân cụm hình học (`w_norm` vs `h_norm`):** Ma trận phân tán thể hiện sự độc lập về mặt hình thái giữa các nhóm đối tượng. Cụ thể, phân phối của nhóm `Pedestrian` (Người đi bộ) cấu thành một dải hẹp theo trục dọc, tách biệt hoàn toàn so với phân phối đám mây trải rộng theo trục ngang của nhóm phương tiện cơ giới (`Car`, `Van`, `Truck`).
+    * *Đề xuất thiết kế mô hình:* Khả năng phân tách tuyến tính rõ rệt này minh chứng Tỷ lệ khung hình (Aspect Ratio) là một đặc trưng cốt lõi. Mạng nơ-ron có thể khai thác tính chất này để duy trì độ chính xác trong việc phân loại giữa người và phương tiện, đặc biệt hiệu quả đối với các đối tượng có độ phân giải thấp ở cự ly xa.
+* **Quỹ đạo hội tụ thị giác (`cy_norm` vs `area_norm`):** Phân phối giữa tọa độ Y và diện tích mô phỏng một đường cong hàm mũ. Đáng chú ý, các đối tượng có kích thước vi mô (`area_norm` < 0.1) hội tụ với mật độ cao tại dải tọa độ `cy_norm` xấp xỉ 0.55.
+    * *Đề xuất tiền xử lý dữ liệu (Preprocessing):* Trọng tâm hội tụ tại tọa độ 0.55 tương đương với vị trí đường chân trời (Vanishing Point). Dựa trên quy luật phối cảnh này, hệ thống có thể tích hợp bộ lọc nhiễu tự động: loại bỏ các Bounding Box có kích thước cực nhỏ (ví dụ: dưới 10x10 pixels) nhưng lại xuất hiện ngoài khu vực đường chân trời. Khả năng cao đây là các lỗi gán nhãn (Label Noise), việc loại bỏ chúng sẽ cải thiện chất lượng tập huấn luyện.
+
+MARKDOWN:
+## Visualize
+
+Saved image 17 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_17.png
+Associated code cell snippet:
+import plotly.graph_objects as go
+import plotly.express as px
+import random
+from PIL import Image
+
+#...
+
+Saved image 18 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_18.png
+Associated code cell snippet:
+import plotly.graph_objects as go
+import plotly.express as px
+import random
+from PIL import Image
+
+#...
+
+Saved image 19 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_19.png
+Associated code cell snippet:
+import plotly.graph_objects as go
+import plotly.express as px
+import random
+from PIL import Image
+
+#...
+
+Saved image 20 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_20.png
+Associated code cell snippet:
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as...
+
+MARKDOWN:
+**BÁO CÁO PHÂN TÍCH ĐẶC TRƯNG VÀ ĐỀ XUẤT TỐI ƯU MÔ HÌNH (Phần 5: Phân tích Định tính Phân lớp)**
+
+Dựa trên kết quả trực quan hóa dữ liệu, các đánh giá định tính về mặt ngữ cảnh được tổng hợp dưới đây nhằm cung cấp cơ sở tinh chỉnh và thiết kế chiến lược huấn luyện cho các kiến trúc Deep Learning tiên tiến (như YOLOv8 hoặc các mạng CNN hiện đại).
+
+### 1. Hiệu ứng Ngữ cảnh Không gian (Contextual Bias)
+
+* **Kết quả quan sát:** Các phân lớp thiểu số thể hiện sự phụ thuộc lớn vào ngữ cảnh môi trường (background) đặc thù. Điển hình, đối tượng `Tram` (Tàu điện) thường xuyên xuất hiện cùng hệ thống đường ray và dây điện tín hiệu; `Person_sitting` gắn liền với kết cấu lề đường hoặc ghế đá; trong khi `Cyclist` luôn đi kèm với cấu trúc hình học của xe đạp.
+* **Đề xuất kỹ thuật:** Do các mạng CNN sở hữu trường thụ cảm (Receptive Field) rộng, mô hình đối mặt với nguy cơ quá khớp ngữ cảnh (overfitting to background) thay vì tập trung trích xuất đặc trưng của thực thể (ví dụ: nhận diện sai `Tram` khi chỉ có đường ray). Nhằm triệt tiêu thiên kiến không gian này, cần áp dụng kỹ thuật **Background Augmentation** (cắt ghép đối tượng vào các nền cảnh ngẫu nhiên) trong pha tiền xử lý dữ liệu.
+
+### 2. Nhiễu Loạn Đặc trưng Nội bộ (Intra-class Variance)
+
+* **Kết quả quan sát:** Tồn tại sự tương đồng lớn về mặt hình thái học giữa một số phân lớp, đặc biệt là sự thiếu rõ ràng trong biên giới đặc trưng của phân lớp `Van`. Đối tượng `Van` (xe tải nhỏ/xe khách) mang các đặc điểm lai tạp giữa `Car` (tỷ lệ khung hình ngang) và `Truck` (cấu trúc viền vuông vức, dạng hộp).
+* **Đề xuất tối ưu:** Trong quá trình huấn luyện, ma trận nhầm lẫn (Confusion Matrix) dự kiến sẽ ghi nhận tỷ lệ dự đoán chéo (misclassification) cao giữa cụm ba nhóm `Car`, `Van` và `Truck`. Nếu yêu cầu dự án không bắt buộc phân định rạch ròi giữa phương tiện dân sự và thương mại tải trọng nhỏ, phương án **Gộp lớp (Class Merging)** — hợp nhất `Van` và `Car` thành một định danh chung — sẽ là giải pháp tối ưu để giảm thiểu độ nhiễu và cải thiện đáng kể độ chính xác tổng thể (mAP).
+
+### 3. Giới hạn Quang học của Thiết bị thu hình (Camera Limitations)
+
+* **Kết quả quan sát:** Dữ liệu hình ảnh đầu vào phản ánh rõ các hạn chế quang học của thiết bị thu hình thực tế, bao gồm hiện tượng nhòe chuyển động (motion blur) đối với các phương tiện ngược chiều ở tốc độ cao, và hiện tượng lóa sáng (lens flare) do góc chiếu của ánh sáng mặt trời.
+* **Đề xuất kỹ thuật:** Để đảm bảo mô hình đạt tính khái quát hóa cao, quy trình Data Pipeline cần tích hợp các công cụ tăng cường hình ảnh (như Albumentations) nhằm bổ sung các phép biến đổi quang học gồm `MotionBlur`, `RandomBrightnessContrast` và `ColorJitter`. Thao tác này giúp mô phỏng đa dạng các điều kiện môi trường khắc nghiệt, từ đó nâng cao tính bền bỉ (robustness) của trọng số mạng khi triển khai suy luận (inference) trong môi trường thực tế.
+
+MARKDOWN:
+# BÁO CÁO TỔNG HỢP: PHÂN TÍCH DỮ LIỆU KHÁM PHÁ (EDA) - KITTI DATASET
+**Mục tiêu:** Đánh giá đặc trưng phân phối, hình thái học và không gian của bộ dữ liệu KITTI nhằm cung cấp cơ sở thiết kế kiến trúc và tinh chỉnh siêu tham số (hyperparameters) cho các mô hình Object Detection.
+
+---
+
+### 1. Phân bố Lớp và Vấn đề Mất cân bằng Dữ liệu (Class Distribution & Imbalance)
+* **Thực trạng:** Dữ liệu tồn tại sự mất cân bằng nghiêm trọng (Long-tail distribution). Phân lớp `Car` chiếm ưu thế tuyệt đối cả về số lượng và tổng diện tích không gian ảnh, theo sau là `Pedestrian` và `Van`. Các lớp như `Tram`, `Person_sitting` chiếm tỷ lệ cực kỳ nhỏ.
+* **Đề xuất xử lý:** Việc sử dụng hàm mất mát Cross-Entropy tiêu chuẩn sẽ dẫn đến thiên kiến dự đoán (Model Bias) nghiêng về lớp `Car`. Để khắc phục, hệ thống bắt buộc phải tích hợp **Focal Loss** nhằm phạt nặng các dự đoán sai ở cụm dữ liệu thiểu số, hoặc áp dụng kỹ thuật **Class-Aware Sampling** trong quá trình tạo Batch huấn luyện.
+
+### 2. Đặc trưng Hình học và Kích thước Khung chuẩn (Geometric & BBox Characteristics)
+* **Phân hóa Tỷ lệ khung hình (Aspect Ratio):** Phân tích Violin Plot và Pair Plot cho thấy sự tách biệt tuyến tính rõ rệt:
+  * Nhóm phương tiện (`Car`, `Van`, `Truck`) tập trung ở tỷ lệ W/H dao động từ 1.2 - 2.5 (dạng hình chữ nhật ngang).
+  * Nhóm người (`Pedestrian`, `Cyclist`) phân bổ hẹp ở mức 0.3 - 0.5 (dạng hình chữ nhật đứng).
+  * **Hành động:** Không sử dụng các Anchor Boxes mặc định (pre-trained trên COCO). Bắt buộc thực hiện thuật toán **K-Means Clustering** trên tập Bounding Box của KITTI để sinh ra bộ Anchors chuyên biệt, tối ưu hóa quá trình hồi quy tọa độ.
+* **Thách thức từ Đối tượng vi mô (Small Objects):** Theo thang đo chuẩn COCO, khoảng 20-30% thực thể trong KITTI thuộc nhóm Small (diện tích < 32x32 pixels), đặc biệt phổ biến ở lớp `Pedestrian`.
+  * **Hành động:** Tránh sử dụng kích thước đầu vào (Image Size) quá nhỏ (như 416x416). Kiến trúc mạng được chọn phải tích hợp **Feature Pyramid Network (FPN)** hoặc **PANet** nhằm bảo toàn đặc trưng của vật thể nhỏ qua các lớp tích chập sâu.
+
+### 3. Phân bố Không gian và Hiệu ứng Phối cảnh (Spatial Distribution & Perspective Bias)
+* **Quỹ đạo hội tụ thị giác (Vanishing Point):** Ma trận tương quan và Bản đồ nhiệt (Heatmap) khẳng định tính chất hình học đặc thù của camera hành trình (Ego-vehicle). Mọi vật thể có kích thước nhỏ đều bị nén chặt vào dải tọa độ `cy_norm ~ 0.55` (đường chân trời).
+* **Thiên kiến vị trí (Spatial Bias):** Phân lớp `Car` tập trung thành dải ngang ở lòng đường, trong khi `Pedestrian` dạt sang hai bên mép ảnh (vỉa hè). 
+  * **Hành động:** Để ngăn chặn mạng Nơ-ron "học thuộc lòng" tọa độ thay vì nhận diện hình dáng, cần tích cực sử dụng các phép biến đổi không gian như **Mosaic Augmentation**, **Random Translation**, và **Random Crop**. 
+  * Đồng thời, có thể thiết lập tiền xử lý **cắt bỏ (Crop) 30% viền trên của ảnh** (vùng bầu trời trống) nhằm tiết kiệm tối đa tài nguyên tính toán (FLOPs) mà không làm thất thoát dữ liệu.
+
+### 4. Đánh giá Suy giảm Tầm nhìn: Truncation & Occlusion
+* **Thực trạng:** Tình trạng che khuất (Occlusion) và cắt xén (Truncation) làm biến dạng nghiêm trọng cấu trúc Bounding Box gốc. Nhóm `Car` sở hữu tỷ lệ bị che khuất (Partly/Largely Occluded) cao đột biến do bối cảnh giao thông nối đuôi. Các đối tượng bị che khuất có độ phân tán Aspect Ratio rất lớn.
+* **Đề xuất thuật toán:**
+  * Bổ sung **Cutout** hoặc **GridMask Augmentation** để ép mô hình trích xuất đặc trưng cục bộ (bánh xe, gương chiếu hậu) thay vì phụ thuộc vào khung xe tổng thể.
+  * Trong pha hậu xử lý, tinh chỉnh hoặc thay thế Non-Maximum Suppression (NMS) tiêu chuẩn bằng **Soft-NMS** hoặc **DIoU-NMS** nhằm giảm thiểu tình trạng triệt tiêu nhầm các phương tiện đứng chồng lấp lên nhau trong bối cảnh kẹt xe.
+
+### 5. Đánh giá Định tính và Giới hạn Thiết bị (Qualitative & Camera Limitations)
+* **Nhiễu loạn Nội bộ (Intra-class Variance):** Sự giao thoa hình thái giữa `Van` và cụm `Car/Truck` dễ gây "chảy máu" dự đoán (misclassification). Đề xuất **gộp lớp (Class Merging)** `Van` và `Car` nếu dự án không yêu cầu phân mảnh quá sâu về phân khúc phương tiện.
+* **Hiệu ứng Ngữ cảnh (Contextual Overfitting):** Các phân lớp như `Tram` (Tàu điện) có tính liên kết chặt chẽ với hậu cảnh (đường ray, dây điện). Cần cấu hình mô hình cẩn trọng để tránh việc nhận diện nhầm hậu cảnh thành vật thể.
+* **Giới hạn quang học:** Tình trạng nhòe chuyển động (Motion Blur) và lóa sáng (Lens Flare) hiện diện phổ biến. Khuyến nghị cấu hình thêm thư viện **Albumentations** (`MotionBlur`, `ColorJitter`) để gia tăng tính bền bỉ (robustness) cho mô hình khi vận hành thực tế.
+
+---
+**KẾT LUẬN TỔNG QUAN:** Bộ dữ liệu KITTI đặt ra ba thách thức cốt lõi cho mô hình Deep Learning: **(1)** Kích thước đối tượng siêu nhỏ ở đường chân trời, **(2)** Tình trạng che khuất dày đặc, và **(3)** Thiên kiến phân bố không gian. Việc ứng dụng linh hoạt K-Means Anchor, FPN, Focal Loss và bộ Augmentation hướng mục tiêu sẽ là chìa khóa quyết định đến độ chính xác (mAP) cuối cùng của dự án.
+
+MARKDOWN:
+# Training
+
+MARKDOWN:
+## Faster R-CNN
+
+Saved image 21 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_21.png
+Associated code cell snippet:
+import torch
+import torchvision
+from torchvision.models.detection.faster_rcnn import FastRCNNPredict...
+
+MARKDOWN:
+## YOLO
+
+Saved image 22 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_22.png
+Associated code cell snippet:
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from...
+
+Saved image 23 to /Users/lap13954/Documents/HCMUT/dl4cv-assignment1-vne/assignment-2/report/Images/output_23.png
+Associated code cell snippet:
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from...
+

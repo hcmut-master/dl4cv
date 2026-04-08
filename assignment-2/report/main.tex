@@ -1,0 +1,393 @@
+\documentclass[a4paper]{article}
+\usepackage{vntex}
+
+\usepackage{a4wide,amssymb,epsfig,latexsym,array,hhline,fancyhdr}
+\usepackage[normalem]{ulem}
+\usepackage{caption}
+\usepackage[makeroom]{cancel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol,longtable,amscd}
+\usepackage{diagbox}
+\usepackage{booktabs}
+\usepackage{alltt}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{caption,subcaption}
+\usepackage{minted}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphics}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{epsfig}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows,snakes,backgrounds,positioning,calc,fit}
+\usepackage[unicode]{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true}
+\usepackage{listings}
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green},
+    morecomment=[l][\color{magenta}]{\#},
+    breaklines=true,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+\newcommand{\code}[1]{\texttt{\textcolor{blue!80!black}{#1}}}
+
+\newtheorem{theorem}{{\bf \DJ ịnh lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
+\theoremstyle{definition}
+\newtheorem{exer}{Bài toán}
+
+\def\thesislayout{
+	\geometry{
+		a4paper,
+		total={160mm,240mm},
+		left=30mm,
+		top=30mm,
+	}
+}
+\thesislayout
+
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{
+ \begin{tabular}{rl}
+    \begin{picture}(25,15)(0,0)
+    \put(0,-8){\includegraphics[width=8mm, height=8mm]{Images/hcmut.png}}
+   \end{picture}&
+	\begin{tabular}{l}
+		\textbf{\bf \ttfamily Trường \DJ ại Học Bách Khoa Tp.Hồ Chí Minh}\\
+		\textbf{\bf \ttfamily Khoa Khoa Học \& Kỹ Thuật Máy Tính}
+	\end{tabular}
+ \end{tabular}
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf
+	\end{tabular}  }
+\fancyfoot{}
+\fancyfoot[L]{\scriptsize \ttfamily Bài tập môn Học sâu và ứng dụng trong thị giác máy tính - Niên khóa 2025-2026}
+\fancyfoot[R]{\scriptsize \ttfamily Trang {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\arabic{subsubsubsection}}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+\sloppy
+\captionsetup[figure]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=-9pt}
+\captionsetup[table]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=7pt}
+
+\setlength{\floatsep}{5pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+\thesislayout
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+		\DJ ẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH \\
+		TRƯỜNG \DJ ẠI HỌC BÁCH KHOA \\
+		KHOA KHOA HỌC \& KỸ THUẬT MÁY TÍNH
+	\end{center}
+
+	\vspace{1cm}
+
+	\begin{figure}[h!]
+		\begin{center}
+			\includegraphics[width=3cm]{Images/hcmut.png}
+		\end{center}
+	\end{figure}
+
+	\vspace{1cm}
+
+	\begin{center}
+		\begin{tabular}{c}
+			\multicolumn{1}{l}{\textbf{{\Large HỌC SÂU VÀ ỨNG DỤNG TRONG THỊ GIÁC MÁY TÍNH}}} \\
+			~~                                                                                \\
+			\hline
+			\\
+			\multicolumn{1}{l}{\textbf{{\large Bài tập -- Nhóm 4}}}                           \\
+			\textbf{\Large Bài tập lớn số 2}                                                  \\
+			\\
+			\hline
+		\end{tabular}
+	\end{center}
+
+	\vspace{1.5cm}
+
+	\begin{table}[h]
+		\begin{tabular}{rrl}
+			\hspace{5 cm} & GVHD:         & TS. Lê Thành Sách            \\
+
+			              & SV thực hiện: & Nguyễn Hữu Trưởng - 2470573  \\
+			              &               & Nguyễn Nhật Thanh - 2570316  \\
+			              &               & Võ Thị Bích Phượng - 2470570 \\
+		\end{tabular}
+	\end{table}
+	\vspace{1.5cm}
+	\begin{center}
+		\vfill
+		{\footnotesize Tp. Hồ Chí Minh, Tháng 04/2026}
+	\end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PHẦN 1: GIỚI THIỆU
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Giới thiệu}
+Báo cáo này trình bày kết quả thực hiện Bài tập lớn số 2 trong khuôn khổ môn học Học sâu và Ứng dụng trong Thị giác máy tính. Căn cứ theo yêu cầu từ tài liệu mô tả đồ án, sinh viên được định hướng vận dụng kiến thức mạng học sâu để giải quyết một trong ba bài toán hạt nhân của thị giác máy tính: \textbf{Phân loại ảnh định danh (Image Classification), Phát hiện đối tượng (Object Detection), hoặc Phân vùng ngữ nghĩa cảnh vật (Semantic Segmentation)}. Đồng thời, đề bài đặt ra tiêu chuẩn khắt khe về việc hiện thực hóa toàn vẹn vòng đời một dự án (End-to-End Pipeline), trải dài từ khâu Phân tích Khám phá Định lượng (EDA), thiết lập DataLoader tích hợp kỹ thuật Augmentation, cho đến lập trình mô hình, kiểm định độ đo và phân tích đánh giá nguyên nhân lỗi (Error Analysis).
+
+Dựa trên những yêu cầu đó, nhóm thực hiện quyết định chọn hướng đi \textbf{Phát hiện đối tượng từ ảnh (Object Detection)}. Lý do cho sự lựa chọn này xuất phát từ tính ứng dụng sống còn và đầy thử thách của bài toán định vị vị trí trong nền kĩ thuật công nghiệp hiện đại, đặc biệt là mảng trí tuệ tự hành (Autonomous Driving). Mục tiêu cốt lõi của nghiên cứu nhằm giải phẫu rạch ròi cấu trúc, đối chiếu hiệu năng giữa hai hệ sinh thái kiến trúc đối lập: đại diện truy xuất One-stage thời gian thực (\textbf{YOLOv8}) và nền tảng chuẩn xác Two-stage (\textbf{Faster R-CNN} tích hợp xương sống ResNet50-FPN).
+
+Tập dữ liệu được nhóm tinh tuyển sử dụng là \textbf{KITTI}, một bộ dữ liệu hình ảnh phức tạp tiêu chuẩn quốc tế chuyên phục vụ nghiên cứu kịch bản giao thông phức hợp. Các nội dung được trình bày tường tận phía dưới sẽ là minh chứng cụ thể cho hành trình áp dụng kiến thức tiên tiến để huấn luyện máy tính tháo gỡ điểm mù từ môi trường thực tế.
+
+\section{Phân tích Dữ liệu Khám phá (EDA)}
+
+\subsection{Tổng quan và Cấu trúc tập dữ liệu KITTI}
+KITTI (Karlsruhe Institute of Technology and Toyota Technological Institute) là bộ dữ liệu khổng lồ thu thập từ xe Mobile Platform gắn nhiều camera màu, camera xám quang phổ rộng và cảm biến Lidar tích hợp GPS. Phiên bản Object Detection (2D) bao gồm 7,481 ảnh huấn luyện (\textit{training set}) và 7,518 ảnh phục vụ suy luận (\textit{testing set}).
+
+Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \textit{Car, Van, Truck, Pedestrian, Person\_sitting, Cyclist, Tram, Misc} cùng lớp \textit{DontCare} chuyên phục vụ cho các vùng chứa đối tượng nằm ngoài giới hạn quan tâm (quá xa, biến dạng cực mạnh hoặc che khuất hoàn toàn) nhằm giảm trừ hình phạt cho các hàm Loss trong pha huấn luyện.
+
+\subsection{Phân tích Phân phối Hình thái học (Morphological Data Visualization)}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_1.png}
+	\caption{Treemap: Cơ cấu Dataset theo Lớp và Diện tích hiển thị}
+\end{figure}
+\textbf{Nhận định Chuyên sâu:} Bộ biểu đồ phơi bày rõ hiện tượng mất cân bằng dữ liệu cực đoan đặc trưng của giao thông đường phố tự nhiên (Long-tail Class Distribution). Lớp \texttt{Car} chiếm ưu thế thống trị tuyệt đối về cả số lượng lẫn diện tích điểm ảnh, theo sau là \texttt{Pedestrian}. Ngược lại, các nhãn như \texttt{Tram} (xe điện), \texttt{Person\_sitting} nằm gọn ở khu vực đuôi dài với tỷ trọng chưa tới 1\%. Sự chênh lệch này là mối nguy hiểm tiềm tàng, khiến mô hình sinh ra "thiên kiến ưu tiên" (Algorithmic Bias) — chúng sẽ phớt lờ hoàn toàn các lớp thiểu số để tối ưu hóa hàm mất mát tổng thể trên tập mẫu đa số. \\
+\textbf{Đề xuất Phương án Tối ưu:} Nếu sử dụng hàm \textit{Cross-Entropy} tiêu chuẩn, Gradient truyền ngược qua chu kỳ học sẽ bị chi phối hoàn toàn bởi \texttt{Car}. Thiết kế cấu hình mạng bắt buộc phải tích hợp \textbf{Focal Loss} nhằm tự động giảm trọng số của các nhãn dễ đoán và ép mạng nơ-ron bù đắp hội tụ học đặc trưng của nhóm thiểu số. Đồng thời, kỹ thuật \textbf{Class-Aware Sampling} (tăng cường bốc mẫu lặp lại ưu tiên các ảnh chứa \texttt{Tram} hoặc \texttt{Cyclist}) là yêu cầu tiền đề để điều chỉnh cân bằng lại không gian đại diện dữ liệu kích hoạt trước khi đưa qua Backbone.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_6.png}
+	\caption{Interactive Histogram: Phân bổ Khoảng cách 3D thực tế của vật thể}
+\end{figure}
+\textbf{Nhận định Chuyên sâu:} Tương quan khoảng cách Z-depth tiết lộ vùng tập trung sinh thái của dữ liệu: mật độ đối tượng đạt đỉnh (Peak Density) trong giới hạn quan sát từ 10 mét đến 30 mét. Ở khoảng cách cận cảnh (dưới 20 mét), \texttt{Pedestrian} xuất hiện dày đặc quanh mép kính chắn gió. Tuy nhiên, từ mốc 50 mét trở lên, tín hiệu bị suy giảm dốc đứng (Exponential Decay). Ở cự ly này, kích thước vật lý của một chiếc xe hơi trên ảnh thu hẹp chỉ còn vài chục pixel vuông, đánh mất toàn bộ đặc trưng kết cấu (texture) bề mặt phản quang. \\
+\textbf{Đề xuất Phương án Tối ưu:} Tại độ phân giải lưới gốc, việc ép các mạng CNN sâu phải phân giải vật lý cho đối tượng dính nhiễu mờ chuyển động (Motion Blur) ở cự ly viễn cảnh xa tít sẽ gây loãng thông lượng, phá hỏng tính hội tụ mAP. Hệ thống DataLoader huấn luyện cần cơ chế chủ động kiểm duyệt: Chuyển toàn bộ các Bounding Box mục tiêu ở cự ly quá lớn hoặc có chiều cao pixel $< 25px$ thành dải nhãn loại trừ \texttt{DontCare}. Bước tiền xử lý (Pre-processing) chặt chẽ này bảo vệ đường cong Gradient khỏi rung lắc do nhiễu số, mặt khác hệ thống tự lái trong thực tiễn cũng không đòi hỏi mô-đun phanh khẩn cấp phải kích hoạt với các vật ngoại đạo ngoài tầm ngắm quy định.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_8.png}
+	\caption{Violin Plot: Phân cực Tỷ lệ Khung hình (Aspect Ratio Width/Height)}
+\end{figure}
+\textbf{Nhận định Chuyên sâu:} Khai phá không gian hình học thông qua chỉ số (Aspect Ratio = Width / Height) bằng Violin Plot minh chứng vùng phân mảnh hình thái cực kỳ sắc nét:
+\begin{itemize}
+	\item \textbf{Khối Cấu trúc thẳng đứng (Vertical-oriented):} Lớp nhãn \texttt{Pedestrian} và \texttt{Cyclist} phình to ở phần đáy biểu đồ. Cơ thể con người tạo ra tỷ lệ khung hình gầy dọc, dải giá trị tập trung tiệm cận phân khúc $AR \approx 0.3 - 0.5$.
+	\item \textbf{Khối Cấu trúc trải ngang (Horizontal-oriented):} Dòng phương tiện cơ giới hạng trung (\texttt{Car, Van, Truck}) phân phối trôi bạt hẳn lên trên tạo đỉnh nhọn nhô ngang. Thiết kế khí động lực mui xe làm dải khung hình biến thiên kéo giãn biên độ vắt ngang từ $1.5 - 3.0$.
+\end{itemize}
+\textbf{Đề xuất Phương án Tối ưu:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO (vốn ưu ái không gian hình khối vuông $1:1$ của động vật / ly tách đồ vật) tại bài toán giao thông là lỗi nhận thức căn bản. Bộ suy biến hộp (Box Regressor) trong mạng Two-stage sẽ bị xoắn tham số, tốn vô vàn Epochs không cần thiết để uốn Box gốc cho vừa vặn xe xải. Biện pháp khai tử lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt. Đây là quy chuẩn mấu chốt để thiết lập vùng quy chiếu hoàn hảo khi thiết kế.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_10.png}
+	\caption{Density Contour: Bản đồ Phân bổ Không gian Mật độ vật thể}
+\end{figure}
+\textbf{Nhận định Chuyên sâu:} Bản đồ Contour Heatmap cho ta phác thảo sự chi phối của quy luật Quang học - Tọa độ hoàn toàn khác xa so với các dataset nhiếp ảnh máy tính (Computer Vision) thông thường. Giao thông tuân theo \textit{Luật Phối Hình Đồng Quy} (Perspective Projection): Mọi phương tiện \texttt{Car} được máy ảnh chụp hút tạo thành luồng giao thông đậm đặc chĩa thẳng hội tụ vào Điểm triệt tiêu (Vanishing Point) ngay giữa ranh giới chân trời ảnh. Trong khi đó, nhóm \texttt{Pedestrian} phân mảnh vụn theo vạt lề trải rộng về nửa vùng đáy y-axis đổ xuống. \textbf{Hơn thế nữa, mảng 30\% không gian vùng trên cao bầu trời hoàn toàn là điểm chết (Dead Zone) không lưu giữ thuộc tính điểm ảnh hình khối.} \\
+\textbf{Đề xuất Phương án Tối ưu:} Sự thiên vị hội tụ tập trung tạo nên nguyên cớ sinh "Thiên kiến Tọa độ điểm mù" - Model CNN sẽ học vẹt khu vực vị trí X và Y tọa độ để phán đoán xe, suy giảm nhận diện đường vòng, góc chuyển chéo. Áp dụng kỹ thuật điều chuyển mạnh \textbf{Random Affine Translation} và \textbf{Mosaic Augmentation} phá vỡ không gian, phân tách đối tượng nén lại rải rác. Thêm vào chiến lược inference, nếu xây dựng luồng transform \textbf{Static Crop ngắt chỏm 30\% bầu trời} trước khi ma trận bị nạp lên tensor xử lý phân chập, cơ hội cắt giảm lượng tham số khổng lồ vô ích (FLOPs) giúp mô hình tối ưu gia tốc phần cứng (FPS) lên tầm mức công nghệ nhúng.
+
+\subsection{Phân tích Ma trận Mật độ Sự cố và Độ Khó Che Khuất (Occlusions)}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_11.png}
+	\caption{Biểu đồ phân phối Histogram: Tấn số xuất hiện Bounding Box trên 1 Khung ảnh}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_4.png}
+	\caption{Tỷ lệ Phân hạch Mức độ che khuất (Occlusion Level) trong không gian chật hẹp}
+\end{figure}
+
+\textbf{Insight về Ma Trận Khu Vực Cục bộ (Crowd Density):} Biểu đồ tần suất Histogram vén màn nghịch lý kịch bản dữ liệu trên đường KITTI: Trục trung tâm tập trung tần suất bình ổn 4-6 thực thể đối tượng/ảnh, nhưng biên phải sở hữu chiếc Đuôi kéo dài đạt tới mức 15-22 đồ vật chi chít trên một Scene. Thông số định lượng này tái hiện bối cảnh các ngã tư ngập xe (Traffic Jam). Trong môi trường chật nghẹt ấy, kiến trúc mạng hai giai đoạn như Faster R-CNN có rủi ro bị bóp nghẹt tài nguyên hệ thống (Out of Memory - OOM) do mạng RPN phải sinh xuất đề xuất quá ngưỡng giới hạn trần trên các tập điểm neo chồng chéo.
+
+\textbf{Insight Về Hiện Tượng Che Khuất Điểm Ảnh (Occlusion Level):} Tỷ trọng che phủ không hề suy thuyên khi nhóm đối tượng bị khuất bóng cây, vạch kẻ ngang hoặc do thân xe tải ép tuyến lộ diện khá dày đặc (Occluded \& Heavily Occluded Level). Với những Box nhãn khuyết mờ đặc điểm này, hệ lụy sụp đổ lớn nhất sẽ xảy ra ngay hệ thống Hậu xử lý tín hiệu (Post-Processing). Khi đoàn xe xếp hàng đỗ dọc theo lộ tuyến với một nửa mui xe trước che lấp vào đuôi xe sau, thuật toán chặn nhiễu NMS (Non-Maximum Suppression) cơ bản sẽ mắc lỗi mù cục bộ. Ngay khi đạt chuẩn ngưỡng IOU Threshold vượt định mức, NMS nhầm lẫn đánh giá 2 luồng viền sát nhau quy là chung 1 đối tượng rác và lược cắt thẳng tay mục tiêu thật đằng sau. Bài học lớn ở đây là việc bắt buộc chuyển hướng đánh giá sang thuật toán cấu hình phân cực linh hoạt \textbf{Soft-NMS} theo hệ số tự giảm dần trọng số điểm rơi hay sử dụng \textbf{IoU-aware NMS} mới triệt để gỡ bỏ được cục diện nhiễu khung bao hỗn độn này.
+
+\section{Chuẩn bị Dataset, DataLoader và Dữ liệu đầu vào}
+\subsection{Quản lý Dữ liệu và DataLoader}
+Kế thừa các kết luận từ pha Exploratory Data Analysis, chúng em xây dựng Custom Dataset Class kế thừa từ \texttt{torch.utils.data.Dataset} hỗ trợ các giao thức:
+\begin{itemize}
+	\item \textbf{Cơ chế Collate Function tuỳ chỉnh:} Tối ưu hóa padding linh hoạt để đưa các bức ảnh chụp ở độ phân giải nhỏ, hẹp dọc của KITTI về chiều dài kích thước cố định như \texttt{640x640} bằng thư viện OpenCV, giữ nguyên kích thước để không làm méo tỷ lệ diện tích của đối tượng người đi bộ.
+	\item \textbf{Gộp lớp - Class Merging (Tùy chọn):} Áp dụng quy hoạch rút gọn từ 8 lớp phân bố lệch về 3 dải phân loại chính yếu (\textit{Vehicle, Person/Biker, Misc}) để giảm nhẹ khó khăn với các biến số che khuất nội vùng.
+\end{itemize}
+
+\subsection{Kỹ thuật Data Augmentation Nâng cao}
+Nhóm khai thác thư viện \textit{Albumentations} để áp dụng điều chỉnh phổ rộng trong pha huấn luyện:
+\begin{itemize}
+	\item \textbf{Khắc phục Che Khuất (Occlusion Resistance):} Sử dụng kỹ thuật \texttt{GridMask} và \texttt{Cutout}. Mạng nơ-ron được ép phải tìm các cấu trúc phân tách phụ trợ (như cấu trúc viền đèn, hoa văn lưới tản nhiệt) thay vì dựa vào toàn bộ kính chắn gió, tăng tính tự học trên đối tượng mất góc.
+	\item \textbf{Khắc phục Thiết bị quang học (Optical Adjustments):} Khởi xướng các lớp nhiễu \texttt{MotionBlur}, \texttt{RandomBrightnessContrast} để rèn giũa độ bền của Weight khi gặp ánh sáng lóa ngược trên dataset thực tế xe tự lái.
+	\item \textbf{Phá vỡ Cấu trúc Không gian (Spatial Shifting):} Kết hợp kỹ thuật siêu Augmentation \textbf{Mosaic} (trộn tỷ lệ 4 bức ảnh) giúp tái tạo một môi trường có đa dạng lớp vật thể và không thể học vẹt theo tọa độ $xy$.
+\end{itemize}
+
+\section{Kiến trúc Mô hình Học Sâu - So sánh và Đánh giá}
+
+Để trả lời cho mục tiêu bài toán, nhóm thực hiện phân chia kỹ năng thiết lập cho 2 nhóm kiến trúc riêng biệt trong bài toán Object Detection. \textbf{Việc lựa chọn đại diện xuất sắc của hai trường phái Two-stage và One-stage cho phép đi sâu đánh giá sự đánh đổi (trade-off) giữa Tốc độ thực thi (Speed/FPS) và Độ chính xác (mAP) tại các điều kiện đa dạng của KITTI.}
+
+\subsection{1. Phương pháp Faster R-CNN (Kiến trúc Two-stage)}
+Faster R-CNN với Backbone ResNet50-FPN là đại diện kinh điển mang tới chuẩn mực đánh giá (baseline) độ chính xác hoàn hảo trong các bài toán nhận diện có sự chồng chéo phức tạp. Nhóm tiến hành cấu hình Transfer Learning, tinh chỉnh trọng số đã được Pre-train trên bộ COCO, đồng thời thay đổi phân lớp cuối (Head) để tương thích với số lượng lớp chuyên biệt của KITTI (8 phân lớp vật thể + 1 Background):
+
+\begin{lstlisting}[language=Python, caption=Khoi tao va cau hinh Transfer Learning Faster R-CNN]
+import torchvision
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+
+# Tai pre-trained model (ResNet50 + FPN) da duoc khoi tao tren COCO
+model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+
+# Lay so chieu in_features cua lop phan loai cuoi cung
+in_features = model.roi_heads.box_predictor.cls_score.in_features
+
+# Thay the Head cu bang Head moi tuong ung voi so lop cua KITTI (NUM_CLASSES = 9)
+model.roi_heads.box_predictor = FastRCNNPredictor(in_features, NUM_CLASSES)
+model.to(DEVICE)
+\end{lstlisting}
+
+\subsubsection*{Phân tích Chuyên sâu Cấu trúc Faster R-CNN}
+\begin{itemize}
+	\item \textbf{Mạng Trích xuất Đặc trưng (ResNet50 + FPN):} ResNet50 là xương sống chính thực hiện khai phá đặc trưng, khắc phục hiện tượng suy giảm gradient (vanishing gradient) cực mạnh qua các khối Skip-Connection. Đặc biệt ở môi trường giao thông phức tạp, kích cỡ vật thể biến thiên liên tục. Mạng bộ phận FPN (Feature Pyramid Network) được sử dụng để giải quyết triệt để bài toán đa tỷ lệ (Multi-scale) này. Bằng cách kết nối cấu trúc tháp đặc trưng từ nhánh Bottom-up và Top-down thông qua các đường nối ngang (lateral connections), FPN cho phép khôi phục trọn vẹn ngữ nghĩa của các loại xe nhỏ ở khoảng cách xa.
+	\item \textbf{Mạng Đề xuất Vùng (Region Proposal Network - RPN):} Là điểm nhấn cách mạng thay thế rập khuôn Selective Search. RPN sử dụng Mạng nơ-ron CNN trực tiếp trượt sinh ra các Hộp neo (Anchors) đa tỷ lệ (scale và aspect ratios). Đầu ra của RPN phân loại nhanh chóng phần nền (background) để chỉ chắt lọc các khu vực tiềm năng (foreground), tiết kiệm tính toán khổng lồ cho lớp Classifier phân tầng đằng sau.
+	\item \textbf{Lớp Trích xuất RoI Align (Khắc phục hạn chế RoI Pooling):} Do việc chuyển đổi tọa độ thập phân về số nguyên ở lớp RoI Pooling gây thất thoát không gian vi mô, kiến trúc hiện hành chèn thêm lớp \textbf{RoI Align} kết hợp bộ nội suy song tuyến (Bilinear Interpolation). Giao thức này bảo tồn y nguyên vị trí chính xác của vùng viền khuếch đại, đáp ứng tiêu chuẩn khắt khe cho Bounding box tự lái xe tự động.
+	\item \textbf{Hàm Tối ưu \& Đánh giá Lợi / Hại:} Ứng dụng Multi-task Loss đan xen chặt chẽ Classification (Cross-Entropy) và Regression Box (Smooth L1 Loss) đảm bảo rào cản vững chắc trước những vật thể chênh lệch viền. Nhờ năng lực lọc phân cực và phán đoán tỉ mỉ, Faster R-CNN cho mAP tiệm cận ngưỡng lý tưởng đối với các nhãn che khuất. Bù lại, kiến trúc trung chuyển Two-stage kinh viện này tạo nút thắt cổ chai vật lý tại việc chờ đợi tensor, cướp đi khả năng bám đuôi độ trễ thời gian thực (real-time FPS) ngay cả trên phần cứng công nghiệp.
+\end{itemize}
+
+\subsection{2. Phương pháp YOLOv8m (Kiến trúc One-stage / Anchor-Free)}
+Trái ngược với chiến lược hai giai đoạn hạng nặng, YOLOv8 đại diện cho xu thế Nhận diện Một bước (Single-Pass), trực tiếp phân hóa đồng thời tọa độ và tỷ lệ lớp từ biểu đồ đặc trưng. Biến thể cỡ trung YOLOv8m (Medium) được ấn định nhằm cân đối hoàn hảo sức mạnh tính toán và khả năng thực thi thông số. Quá trình tiền huấn luyện được lập chỉ mục bài bản qua cơ chế nạp cấu hình đa luồng Hyperparameters:
+
+\begin{lstlisting}[language=Python, caption=Tham so cau hinh huan luyen YOLOv8 (Medium)]
+from ultralytics import YOLO
+
+# Khoi tao mo hinh YOLOv8 ban Medium
+model = YOLO('yolov8m.pt')
+
+# Bat dau qua trinh Training voi cau hinh Data Pipeline doc lap
+results = model.train(
+    data=str(yaml_path),   
+    epochs=20,
+    imgsz=640,             
+    batch=32,
+    device=[0, 1],         # Su dung kien truc chay da luong 2 GPU Tesla T4
+    patience=5,            
+    optimizer='auto',      
+    lr0=0.01,              
+    mosaic=1.0,            # Kich hoat sieu Augmentation Mosaic 
+    project='YOLOv8_KITTI',
+    name='train_run'
+)
+\end{lstlisting}
+
+\subsubsection*{Phân tích Chuyên sâu Cấu trúc YOLOv8}
+\begin{itemize}
+	\item \textbf{Khung Xương sống (Modified CSPDarknet) \& Mô đun C2f:} Backbone cải thiện tích chập qua tái cấu trúc Cross-stage Partial block. Bước tiến sáng giá nhất nằm ở việc loại bỏ C3 bằng khối \textbf{C2f} (Cross Stage Partial bottleneck with 2 convolutions). Thiết kế vi mô liên kết đa nhánh của C2f thu nhận và khuếch đại trọn vẹn Gradient truyền ngược đi sâu cực đỉnh. Đồng thời, vùng Neck có gắn \textbf{PANet} (Path Aggregation Network) phụ trách chuyển phát nhịp nhàng thông tin hạ tầng và thượng tầng không gian chéo, hạn chế tối đa vấn đề nhiễu vùng viễn ảnh.
+	\item \textbf{Đầu Dự đoán Thiết kế Kép (Decoupled Head):} Giải quyết triệt để xung đột băng thông tại bước đưa quyết định, YOLOv8 tách lẻ độc lập nhánh Regression (đo kích cỡ hộp) và Classification (định tính nhãn hiệu). Sự chuyên môn hóa này giúp cho hệ điều hướng trọng số mỗi nhánh tối ưu độ suy biến dữ liệu mượt mà, tăng đáng kể mAP đối với các nhãn mất cân bằng (imbalanced minority class).
+	\item \textbf{Triết lý Hệ Phi-Neo (Anchor-Free Center):} Tham gia đo lường mật độ xe di chuyển tự do với góc nghiêng và khoảng cách không đồng nhất như bộ KITTI, định hình khung Anchor thủ công qua K-Means rườm rà dễ dẫn đến sai số. Cấu trúc mới tiếp cận Vector hướng tâm xuất phát từ giữa điểm lõi phóng ra 4 cạnh Bounding Box bao quát, siêu linh hoạt ứng phó với cả xe vi mô hoặc buồng hàng khổng lồ.
+	\item \textbf{Khởi Hoạch CIoU \& DFL (Distribution Focal Loss):} YOLOv8 trang bị cặp Loss kết hợp siêu việt: Đầu tiên \textbf{CIoU} định thức đo lường cả diện tích Trùng lặp (Intersection), Khoảng cách Tâm và Tỉ lệ khung biên (Aspect Ratio Difference) nhằm ôm sát phương tiện đang cắt kéo qua khung hình. Phối hợp với \textbf{DFL Loss} thay vì gò bó trong xác suất nhị phân, nay lan tỏa xác suất suy luận viền qua dạng phân phối chuỗi rời rạc. Vô cùng hiệu quả khắc trị viền xe chìm trong bóng đêm che khuất nửa phía.
+	\item \textbf{Hệ Thống Phân Tầng Học Đồng Nhất (Task-Aligned Assigner):} Thay thế việc lấy IOU tĩnh đối chiếu rập khuôn, bộ gán mác linh động đánh giá năng suất cả Loss hộp giao và dự đoán Confidence tốt ưu nhất để ấn định là 'mục tiêu cực thực', đồng thời phân tách nhiễu loạn của nền nhiễu ảnh tĩnh.
+\end{itemize}
+
+\section{Kết quả Thực nghiệm và Phân tích}
+
+Khung đánh giá được triển khai chặt chẽ bằng cách thực thi hai mô hình tại mốc Validation Dataset với tham số $20 \text{ Epochs}$. Ở mô hình Faster R-CNN, thuật toán chạm mốc \textbf{Validation Loss tối ưu đạt 0.2659} tại Epoch thứ 18. Ở mô hình YOLOv8m, bảng tổng hợp Precision-Recall chi tiết được xuất như sau:
+
+\subsection{Số liệu Thực nghiệm Đánh giá Độ chính xác}
+
+\begin{table}[H]
+	\centering
+	\caption{Phân rã số liệu mAP chi tiết của YOLOv8m trên Validation Set}
+	\begin{tabular}{l c c c c c}
+		\toprule
+		\textbf{Phân lớp (Class)} & \textbf{Instances} & \textbf{Precision (P)} & \textbf{Recall (R)} & \textbf{mAP@0.5} & \textbf{mAP@0.5:0.95} \\
+		\midrule
+		\textbf{All (Tổng quát)}  & \textbf{8231}      & \textbf{0.863}         & \textbf{0.858}      & \textbf{0.903}   & \textbf{0.671}        \\
+		Car                       & 5889               & 0.903                  & 0.936               & 0.967            & 0.803                 \\
+		Van                       & 570                & 0.894                  & 0.933               & 0.967            & 0.773                 \\
+		Truck                     & 227                & 0.952                  & 0.969               & 0.985            & 0.851                 \\
+		Pedestrian                & 916                & 0.872                  & 0.741               & 0.834            & 0.486                 \\
+		Cyclist                   & 308                & 0.842                  & 0.828               & 0.882            & 0.611                 \\
+		Tram                      & 95                 & 0.864                  & 0.916               & 0.957            & 0.735                 \\
+		Person\_sitting           & 39                 & 0.724                  & 0.692               & 0.726            & 0.430                 \\
+		Misc                      & 187                & 0.851                  & 0.850               & 0.905            & 0.679                 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\textbf{Insight Phân tích Số liệu (mAP):}
+Bảng thông số thể hiện sự tương đồng tuyệt đối với phân tích EDA từ đầu đồ án. Các nhóm phương tiện khối lớn như \texttt{Car}, \texttt{Truck} và \texttt{Van} đạt chỉ số mAP@0.5 tiệm cận độ hoàn hảo (trên 96.7\%). Tuy nhiên, đối với lớp \texttt{Pedestrian} (người đi bộ) và \texttt{Person\_sitting}, chỉ số sụt giảm đáng kể do hiệu ứng "Small Object" kết hợp với "Occlusion" (che khuất) khi xuất hiện xen kẽ với phương tiện. Đây cũng là lý do điểm đo gắt gao \textbf{mAP@0.5:0.95} tụt hẳn xuống 0.43-0.48. Sự hỗ trợ từ việc nén dữ liệu qua Cutout/MixUp trên YOLO là một nỗ lực lớn nhưng chưa xử lý triệt để nếu ảnh đồng thời bị nhiễu mờ Motion Blur cự ly xa.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{Images/output_17.png}
+	\caption{Kết quả trực quan hóa dự đoán một khung ảnh thực nghiệm của YOLOv8}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{Images/output_18.png}
+	\caption{Chất lượng mạng bắt ảnh với các khoảng cách xa từ tâm Vanishing Point}
+\end{figure}
+
+\subsection{Số liệu Đánh giá Tốc độ Inference (FPS Real-time Benchmark)}
+
+Tốc độ phân tích khung hình (Speed Inference) là rào cản tối thượng cho mọi thiết bị xe gắn chíp tự lái. Kiểm chứng Benchmark thực tế được trích xuất trên môi trường \textbf{GPU nền tảng Tesla T4}:
+
+\begin{table}[H]
+	\centering
+	\caption{Benchmark theo Thời gian thực (Real-time FPS) trên Validation Set}
+	\begin{tabular}{l l r}
+		\toprule
+		\textbf{Kiến trúc Model}  & \textbf{Thiết bị phần cứng đánh giá}       & \textbf{Tốc độ tính toán}  \\
+		\midrule
+		Faster R-CNN (ResNet50)   & GPU Tesla T4 (Single - Inference)          & $7.0\text{ FPS}$           \\
+		\textbf{YOLOv8m (Medium)} & \textbf{GPU Tesla T4 (Single - Inference)} & $\mathbf{45.4\text{ FPS}}$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\textbf{SO SÁNH MÔ THỨC VÀ THẢO LUẬN LỖI (ERROR ANALYSIS):}
+
+\begin{enumerate}
+	\item \textbf{Đánh giá đo lường FPS và Tính ứng dụng công nghiệp:} Ở các tác vụ xe tự hành trên cao tốc, ngưỡng $30\text{ FPS}$ là vạch an toàn tối thiểu và bắt buộc để hệ thống rà quét phanh điện tử. Theo số liệu, \textbf{Faster R-CNN} chỉ đạt \textbf{7.0 FPS} (độ trễ khủng khiếp lên tới xấp xỉ 140ms để đọc xong một khung hình). Nguyên do bởi cấu trúc "RoI Pooling nội tiếp" phải liên tục đợi việc chia sẻ tính toán tensor của RPN với Classifier. Chậm trễ này sẽ gây ra tình huống xe gốc tông vào trướng ngại vật trước khi mô hình kịp chạy lệnh rẽ. Ngược lại, \textbf{YOLOv8m} vươn lên thành tiêu chuẩn chiến thắng với \textbf{45.4 FPS}.
+	\item \textbf{Cân bằng Kháng nhiễu False Positive / False Negative:}  Dù bị nghẽn thông lượng, Faster R-CNN vẫn duy trì điểm sáng ở khả năng bóc tách vùng chi tiết. Mạng thác FPN trích xuất pixel tỉ mỉ giúp giảm thiểu đáng kể số lượng lỗi bỏ sót (\textit{False Negatives}) với đối tượng \texttt{Pedestrian}. Ngược lại, tính toán Global Convolutions "Anchor-Free" của YOLO đôi khi khiến mô hình đánh giá vội và dễ vi phạm \textit{False Positives}.
+	\item \textbf{Thử thách từ NMS trong Bối cảnh Tắc nghẽn:} Hiện tượng các xe (Car) đỗ nối chuỗi tại điểm tắc (Traffic JAM) vô tình tạo ra Box tương tự nhau. Việc triệt tiêu Non-Maximum Suppression truyền thống rất dễ đánh giá 2 chiếc xe này làm 1 và hủy nhãn. Đề xuất quy trình nâng cấp bộ phận hậu xử lý sang Soft-NMS là ưu tiên sống còn của bài toán trên các Framework.
+\end{enumerate}
+
+\section{Tổng kết}
+Thông qua đồ án này, nhóm hoàn thành mục tiêu hệ thống hóa kiến thức toàn năng từ Phân tích dữ liệu (EDA định lượng vị trí, phương vị) đến triển khai hai nhóm mạng thiết yếu của thị giác học sâu. Tùy thuộc vào yêu cầu bài toán công nghiệp: Ưu tiên phân tích cảnh y tế siêu nhỏ, cần chọn \textbf{Faster R-CNN}. Đối mặt tính khốc liệt của tự hành tốc độ cao trong thời gian thực, họ \textbf{YOLO} chính là đáp án duy nhất và tối ưu. Các chuẩn mực kỹ thuật khai mở sẽ mở đường cho các chủ đề tinh chỉnh tiếp theo bằng Transformer và Attention-Mechanism.
+% TÀI LIỆU THAM KHẢO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
+
+\end{document}
