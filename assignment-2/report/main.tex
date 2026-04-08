@@ -29,6 +29,11 @@
 \usepackage{setspace}
 \usepackage{epsfig}
 \usepackage{float}
+\usepackage[indent]{parskip}
+\usepackage{enumitem}
+\setlist[itemize]{itemsep=5pt, topsep=5pt, parsep=0pt}
+\setlist[enumerate]{itemsep=5pt, topsep=5pt, parsep=0pt}
+\renewcommand{\arraystretch}{1.25}
 \usepackage{tikz}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
@@ -105,12 +110,13 @@
 \makeatother
 
 \sloppy
-\captionsetup[figure]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=-9pt}
-\captionsetup[table]{labelfont={small,bf},textfont={small,it},belowskip=-1pt,aboveskip=7pt}
+\captionsetup[figure]{labelfont={small,bf},textfont={small,it},belowskip=5pt,aboveskip=10pt}
+\captionsetup[table]{labelfont={small,bf},textfont={small,it},belowskip=10pt,aboveskip=5pt}
 
-\setlength{\floatsep}{5pt plus 2pt minus 2pt}
-\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
-\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{15pt plus 4pt minus 2pt}
+\setlength{\textfloatsep}{25pt plus 4pt minus 4pt}
+\setlength{\intextsep}{20pt plus 4pt minus 2pt}
+\setstretch{1.15} % Slightly increase line spacing for better readability
 
 \thesislayout
 
@@ -189,7 +195,7 @@ Phát hiện đối tượng là một trong những bài toán cốt lõi của
 \subsection{Các Chỉ số Đánh giá Cốt lõi}
 Để đo lường định lượng và so sánh công bằng độ chính xác lẫn hiệu năng của thuật toán phát hiện đối tượng, cộng đồng nghiên cứu quy chiếu dựa trên một hệ thống các chuẩn đo lường quốc tế:
 
-\subsubsection{1. Ma trận nhầm lẫn (Confusion Matrix) trong phát hiện đối tượng}
+\subsubsection{Ma trận nhầm lẫn (Confusion Matrix) trong phát hiện đối tượng}
 Khác với phân loại ảnh thông thường, việc xác định đúng/sai (True/False) trong Object Detection dựa vào chỉ số \textbf{IoU (Intersection over Union)} – tỷ lệ diện tích phần giao nhau chia cho diện tích phần hợp tập của hộp dự đoán (Predicted Box) và hộp thực tế (Ground-truth Box). Nếu IoU vượt qua một ngưỡng quy định (Threshold, thường là $0.5$), dự đoán được xem là khớp. Từ sự đối soát này, hệ thống sản sinh:
 \begin{itemize}
 	\item \textbf{True Positive (TP):} Mô hình phát hiện chính xác vật thể, phân loại đúng nhãn dán, và khung Bounding Box ôm sát với độ chồng lấp $IoU \ge Threshold$.
@@ -198,7 +204,7 @@ Khác với phân loại ảnh thông thường, việc xác định đúng/sai 
 	\item \textit{Lưu ý:} \textbf{True Negative (TN)} (không có xe và mô hình bảo không có) không được xem xét sử dụng để đo đạc vì số lượng hộp bao trống (background boxes) trên ảnh là vô hạn, làm nhiễu mẫu số.
 \end{itemize}
 
-\subsubsection{2. Biến số Cân bằng Trọng yếu: Precision, Recall và F1-Score}
+\subsubsection{Biến số Cân bằng Trọng yếu: Precision, Recall và F1-Score}
 Trong bài toán xe tự hành, tồn tại một sự đánh đổi sinh tử (Trade-off) giữa độ đo Precision và Recall:
 \begin{itemize}
 	\item \textbf{Precision (Độ chuẩn xác):} $Precision = \frac{TP}{TP + FP}$. Tỷ lệ này biểu thị: trong 100 vật thể thuật toán "tự tin khoanh vùng", thực sự có bao nhiêu đồ vật là thật. Lỗi FP cao (nhận diện cột điện thành gã đi bộ) khiến Precision giảm mạnh, khiến xe tự lái sẽ phanh gấp liên tục gây sốc an toàn.
@@ -206,7 +212,7 @@ Trong bài toán xe tự hành, tồn tại một sự đánh đổi sinh tử (
 	\item \textbf{F1-Score:} Là trung bình điều hòa của cả hai ($F1 = 2 \times \frac{Precision \times Recall}{Precision + Recall}$). Một mô hình thương mại xuất sắc phải giữ vững khả năng dự đoán cân bằng định thái tạo ra đường tiệm cận độ tin cậy đỉnh cao cho chỉ số F1 tốt nhất.
 \end{itemize}
 
-\subsubsection{3. Tiêu chuẩn Vàng Đánh giá: AP và mAP}
+\subsubsection{Tiêu chuẩn Vàng Đánh giá: AP và mAP}
 Hai mô hình sở hữu F1-score giống nhau nhưng hành vi phản ứng điểm tin cậy lại rất khác biệt. Để đánh giá đường dài toàn diện, \textbf{Precision-Recall Curve (Đường cong PR)} được vẽ ra nhờ cơ chế quét thử các dự đoán từ mốc Confidence cực đại xuống thấp nhất:
 \begin{itemize}
 	\item \textbf{AP (Average Precision):} Là tổng diện tích phân bổ nằm dưới đường cong PR của \textit{một phân lớp cụ thể} (Ví dụ: AP của Class Car, AP của Class Cyclist). Tính tích phân đồ thị này càng lấp đầy tiệm cận mốc 1.0 (100\%) thì mạng thu nạp đối tượng đó càng hoàn hảo.
@@ -214,7 +220,7 @@ Hai mô hình sở hữu F1-score giống nhau nhưng hành vi phản ứng đi�
 	\item \textbf{Chuẩn đo lường gắt gao mAP@0.5:0.95:} Theo hệ quy chuẩn giám định đo lường tân tiến của COCO, việc cố định IoU ở mức $0.5$ là quá dễ dãi. Chuẩn đánh giá cực khoai mAP@0.5:0.95 sẽ lấy trung bình điểm mAP tích phân quét vắt kiệt qua 10 biến ngưỡng IoU liên tiếp nâng dần lên (0.50, 0.55, 0.60, ... 0.95). Chỉ số này trừng phạt cực nặng các thuật toán dán nhãn định danh trúng đối tượng nhưng kết cấu vẽ viền khung thừa thải, méo xệch so với thân xe.
 \end{itemize}
 
-\subsubsection{4. Hiệu suất Đo lường Cấu trúc (Hardware Metrics)}
+\subsubsection{Hiệu suất Đo lường Cấu trúc (Hardware Metrics)}
 Bên cạnh độ mẫn cảm bắt dính hộp ảnh, hao phí tài nguyên đóng vai trò tối thượng khi triển khai lên máy tính biên (Jetson, Raspberry Pi) của xe tự lái:
 \begin{itemize}
 	\item \textbf{FPS (Frames Per Second):} Khối lượng điểm ảnh số hóa xử lý thành công trên 1 giây tĩnh. Ngưỡng tốc độ $FPS \ge 30$ được xem định mốc cấu trúc luân lý an toàn của chuẩn xử lý Thời gian thực (Real-time).
@@ -242,8 +248,8 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Images/output_1.png}
-	\caption{Treemap: Cơ cấu Dataset theo Lớp và Diện tích hiển thị}
+	\includegraphics[width=0.88\textwidth]{Images/output_5.png}
+	\caption{Treemap: Cơ cấu Dataset theo Lớp và Phân cấp mức độ Che khuất (Occlusion Hierarchy).}
 \end{figure}
 \textbf{Nhận định Chuyên sâu:} Bộ biểu đồ phơi bày rõ hiện tượng mất cân bằng dữ liệu cực đoan đặc trưng của giao thông đường phố tự nhiên (Long-tail Class Distribution). Lớp \texttt{Car} chiếm ưu thế thống trị tuyệt đối về cả số lượng lẫn diện tích điểm ảnh, theo sau là \texttt{Pedestrian}. Ngược lại, các nhãn như \texttt{Tram} (xe điện), \texttt{Person\_sitting} nằm gọn ở khu vực đuôi dài với tỷ trọng chưa tới 1\%. Sự chênh lệch này là mối nguy hiểm tiềm tàng, khiến mô hình sinh ra "thiên kiến ưu tiên" (Algorithmic Bias) — chúng sẽ phớt lờ hoàn toàn các lớp thiểu số để tối ưu hóa hàm mất mát tổng thể trên tập mẫu đa số. \\
 \textbf{Đề xuất Phương án Tối ưu:} Nếu sử dụng hàm \textit{Cross-Entropy} tiêu chuẩn, Gradient truyền ngược qua chu kỳ học sẽ bị chi phối hoàn toàn bởi \texttt{Car}. Thiết kế cấu hình mạng bắt buộc phải tích hợp \textbf{Focal Loss} nhằm tự động giảm trọng số của các nhãn dễ đoán và ép mạng nơ-ron bù đắp hội tụ học đặc trưng của nhóm thiểu số. Đồng thời, kỹ thuật \textbf{Class-Aware Sampling} (tăng cường bốc mẫu lặp lại ưu tiên các ảnh chứa \texttt{Tram} hoặc \texttt{Cyclist}) là yêu cầu tiền đề để điều chỉnh cân bằng lại không gian đại diện dữ liệu kích hoạt trước khi đưa qua Backbone.
@@ -266,7 +272,71 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\item \textbf{Khối Cấu trúc thẳng đứng (Vertical-oriented):} Lớp nhãn \texttt{Pedestrian} và \texttt{Cyclist} phình to ở phần đáy biểu đồ. Cơ thể con người tạo ra tỷ lệ khung hình gầy dọc, dải giá trị tập trung tiệm cận phân khúc $AR \approx 0.3 - 0.5$.
 	\item \textbf{Khối Cấu trúc trải ngang (Horizontal-oriented):} Dòng phương tiện cơ giới hạng trung (\texttt{Car, Van, Truck}) phân phối trôi bạt hẳn lên trên tạo đỉnh nhọn nhô ngang. Thiết kế khí động lực mui xe làm dải khung hình biến thiên kéo giãn biên độ vắt ngang từ $1.5 - 3.0$.
 \end{itemize}
-\textbf{Đề xuất Phương án Tối ưu:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO (vốn ưu ái không gian hình khối vuông $1:1$ của động vật / ly tách đồ vật) tại bài toán giao thông là lỗi nhận thức căn bản. Bộ suy biến hộp (Box Regressor) trong mạng Two-stage sẽ bị xoắn tham số, tốn vô vàn Epochs không cần thiết để uốn Box gốc cho vừa vặn xe xải. Biện pháp khai tử lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt. Đây là quy chuẩn mấu chốt để thiết lập vùng quy chiếu hoàn hảo khi thiết kế.
+\textbf{Đề xuất Phương án Tối ưu:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO là lỗi nhận thức căn bản. Biện pháp khai tử lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_2.png}
+		\caption{Diện tích (Log-Scale).}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_9.png}
+		\caption{Phân bổ COCO (\%).}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.32\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_12.png}
+		\caption{Normalized size (w vs h).}
+	\end{subfigure}
+	\caption{Phân tích tương quan kích thước và nội suy diện tích đối tượng.}
+\end{figure}
+
+\textbf{Nhận định Chuyên sâu:} Biểu đồ \textit{Log-scale Area} và \textit{COCO Size Distribution} phơi bày một thách thức kỹ thuật lớn: có tới hơn 30\% đối tượng thuộc nhóm \textbf{Small} ($< 32 \times 32$ px). Đặc biệt là lớp \texttt{Pedestrian} và \texttt{Cyclist} có tỷ lệ đối tượng nhỏ rất cao, khiến chúng dễ bị triệt tiêu tín hiệu sau khi đi qua các lớp Pooling sâu của CNN.
+
+\subsection{Tương quan Phối cảnh và Khoảng cách (Spatial Perspectives)}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_7.png}
+	\caption{Tương quan: Khoảng cách (m) vs Chiều cao Bbox (px) tuân theo quy luật Perspective Projection.}
+\end{figure}
+
+\textbf{Nhận định Chuyên sâu:} Tương quan giữa khoảng cách thực tế (D) và chiều cao pixel (H) tuân thủ chặt chẽ quy luật hình học phối cảnh. Khi $D > 50m$, chiều cao vật thể hội tụ về dải cực thấp ($< 50px$). Điều này củng cố nhu cầu về các kiến trúc \textbf{Feature Pyramid Network (FPN)} để duy trì độ phân giải cao cho các tầng đặc trưng sớm, hỗ trợ phát hiện các vật thể ở xa trước khi chúng bị bão hòa thông tin.
+
+\subsection{Phân bổ Không gian và Tọa độ (Coordinate Analysis)}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{Images/output_13.png}
+	\caption{Heatmap vị trí tâm vật thể theo từng phân lớp (cx\_norm vs cy\_norm).}
+\end{figure}
+
+\textbf{Nhận định Chuyên sâu:} Bản đồ nhiệt vị trí tâm bộc lộ tính quy luật trong giao thông:
+\begin{itemize}
+	\item Các lớp phương tiện (\texttt{Car, Truck, Van}) tập trung cao độ tại dải $cy \approx 0.5 - 0.6$ (mặt đường chính).
+	\item Lớp \texttt{Pedestrian} và \texttt{Cyclist} có xu hướng xuất hiện rải rác hơn ở hai bên biên trái/phải, phản ánh vị trí trên vỉa hè hoặc làn đường thô sơ.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Images/output_14.png}
+	\caption{So sánh mật độ không gian: Car (Heatmap) vs Pedestrian (Contour).}
+\end{figure}
+
+\subsection{Ma trận Tương quan các Đặc trưng Số (Statistical Correlation)}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Images/output_15.png}
+	\caption{Ma trận tương quan Heatmap giữa các biến số hình thái học.}
+\end{figure}
+\textbf{Nhận định Chuyên sâu:} Ma trận tương quan xác nhận hệ số tương quan rất cao ($r \approx 0.89$) giữa \texttt{area\_norm} và \texttt{h\_norm}, điều này cho thấy chiều cao là biến số chi phối diện tích mạnh hơn chiều rộng trong KITTI. Đồng thời, biến \texttt{cy\_norm} (tọa độ Y) có tương quan chặt với kích thước, minh chứng cho việc vật thể càng ở thấp (gần xe hơn) thì càng lớn.
+
 
 \begin{figure}[H]
 	\centering
@@ -308,11 +378,17 @@ Nhóm khai thác thư viện \textit{Albumentations} để áp dụng điều ch
 	\item \textbf{Phá vỡ Cấu trúc Không gian (Spatial Shifting):} Kết hợp kỹ thuật siêu Augmentation \textbf{Mosaic} (trộn tỷ lệ 4 bức ảnh) giúp tái tạo một môi trường có đa dạng lớp vật thể và không thể học vẹt theo tọa độ $xy$.
 \end{itemize}
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{Images/output_16.png}
+	\caption{Pair Plot: Tương quan chéo giữa các biến không gian (Sample 3000).}
+\end{figure}
+
 \section{Kiến trúc Mô hình Học Sâu - So sánh và Đánh giá}
 
 Để trả lời cho mục tiêu bài toán, nhóm thực hiện phân chia kỹ năng thiết lập cho 2 nhóm kiến trúc riêng biệt trong bài toán Object Detection. \textbf{Việc lựa chọn đại diện xuất sắc của hai trường phái Two-stage và One-stage cho phép đi sâu đánh giá sự đánh đổi (trade-off) giữa Tốc độ thực thi (Speed/FPS) và Độ chính xác (mAP) tại các điều kiện đa dạng của KITTI.}
 
-\subsection{1. Phương pháp Faster R-CNN (Kiến trúc Two-stage)}
+\subsection{Phương pháp Faster R-CNN (Kiến trúc Two-stage)}
 Faster R-CNN với Backbone ResNet50-FPN là đại diện kinh điển mang tới chuẩn mực đánh giá (baseline) độ chính xác hoàn hảo trong các bài toán nhận diện có sự chồng chéo phức tạp. Nhóm tiến hành cấu hình Transfer Learning, tinh chỉnh trọng số đã được Pre-train trên bộ COCO, đồng thời thay đổi phân lớp cuối (Head) để tương thích với số lượng lớp chuyên biệt của KITTI (8 phân lớp vật thể + 1 Background):
 
 \begin{lstlisting}[language=Python, caption=Khoi tao va cau hinh Transfer Learning Faster R-CNN]
@@ -338,7 +414,7 @@ model.to(DEVICE)
 	\item \textbf{Hàm Tối ưu \& Đánh giá Lợi / Hại:} Ứng dụng Multi-task Loss đan xen chặt chẽ Classification (Cross-Entropy) và Regression Box (Smooth L1 Loss) đảm bảo rào cản vững chắc trước những vật thể chênh lệch viền. Nhờ năng lực lọc phân cực và phán đoán tỉ mỉ, Faster R-CNN cho mAP tiệm cận ngưỡng lý tưởng đối với các nhãn che khuất. Bù lại, kiến trúc trung chuyển Two-stage kinh viện này tạo nút thắt cổ chai vật lý tại việc chờ đợi tensor, cướp đi khả năng bám đuôi độ trễ thời gian thực (real-time FPS) ngay cả trên phần cứng công nghiệp.
 \end{itemize}
 
-\subsection{2. Phương pháp YOLOv8m (Kiến trúc One-stage / Anchor-Free)}
+\subsection{Phương pháp YOLOv8m (Kiến trúc One-stage / Anchor-Free)}
 Trái ngược với chiến lược hai giai đoạn hạng nặng, YOLOv8 đại diện cho xu thế Nhận diện Một bước (Single-Pass), trực tiếp phân hóa đồng thời tọa độ và tỷ lệ lớp từ biểu đồ đặc trưng. Biến thể cỡ trung YOLOv8m (Medium) được ấn định nhằm cân đối hoàn hảo sức mạnh tính toán và khả năng thực thi thông số. Quá trình tiền huấn luyện được lập chỉ mục bài bản qua cơ chế nạp cấu hình đa luồng Hyperparameters:
 
 \begin{lstlisting}[language=Python, caption=Tham so cau hinh huan luyen YOLOv8 (Medium)]
@@ -381,9 +457,44 @@ results = model.train(
 
 \section{Kết quả Thực nghiệm và Phân tích}
 
-Khung đánh giá được triển khai chặt chẽ bằng cách thực thi hai mô hình tại mốc Validation Dataset với tham số $20 \text{ Epochs}$. Ở mô hình Faster R-CNN, thuật toán chạm mốc \textbf{Validation Loss tối ưu đạt 0.2659} tại Epoch thứ 18. Ở mô hình YOLOv8m, bảng tổng hợp Precision-Recall chi tiết được xuất như sau:
+Khung đánh giá được triển khai chặt chẽ bằng cách thực thi hai mô hình tại mốc Validation Dataset với tham số $20 \text{ Epochs}$.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_21.png}
+		\caption{Đường cong Learning Curve (Loss) - Faster R-CNN.}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_23.png}
+		\caption{Training Curves \& Metrics - YOLOv8.}
+	\end{subfigure}
+	\caption{Diễn biến quá trình huấn luyện và hội tụ của các mô hình.}
+\end{figure}
+
+Ở mô hình Faster R-CNN, thuật toán chạm mốc \textbf{Validation Loss tối ưu đạt 0.2659} tại Epoch thứ 18. Ở mô hình YOLOv8m, các chỉ số mAP@0.5 và mAP@0.5:0.95 liên tục tăng trưởng và ổn định sau Epoch 15.
 
 \subsection{Số liệu Thực nghiệm Đánh giá Độ chính xác}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_17.png}
+		\caption{Kết quả dự đoán (Inference) thực tế.}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/output_18.png}
+		\caption{Đánh giá chất lượng Box dự đoán.}
+	\end{subfigure}
+	\caption{Kiểm chứng trực quan (Qualitative Results) trên tập dữ liệu KITTI.}
+\end{figure}
+
 
 \begin{table}[H]
 	\centering

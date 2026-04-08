@@ -3,7 +3,7 @@
 % Subsection bổ sung vào Section "Kiến trúc Mô hình Học Sâu"
 % ============================================================
 
-\subsection{3. Phương pháp DETR (Kiến trúc Transformer-based / Set Prediction)}
+\subsection{Phương pháp DETR (Kiến trúc Transformer-based / Set Prediction)}
 
 Ngoài hai trường phái kinh điển One-stage (YOLOv8) và Two-stage (Faster R-CNN) thuần CNN đã phân tích ở trên, nhóm mở rộng nghiên cứu sang hướng tiếp cận thứ ba mang tính cách mạng: \textbf{DETR (DEtection TRansformer)} --- mô hình đầu tiên áp dụng kiến trúc Transformer vào bài toán Object Detection, được giới thiệu bởi Carion et al. tại Facebook AI Research (ECCV 2020). DETR tái định nghĩa hoàn toàn bài toán phát hiện đối tượng từ mô hình hồi quy hộp truyền thống sang bài toán \textbf{dự đoán tập hợp (Set Prediction)}, loại bỏ triệt để các thành phần thủ công như anchor boxes, NMS, và region proposals.
 
@@ -61,7 +61,7 @@ detr_model = DetrForObjectDetection.from_pretrained(
 	Trong đó $\mathcal{L}_{cls}$ là cross-entropy cho phân loại, $\mathcal{L}_{L1}$ là L1 loss cho tọa độ box, và $\mathcal{L}_{GIoU}$ là Generalized IoU loss cho hình dạng box. Ưu điểm: đảm bảo mỗi đối tượng \textit{chỉ được dự đoán đúng một lần}, loại bỏ hoàn toàn nhu cầu NMS. Nhược điểm: quá trình matching phức tạp khiến \textbf{DETR hội tụ rất chậm} --- paper gốc cần 300 epochs trên COCO, trong khi YOLOv8 chỉ cần 50--100 epochs.
 \end{itemize}
 
-\subsection{4. So sánh đặc điểm kiến trúc: CNN-based (YOLOv8) vs Transformer-based (DETR)}
+\subsection{So sánh đặc điểm kiến trúc: CNN-based (YOLOv8) vs Transformer-based (DETR)}
 
 Để đáp ứng yêu cầu đề bài mục 4.2 --- \textit{``Backbone hoặc kiến trúc khác nhau (CNN vs Transformer)''}, Bảng~\ref{tab:cnn-vs-transformer} tổng hợp đối chiếu giữa phương pháp thuần CNN (YOLOv8s) và phương pháp kết hợp Transformer (DETR) trên cùng tập dữ liệu KITTI:
 
@@ -98,7 +98,7 @@ Pretrained trên & COCO (80 lớp) & COCO (91 lớp) \\
 \end{tabular}
 \end{table}
 
-\subsection{5. Cấu hình và Tham số Huấn luyện: YOLOv8s vs DETR}
+\subsection{Cấu hình và Tham số Huấn luyện: YOLOv8s vs DETR}
 
 Bảng~\ref{tab:cnn-transformer-params} tổng hợp toàn bộ tham số huấn luyện của hai mô hình trên cùng tập KITTI:
 
