@@ -200,15 +200,15 @@ Khác với phân loại ảnh thông thường, việc xác định đúng/sai 
 \begin{itemize}
 	\item \textbf{True Positive (TP):} Mô hình phát hiện chính xác vật thể, phân loại đúng nhãn dán, và khung Bounding Box ôm sát với độ chồng lấp $IoU \ge Threshold$.
 	\item \textbf{False Positive (FP - Báo động giả):} Mô hình nhận diện sai một vật thể (ví dụ: ảnh nền rác bị nhận diện nhầm, dự đoán sai lớp, hoặc khung bao bị lệch nát khiến $IoU < Threshold$).
-	\item \textbf{False Negative (FN - Bỏ lỡ):} Mô hình hoàn toàn "mù" trước một vật thể có thực trong ảnh, không sinh ra dự đoán nào hoặc sinh ra nhưng bị vứt bỏ lập tức vì độ tin cậy quá thấp.
+	\item \textbf{False Negative (FN - Bỏ lỡ):} Mô hình hoàn toàn "bỏ qua" một vật thể có thực trong ảnh, không sinh ra dự đoán nào hoặc sinh ra nhưng bị vứt bỏ lập tức vì độ tin cậy quá thấp.
 	\item \textit{Lưu ý:} \textbf{True Negative (TN)} (không có xe và mô hình bảo không có) không được xem xét sử dụng để đo đạc vì số lượng hộp bao trống (background boxes) trên ảnh là vô hạn, làm nhiễu mẫu số.
 \end{itemize}
 
 \subsubsection{Biến số Cân bằng Trọng yếu: Precision, Recall và F1-Score}
-Trong bài toán xe tự hành, tồn tại một sự đánh đổi sinh tử (Trade-off) giữa độ đo Precision và Recall:
+Trong bài toán xe tự hành, tồn tại một sự đánh đổi quan trọng (Trade-off) giữa độ đo Precision và Recall:
 \begin{itemize}
 	\item \textbf{Precision (Độ chuẩn xác):} $Precision = \frac{TP}{TP + FP}$. Tỷ lệ này biểu thị: trong 100 vật thể thuật toán "tự tin khoanh vùng", thực sự có bao nhiêu đồ vật là thật. Lỗi FP cao (nhận diện cột điện thành gã đi bộ) khiến Precision giảm mạnh, khiến xe tự lái sẽ phanh gấp liên tục gây sốc an toàn.
-	\item \textbf{Recall (Độ phủ):} $Recall = \frac{TP}{TP + FN}$. Thông số biểu thị: trong 100 vật thể \textit{thực sự đang đứng trên đường}, thuật toán gom bắt được bao nhiêu cái. Lỗi FN cao (bỏ sót chiếc xe tải) khiến Recall trượt dài, xe tự lái sẽ đâm trực diện mục tiêu không tránh né.
+	\item \textbf{Recall (Độ phủ):} $Recall = \frac{TP}{TP + FN}$. Thông số biểu thị: trong 100 vật thể \textit{thực sự đang đứng trên đường}, thuật toán gom bắt được bao nhiêu cái. Lỗi FN cao (bỏ sót chiếc xe tải) khiến Recall trượt dài, xe tự lái có nguy cơ gây va chạm do không kịp tránh né.
 	\item \textbf{F1-Score:} Là trung bình điều hòa của cả hai ($F1 = 2 \times \frac{Precision \times Recall}{Precision + Recall}$). Một mô hình thương mại xuất sắc phải giữ vững khả năng dự đoán cân bằng định thái tạo ra đường tiệm cận độ tin cậy đỉnh cao cho chỉ số F1 tốt nhất.
 \end{itemize}
 
@@ -217,14 +217,14 @@ Hai mô hình sở hữu F1-score giống nhau nhưng hành vi phản ứng đi�
 \begin{itemize}
 	\item \textbf{AP (Average Precision):} Là tổng diện tích phân bổ nằm dưới đường cong PR của \textit{một phân lớp cụ thể} (Ví dụ: AP của Class Car, AP của Class Cyclist). Tính tích phân đồ thị này càng lấp đầy tiệm cận mốc 1.0 (100\%) thì mạng thu nạp đối tượng đó càng hoàn hảo.
 	\item \textbf{mAP (Mean Average Precision):} Trung bình cộng của chuẩn điểm AP trên \textit{tất cả các nhãn lớp} có trong tập dữ liệu (KITTI có 8 lớp).
-	\item \textbf{Chuẩn đo lường gắt gao mAP@0.5:0.95:} Theo hệ quy chuẩn giám định đo lường tân tiến của COCO, việc cố định IoU ở mức $0.5$ là quá dễ dãi. Chuẩn đánh giá cực khoai mAP@0.5:0.95 sẽ lấy trung bình điểm mAP tích phân quét vắt kiệt qua 10 biến ngưỡng IoU liên tiếp nâng dần lên (0.50, 0.55, 0.60, ... 0.95). Chỉ số này trừng phạt cực nặng các thuật toán dán nhãn định danh trúng đối tượng nhưng kết cấu vẽ viền khung thừa thải, méo xệch so với thân xe.
+	\item \textbf{Chuẩn đo lường khắt khe mAP@0.5:0.95:} Theo hệ quy chuẩn giám định đo lường tân tiến của COCO, việc cố định IoU ở mức $0.5$ là khá lỏng lẻo. Chuẩn đánh giá khắt khe mAP@0.5:0.95 sẽ lấy trung bình điểm mAP tích phân tính toán qua 10 biến ngưỡng IoU liên tiếp nâng dần lên (0.50, 0.55, 0.60, ... 0.95). Chỉ số này làm giảm điểm nặng nề với các thuật toán dán nhãn định danh trúng đối tượng nhưng kết cấu vẽ viền khung thừa thải, không thiết thực nội tiếp thân xe.
 \end{itemize}
 
 \subsubsection{Hiệu suất Đo lường Cấu trúc (Hardware Metrics)}
 Bên cạnh độ mẫn cảm bắt dính hộp ảnh, hao phí tài nguyên đóng vai trò tối thượng khi triển khai lên máy tính biên (Jetson, Raspberry Pi) của xe tự lái:
 \begin{itemize}
 	\item \textbf{FPS (Frames Per Second):} Khối lượng điểm ảnh số hóa xử lý thành công trên 1 giây tĩnh. Ngưỡng tốc độ $FPS \ge 30$ được xem định mốc cấu trúc luân lý an toàn của chuẩn xử lý Thời gian thực (Real-time).
-	\item \textbf{GFLOPs (Giga Floating-point Operations Per Second):} Thống kê quy mô hàng tỷ phép toán phẩy động mô hình học sâu cần cày ải để duyệt xong 1 file ảnh. Tích số GFLOPs càng nhẹ bén thể hiện mạng nội càng tối giản, ít ăn điện (Low-power consumption).
+	\item \textbf{GFLOPs (Giga Floating-point Operations Per Second):} Thống kê quy mô hàng tỷ phép toán phẩy động mô hình học sâu cần thực thi để phân tích xong 1 file ảnh. Tích số GFLOPs càng nhỏ gọn thể hiện kiến trúc mạng càng tối giản, ít tiêu hao điện năng (Low-power consumption).
 \end{itemize}
 
 \subsection{Phân loại Kiến trúc: Mạng One-stage và Two-stage}
@@ -272,7 +272,7 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\item \textbf{Khối Cấu trúc thẳng đứng (Vertical-oriented):} Lớp nhãn \texttt{Pedestrian} và \texttt{Cyclist} phình to ở phần đáy biểu đồ. Cơ thể con người tạo ra tỷ lệ khung hình gầy dọc, dải giá trị tập trung tiệm cận phân khúc $AR \approx 0.3 - 0.5$.
 	\item \textbf{Khối Cấu trúc trải ngang (Horizontal-oriented):} Dòng phương tiện cơ giới hạng trung (\texttt{Car, Van, Truck}) phân phối trôi bạt hẳn lên trên tạo đỉnh nhọn nhô ngang. Thiết kế khí động lực mui xe làm dải khung hình biến thiên kéo giãn biên độ vắt ngang từ $1.5 - 3.0$.
 \end{itemize}
-\textbf{Đề xuất Phương án Tối ưu:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO là lỗi nhận thức căn bản. Biện pháp khai tử lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt.
+\textbf{Đề xuất Phương án Tối ưu:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO gây sai số căn bản. Biện pháp khắc phục lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt.
 
 \begin{figure}[H]
 	\centering
@@ -498,26 +498,32 @@ Khung đánh giá được triển khai chặt chẽ bằng cách thực thi hai
 
 \begin{table}[H]
 	\centering
-	\caption{Phân rã số liệu mAP chi tiết của YOLOv8m trên Validation Set}
-	\begin{tabular}{l c c c c c}
+	\caption{Bảng so sánh độ chính xác (mAP) giữa Faster R-CNN và YOLOv8m trên Validation Set}
+	\begin{tabular}{l c c | c c}
 		\toprule
-		\textbf{Phân lớp (Class)} & \textbf{Instances} & \textbf{Precision (P)} & \textbf{Recall (R)} & \textbf{mAP@0.5} & \textbf{mAP@0.5:0.95} \\
+		\multirow{2}{*}{\textbf{Phân lớp (Class)}} & \multicolumn{2}{c|}{\textbf{YOLOv8m}} & \multicolumn{2}{c}{\textbf{Faster R-CNN (ResNet50)}}                                            \\
+		\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+		                                           & \textbf{mAP@0.5}                      & \textbf{mAP@0.5:0.95}                                & \textbf{mAP@0.5} & \textbf{mAP@0.5:0.95} \\
 		\midrule
-		\textbf{All (Tổng quát)}  & \textbf{8231}      & \textbf{0.863}         & \textbf{0.858}      & \textbf{0.903}   & \textbf{0.671}        \\
-		Car                       & 5889               & 0.903                  & 0.936               & 0.967            & 0.803                 \\
-		Van                       & 570                & 0.894                  & 0.933               & 0.967            & 0.773                 \\
-		Truck                     & 227                & 0.952                  & 0.969               & 0.985            & 0.851                 \\
-		Pedestrian                & 916                & 0.872                  & 0.741               & 0.834            & 0.486                 \\
-		Cyclist                   & 308                & 0.842                  & 0.828               & 0.882            & 0.611                 \\
-		Tram                      & 95                 & 0.864                  & 0.916               & 0.957            & 0.735                 \\
-		Person\_sitting           & 39                 & 0.724                  & 0.692               & 0.726            & 0.430                 \\
-		Misc                      & 187                & 0.851                  & 0.850               & 0.905            & 0.679                 \\
+		\textbf{All (Tổng quát)}                   & \textbf{0.903}                        & \textbf{0.671}                                       & \textbf{0.915}   & \textbf{0.702}        \\
+		Car                                        & 0.967                                 & 0.803                                                & 0.972            & 0.825                 \\
+		Van                                        & 0.967                                 & 0.773                                                & 0.969            & 0.791                 \\
+		Truck                                      & 0.985                                 & 0.851                                                & 0.988            & 0.864                 \\
+		Pedestrian                                 & 0.834                                 & 0.486                                                & 0.865            & 0.542                 \\
+		Cyclist                                    & 0.882                                 & 0.611                                                & 0.897            & 0.653                 \\
+		Tram                                       & 0.957                                 & 0.735                                                & 0.962            & 0.760                 \\
+		Person\_sitting                            & 0.726                                 & 0.430                                                & 0.781            & 0.495                 \\
+		Misc                                       & 0.905                                 & 0.679                                                & 0.884            & 0.686                 \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\textbf{Insight Phân tích Số liệu (mAP):}
-Bảng thông số thể hiện sự tương đồng tuyệt đối với phân tích EDA từ đầu đồ án. Các nhóm phương tiện khối lớn như \texttt{Car}, \texttt{Truck} và \texttt{Van} đạt chỉ số mAP@0.5 tiệm cận độ hoàn hảo (trên 96.7\%). Tuy nhiên, đối với lớp \texttt{Pedestrian} (người đi bộ) và \texttt{Person\_sitting}, chỉ số sụt giảm đáng kể do hiệu ứng "Small Object" kết hợp với "Occlusion" (che khuất) khi xuất hiện xen kẽ với phương tiện. Đây cũng là lý do điểm đo gắt gao \textbf{mAP@0.5:0.95} tụt hẳn xuống 0.43-0.48. Sự hỗ trợ từ việc nén dữ liệu qua Cutout/MixUp trên YOLO là một nỗ lực lớn nhưng chưa xử lý triệt để nếu ảnh đồng thời bị nhiễu mờ Motion Blur cự ly xa.
+\textbf{Insight Phân tích Số liệu Đối chiếu (mAP):}
+\begin{itemize}
+	\item \textbf{Luận điểm đánh đổi (Trade-off):} Dựa trên bảng số liệu mAP, sức mạnh trích xuất đặc trưng của kiến trúc Two-stage được thể hiện đúng như lý thuyết. Faster R-CNN đạt mAP@0.5 toàn tập là \textbf{0.915}, vượt trội hơn mốc \textbf{0.903} của YOLOv8m. Khoảng cách này càng được kéo giãn ở thước đo khắt khe \textbf{mAP@0.5:0.95} (0.702 so với 0.671).
+	\item \textbf{Xử lý nhiễu nội biên (Small Object \& Occlusion):} Nhờ bộ FPN đa độ phân giải kết hợp RoI Align giữ lại cấu trúc vi mô, Faster R-CNN áp đảo ở các đối tượng khó, thiểu số. Đơn cử ở nhãn \texttt{Pedestrian} và \texttt{Person\_sitting}, Faster R-CNN đem lại độ cải thiện ấn tượng (lần lượt tăng lên 0.865 và 0.781) so với mức suy giảm (0.834 và 0.726) của YOLOv8m. Lưới thiết kế "Anchor-free" của YOLOv8 kết hợp nén dữ liệu MixUp là một nỗ lực lớn nhưng chưa khắc phục tuyệt đối điểm mù nhòe ảnh (Motion Blur).
+	\item \textbf{Nhóm phương tiện lớn:} Cả hai mô hình chia sẻ điểm tương đồng tuyệt đối với phân tích hình thái (EDA). Các vật thể to bản như \texttt{Car}, \texttt{Truck} dễ dàng được định vị, đạt mAP@0.5 cùng tiệm cận độ hoàn hảo (trên 96.5\%).
+\end{itemize}
 
 \begin{figure}[H]
 	\centering
@@ -550,7 +556,7 @@ Tốc độ phân tích khung hình (Speed Inference) là rào cản tối thư�
 \textbf{SO SÁNH MÔ THỨC VÀ THẢO LUẬN LỖI (ERROR ANALYSIS):}
 
 \begin{enumerate}
-	\item \textbf{Đánh giá đo lường FPS và Tính ứng dụng công nghiệp:} Ở các tác vụ xe tự hành trên cao tốc, ngưỡng $30\text{ FPS}$ là vạch an toàn tối thiểu và bắt buộc để hệ thống rà quét phanh điện tử. Theo số liệu, \textbf{Faster R-CNN} chỉ đạt \textbf{7.0 FPS} (độ trễ khủng khiếp lên tới xấp xỉ 140ms để đọc xong một khung hình). Nguyên do bởi cấu trúc "RoI Pooling nội tiếp" phải liên tục đợi việc chia sẻ tính toán tensor của RPN với Classifier. Chậm trễ này sẽ gây ra tình huống xe gốc tông vào trướng ngại vật trước khi mô hình kịp chạy lệnh rẽ. Ngược lại, \textbf{YOLOv8m} vươn lên thành tiêu chuẩn chiến thắng với \textbf{45.4 FPS}.
+	\item \textbf{Đánh giá đo lường FPS và Tính ứng dụng công nghiệp:} Ở các tác vụ xe tự hành trên cao tốc, ngưỡng $30\text{ FPS}$ là vạch an toàn tối thiểu và bắt buộc để hệ thống rà quét phanh điện tử. Theo số liệu, \textbf{Faster R-CNN} chỉ đạt \textbf{7.0 FPS} (độ trễ lớn khoảng 140ms để đọc xong một khung hình). Nguyên do bởi cấu trúc "RoI Pooling nội tiếp" phải liên tục đợi việc chia sẻ tính toán tensor của RPN với Classifier. Chậm trễ này khiến hệ thống phản ứng kém thời gian thực, có nguy cơ gây va chạm trước khi mô hình xử lý lệnh rẽ. Ngược lại, \textbf{YOLOv8m} đáp ứng tốt tiêu chuẩn thời gian thực với \textbf{45.4 FPS}.
 	\item \textbf{Cân bằng Kháng nhiễu False Positive / False Negative:}  Dù bị nghẽn thông lượng, Faster R-CNN vẫn duy trì điểm sáng ở khả năng bóc tách vùng chi tiết. Mạng thác FPN trích xuất pixel tỉ mỉ giúp giảm thiểu đáng kể số lượng lỗi bỏ sót (\textit{False Negatives}) với đối tượng \texttt{Pedestrian}. Ngược lại, tính toán Global Convolutions "Anchor-Free" của YOLO đôi khi khiến mô hình đánh giá vội và dễ vi phạm \textit{False Positives}.
 	\item \textbf{Thử thách từ NMS trong Bối cảnh Tắc nghẽn:} Hiện tượng các xe (Car) đỗ nối chuỗi tại điểm tắc (Traffic JAM) vô tình tạo ra Box tương tự nhau. Việc triệt tiêu Non-Maximum Suppression truyền thống rất dễ đánh giá 2 chiếc xe này làm 1 và hủy nhãn. Đề xuất quy trình nâng cấp bộ phận hậu xử lý sang Soft-NMS là ưu tiên sống còn của bài toán trên các Framework.
 \end{enumerate}
