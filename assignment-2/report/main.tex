@@ -282,28 +282,28 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\includegraphics[width=0.88\textwidth]{Images/output_5.png}
 	\caption{Treemap: Cơ cấu Dataset theo Lớp và Phân cấp mức độ Che khuất (Occlusion Hierarchy).}
 \end{figure}
-\textbf{Nhận định Chuyên sâu:} Bộ biểu đồ phơi bày rõ hiện tượng mất cân bằng dữ liệu cực đoan đặc trưng của giao thông đường phố tự nhiên (Long-tail Class Distribution). Lớp \texttt{Car} chiếm ưu thế thống trị tuyệt đối về cả số lượng lẫn diện tích điểm ảnh, theo sau là \texttt{Pedestrian}. Ngược lại, các nhãn như \texttt{Tram} (xe điện), \texttt{Person\_sitting} nằm gọn ở khu vực đuôi dài với tỷ trọng chưa tới 1\%. Sự chênh lệch này là mối nguy hiểm tiềm tàng, khiến mô hình sinh ra "thiên kiến ưu tiên" (Algorithmic Bias) — chúng sẽ phớt lờ hoàn toàn các lớp thiểu số để tối ưu hóa hàm mất mát tổng thể trên tập mẫu đa số. \\
-\textbf{Đề xuất Phương án Tối ưu:} Nếu sử dụng hàm \textit{Cross-Entropy} tiêu chuẩn, Gradient truyền ngược qua chu kỳ học sẽ bị chi phối hoàn toàn bởi \texttt{Car}. Thiết kế cấu hình mạng bắt buộc phải tích hợp \textbf{Focal Loss} nhằm tự động giảm trọng số của các nhãn dễ đoán và ép mạng nơ-ron bù đắp hội tụ học đặc trưng của nhóm thiểu số. Đồng thời, kỹ thuật \textbf{Class-Aware Sampling} (tăng cường bốc mẫu lặp lại ưu tiên các ảnh chứa \texttt{Tram} hoặc \texttt{Cyclist}) là yêu cầu tiền đề để điều chỉnh cân bằng lại không gian đại diện dữ liệu kích hoạt trước khi đưa qua Backbone.
+\textbf{Nhận xét:} Bộ biểu đồ phơi bày rõ hiện tượng mất cân bằng dữ liệu cực đoan đặc trưng của giao thông đường phố tự nhiên (Long-tail Class Distribution). Lớp \texttt{Car} chiếm ưu thế thống trị tuyệt đối về cả số lượng lẫn diện tích điểm ảnh, theo sau là \texttt{Pedestrian}. Ngược lại, các nhãn như \texttt{Tram} (xe điện), \texttt{Person\_sitting} nằm gọn ở khu vực đuôi dài với tỷ trọng chưa tới 1\%. Sự chênh lệch này là mối nguy hiểm tiềm tàng, khiến mô hình sinh ra "thiên kiến ưu tiên" (Algorithmic Bias) — chúng sẽ phớt lờ hoàn toàn các lớp thiểu số để tối ưu hóa hàm mất mát tổng thể trên tập mẫu đa số. \\
+\textbf{Giải pháp đề xuất:} Nếu sử dụng hàm \textit{Cross-Entropy} tiêu chuẩn, Gradient truyền ngược qua chu kỳ học sẽ bị chi phối hoàn toàn bởi \texttt{Car}. Thiết kế cấu hình mạng bắt buộc phải tích hợp \textbf{Focal Loss} nhằm tự động giảm trọng số của các nhãn dễ đoán và ép mạng nơ-ron bù đắp hội tụ học đặc trưng của nhóm thiểu số. Đồng thời, kỹ thuật \textbf{Class-Aware Sampling} (tăng cường bốc mẫu lặp lại ưu tiên các ảnh chứa \texttt{Tram} hoặc \texttt{Cyclist}) là yêu cầu tiền đề để điều chỉnh cân bằng lại không gian đại diện dữ liệu kích hoạt trước khi đưa qua Backbone.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Images/output_6.png}
 	\caption{Interactive Histogram: Phân bổ Khoảng cách 3D thực tế của vật thể}
 \end{figure}
-\textbf{Nhận định Chuyên sâu:} Tương quan khoảng cách Z-depth tiết lộ vùng tập trung sinh thái của dữ liệu: mật độ đối tượng đạt đỉnh (Peak Density) trong giới hạn quan sát từ 10 mét đến 30 mét. Ở khoảng cách cận cảnh (dưới 20 mét), \texttt{Pedestrian} xuất hiện dày đặc quanh mép kính chắn gió. Tuy nhiên, từ mốc 50 mét trở lên, tín hiệu bị suy giảm dốc đứng (Exponential Decay). Ở cự ly này, kích thước vật lý của một chiếc xe hơi trên ảnh thu hẹp chỉ còn vài chục pixel vuông, đánh mất toàn bộ đặc trưng kết cấu (texture) bề mặt phản quang. \\
-\textbf{Đề xuất Phương án Tối ưu:} Tại độ phân giải lưới gốc, việc ép các mạng CNN sâu phải phân giải vật lý cho đối tượng dính nhiễu mờ chuyển động (Motion Blur) ở cự ly viễn cảnh xa tít sẽ gây loãng thông lượng, phá hỏng tính hội tụ mAP. Hệ thống DataLoader huấn luyện cần cơ chế chủ động kiểm duyệt: Chuyển toàn bộ các Bounding Box mục tiêu ở cự ly quá lớn hoặc có chiều cao pixel $< 25px$ thành dải nhãn loại trừ \texttt{DontCare}. Bước tiền xử lý (Pre-processing) chặt chẽ này bảo vệ đường cong Gradient khỏi rung lắc do nhiễu số, mặt khác hệ thống tự lái trong thực tiễn cũng không đòi hỏi mô-đun phanh khẩn cấp phải kích hoạt với các vật ngoại đạo ngoài tầm ngắm quy định.
+\textbf{Nhận xét:} Tương quan khoảng cách Z-depth tiết lộ vùng tập trung sinh thái của dữ liệu: mật độ đối tượng đạt đỉnh (Peak Density) trong giới hạn quan sát từ 10 mét đến 30 mét. Ở khoảng cách cận cảnh (dưới 20 mét), \texttt{Pedestrian} xuất hiện dày đặc quanh mép kính chắn gió. Tuy nhiên, từ mốc 50 mét trở lên, tín hiệu bị suy giảm dốc đứng (Exponential Decay). Ở cự ly này, kích thước vật lý của một chiếc xe hơi trên ảnh thu hẹp chỉ còn vài chục pixel vuông, đánh mất toàn bộ đặc trưng kết cấu (texture) bề mặt phản quang. \\
+\textbf{Giải pháp đề xuất:} Tại độ phân giải lưới gốc, việc ép các mạng CNN sâu phải phân giải vật lý cho đối tượng dính nhiễu mờ chuyển động (Motion Blur) ở cự ly viễn cảnh xa tít sẽ gây loãng thông lượng, phá hỏng tính hội tụ mAP. Hệ thống DataLoader huấn luyện cần cơ chế chủ động kiểm duyệt: Chuyển toàn bộ các Bounding Box mục tiêu ở cự ly quá lớn hoặc có chiều cao pixel $< 25px$ thành dải nhãn loại trừ \texttt{DontCare}. Bước tiền xử lý (Pre-processing) chặt chẽ này bảo vệ đường cong Gradient khỏi rung lắc do nhiễu số, mặt khác hệ thống tự lái trong thực tiễn cũng không đòi hỏi mô-đun phanh khẩn cấp phải kích hoạt với các vật ngoại đạo ngoài tầm ngắm quy định.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Images/output_8.png}
 	\caption{Violin Plot: Phân cực Tỷ lệ Khung hình (Aspect Ratio Width/Height)}
 \end{figure}
-\textbf{Nhận định Chuyên sâu:} Khai phá không gian hình học thông qua chỉ số (Aspect Ratio = Width / Height) bằng Violin Plot minh chứng vùng phân mảnh hình thái cực kỳ sắc nét:
+\textbf{Nhận xét:} Khai phá không gian hình học thông qua chỉ số (Aspect Ratio = Width / Height) bằng Violin Plot minh chứng vùng phân mảnh hình thái cực kỳ sắc nét:
 \begin{itemize}
 	\item \textbf{Khối Cấu trúc thẳng đứng (Vertical-oriented):} Lớp nhãn \texttt{Pedestrian} và \texttt{Cyclist} phình to ở phần đáy biểu đồ. Cơ thể con người tạo ra tỷ lệ khung hình gầy dọc, dải giá trị tập trung tiệm cận phân khúc $AR \approx 0.3 - 0.5$.
 	\item \textbf{Khối Cấu trúc trải ngang (Horizontal-oriented):} Dòng phương tiện cơ giới hạng trung (\texttt{Car, Van, Truck}) phân phối trôi bạt hẳn lên trên tạo đỉnh nhọn nhô ngang. Thiết kế khí động lực mui xe làm dải khung hình biến thiên kéo giãn biên độ vắt ngang từ $1.5 - 3.0$.
 \end{itemize}
-\textbf{Đề xuất Phương án Tối ưu:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO gây sai số căn bản. Biện pháp khắc phục lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt.
+\textbf{Giải pháp đề xuất:} Đứng trước phổ dãn cách hình dạng (Morphological gap) cực đoan giữa hai thái cực, việc lạm dụng lưới Anchor Box mặc định từ bộ trọng số cấu hình pre-trained COCO gây sai số căn bản. Biện pháp khắc phục lỗi này là tái ứng dụng \textbf{K-Means++ Clustering Analysis} trên tập Bounding Box của KITTI để trích xuất ra một bộ Anchors độc bản riêng biệt.
 
 \begin{figure}[H]
 	\centering
@@ -327,7 +327,7 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\caption{Phân tích tương quan kích thước và nội suy diện tích đối tượng.}
 \end{figure}
 
-\textbf{Nhận định Chuyên sâu:} Biểu đồ \textit{Log-scale Area} và \textit{COCO Size Distribution} phơi bày một thách thức kỹ thuật lớn: có tới hơn 30\% đối tượng thuộc nhóm \textbf{Small} ($< 32 \times 32$ px). Đặc biệt là lớp \texttt{Pedestrian} và \texttt{Cyclist} có tỷ lệ đối tượng nhỏ rất cao, khiến chúng dễ bị triệt tiêu tín hiệu sau khi đi qua các lớp Pooling sâu của CNN.
+\textbf{Nhận xét:} Biểu đồ \textit{Log-scale Area} và \textit{COCO Size Distribution} phơi bày một thách thức kỹ thuật lớn: có tới hơn 30\% đối tượng thuộc nhóm \textbf{Small} ($< 32 \times 32$ px). Đặc biệt là lớp \texttt{Pedestrian} và \texttt{Cyclist} có tỷ lệ đối tượng nhỏ rất cao, khiến chúng dễ bị triệt tiêu tín hiệu sau khi đi qua các lớp Pooling sâu của CNN.
 
 \subsection{Tương quan Phối cảnh và Khoảng cách (Spatial Perspectives)}
 
@@ -337,7 +337,7 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\caption{Tương quan: Khoảng cách (m) vs Chiều cao Bbox (px) tuân theo quy luật Perspective Projection.}
 \end{figure}
 
-\textbf{Nhận định Chuyên sâu:} Tương quan giữa khoảng cách thực tế (D) và chiều cao pixel (H) tuân thủ chặt chẽ quy luật hình học phối cảnh. Khi $D > 50m$, chiều cao vật thể hội tụ về dải cực thấp ($< 50px$). Điều này củng cố nhu cầu về các kiến trúc \textbf{Feature Pyramid Network (FPN)} để duy trì độ phân giải cao cho các tầng đặc trưng sớm, hỗ trợ phát hiện các vật thể ở xa trước khi chúng bị bão hòa thông tin.
+\textbf{Nhận xét:} Tương quan giữa khoảng cách thực tế (D) và chiều cao pixel (H) tuân thủ chặt chẽ quy luật hình học phối cảnh. Khi $D > 50m$, chiều cao vật thể hội tụ về dải cực thấp ($< 50px$). Điều này củng cố nhu cầu về các kiến trúc \textbf{Feature Pyramid Network (FPN)} để duy trì độ phân giải cao cho các tầng đặc trưng sớm, hỗ trợ phát hiện các vật thể ở xa trước khi chúng bị bão hòa thông tin.
 
 \subsection{Phân bổ Không gian và Tọa độ (Coordinate Analysis)}
 
@@ -347,7 +347,7 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\caption{Heatmap vị trí tâm vật thể theo từng phân lớp (cx\_norm vs cy\_norm).}
 \end{figure}
 
-\textbf{Nhận định Chuyên sâu:} Bản đồ nhiệt vị trí tâm bộc lộ tính quy luật trong giao thông:
+\textbf{Nhận xét:} Bản đồ nhiệt vị trí tâm bộc lộ tính quy luật trong giao thông:
 \begin{itemize}
 	\item Các lớp phương tiện (\texttt{Car, Truck, Van}) tập trung cao độ tại dải $cy \approx 0.5 - 0.6$ (mặt đường chính).
 	\item Lớp \texttt{Pedestrian} và \texttt{Cyclist} có xu hướng xuất hiện rải rác hơn ở hai bên biên trái/phải, phản ánh vị trí trên vỉa hè hoặc làn đường thô sơ.
@@ -366,7 +366,7 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\includegraphics[width=0.7\textwidth]{Images/output_15.png}
 	\caption{Ma trận tương quan Heatmap giữa các biến số hình thái học.}
 \end{figure}
-\textbf{Nhận định Chuyên sâu:} Ma trận tương quan xác nhận hệ số tương quan rất cao ($r \approx 0.89$) giữa \texttt{area\_norm} và \texttt{h\_norm}, điều này cho thấy chiều cao là biến số chi phối diện tích mạnh hơn chiều rộng trong KITTI. Đồng thời, biến \texttt{cy\_norm} (tọa độ Y) có tương quan chặt với kích thước, minh chứng cho việc vật thể càng ở thấp (gần xe hơn) thì càng lớn.
+\textbf{Nhận xét:} Ma trận tương quan xác nhận hệ số tương quan rất cao ($r \approx 0.89$) giữa \texttt{area\_norm} và \texttt{h\_norm}, điều này cho thấy chiều cao là biến số chi phối diện tích mạnh hơn chiều rộng trong KITTI. Đồng thời, biến \texttt{cy\_norm} (tọa độ Y) có tương quan chặt với kích thước, minh chứng cho việc vật thể càng ở thấp (gần xe hơn) thì càng lớn.
 
 
 \begin{figure}[H]
@@ -374,8 +374,8 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\includegraphics[width=0.8\textwidth]{Images/output_10.png}
 	\caption{Density Contour: Bản đồ Phân bổ Không gian Mật độ vật thể}
 \end{figure}
-\textbf{Nhận định Chuyên sâu:} Bản đồ Contour Heatmap cho ta phác thảo sự chi phối của quy luật Quang học - Tọa độ hoàn toàn khác xa so với các dataset nhiếp ảnh máy tính (Computer Vision) thông thường. Giao thông tuân theo \textit{Luật Phối Hình Đồng Quy} (Perspective Projection): Mọi phương tiện \texttt{Car} được máy ảnh chụp hút tạo thành luồng giao thông đậm đặc chĩa thẳng hội tụ vào Điểm triệt tiêu (Vanishing Point) ngay giữa ranh giới chân trời ảnh. Trong khi đó, nhóm \texttt{Pedestrian} phân mảnh vụn theo vạt lề trải rộng về nửa vùng đáy y-axis đổ xuống. \textbf{Hơn thế nữa, mảng 30\% không gian vùng trên cao bầu trời hoàn toàn là điểm chết (Dead Zone) không lưu giữ thuộc tính điểm ảnh hình khối.} \\
-\textbf{Đề xuất Phương án Tối ưu:} Sự thiên vị hội tụ tập trung tạo nên nguyên cớ sinh "Thiên kiến Tọa độ điểm mù" - Model CNN sẽ học vẹt khu vực vị trí X và Y tọa độ để phán đoán xe, suy giảm nhận diện đường vòng, góc chuyển chéo. Áp dụng kỹ thuật điều chuyển mạnh \textbf{Random Affine Translation} và \textbf{Mosaic Augmentation} phá vỡ không gian, phân tách đối tượng nén lại rải rác. Thêm vào chiến lược inference, nếu xây dựng luồng transform \textbf{Static Crop ngắt chỏm 30\% bầu trời} trước khi ma trận bị nạp lên tensor xử lý phân chập, cơ hội cắt giảm lượng tham số khổng lồ vô ích (FLOPs) giúp mô hình tối ưu gia tốc phần cứng (FPS) lên tầm mức công nghệ nhúng.
+\textbf{Nhận xét:} Bản đồ Contour Heatmap cho ta phác thảo sự chi phối của quy luật Quang học - Tọa độ hoàn toàn khác xa so với các dataset nhiếp ảnh máy tính (Computer Vision) thông thường. Giao thông tuân theo \textit{Luật Phối Hình Đồng Quy} (Perspective Projection): Mọi phương tiện \texttt{Car} được máy ảnh chụp hút tạo thành luồng giao thông đậm đặc chĩa thẳng hội tụ vào Điểm triệt tiêu (Vanishing Point) ngay giữa ranh giới chân trời ảnh. Trong khi đó, nhóm \texttt{Pedestrian} phân mảnh vụn theo vạt lề trải rộng về nửa vùng đáy y-axis đổ xuống. \textbf{Hơn thế nữa, mảng 30\% không gian vùng trên cao bầu trời hoàn toàn là điểm chết (Dead Zone) không lưu giữ thuộc tính điểm ảnh hình khối.} \\
+\textbf{Giải pháp đề xuất:} Sự thiên vị hội tụ tập trung tạo nên nguyên cớ sinh "Thiên kiến Tọa độ điểm mù" - Model CNN sẽ học vẹt khu vực vị trí X và Y tọa độ để phán đoán xe, suy giảm nhận diện đường vòng, góc chuyển chéo. Áp dụng kỹ thuật điều chuyển mạnh \textbf{Random Affine Translation} và \textbf{Mosaic Augmentation} phá vỡ không gian, phân tách đối tượng nén lại rải rác. Thêm vào chiến lược inference, nếu xây dựng luồng transform \textbf{Static Crop ngắt chỏm 30\% bầu trời} trước khi ma trận bị nạp lên tensor xử lý phân chập, cơ hội cắt giảm lượng tham số khổng lồ vô ích (FLOPs) giúp mô hình tối ưu gia tốc phần cứng (FPS) lên tầm mức công nghệ nhúng.
 
 \subsection{Phân tích Ma trận Mật độ Sự cố và Độ Khó Che Khuất (Occlusions)}
 \begin{figure}[H]
@@ -389,9 +389,9 @@ Hệ thống nhãn gốc của KITTI định nghĩa 8 lớp chính bao gồm: \t
 	\caption{Tỷ lệ Phân hạch Mức độ che khuất (Occlusion Level) trong không gian chật hẹp}
 \end{figure}
 
-\textbf{Insight về Ma Trận Khu Vực Cục bộ (Crowd Density):} Biểu đồ tần suất Histogram vén màn nghịch lý kịch bản dữ liệu trên đường KITTI: Trục trung tâm tập trung tần suất bình ổn 4-6 thực thể đối tượng/ảnh, nhưng biên phải sở hữu chiếc Đuôi kéo dài đạt tới mức 15-22 đồ vật chi chít trên một Scene. Thông số định lượng này tái hiện bối cảnh các ngã tư ngập xe (Traffic Jam). Trong môi trường chật nghẹt ấy, kiến trúc mạng hai giai đoạn như Faster R-CNN có rủi ro bị bóp nghẹt tài nguyên hệ thống (Out of Memory - OOM) do mạng RPN phải sinh xuất đề xuất quá ngưỡng giới hạn trần trên các tập điểm neo chồng chéo.
+\textbf{Phân tích mật độ đối tượng (Crowd Density):} Biểu đồ tần suất Histogram vén màn nghịch lý kịch bản dữ liệu trên đường KITTI: Trục trung tâm tập trung tần suất bình ổn 4-6 thực thể đối tượng/ảnh, nhưng biên phải sở hữu chiếc Đuôi kéo dài đạt tới mức 15-22 đồ vật chi chít trên một Scene. Thông số định lượng này tái hiện bối cảnh các ngã tư ngập xe (Traffic Jam). Trong môi trường chật nghẹt ấy, kiến trúc mạng hai giai đoạn như Faster R-CNN có rủi ro bị bóp nghẹt tài nguyên hệ thống (Out of Memory - OOM) do mạng RPN phải sinh xuất đề xuất quá ngưỡng giới hạn trần trên các tập điểm neo chồng chéo.
 
-\textbf{Insight Về Hiện Tượng Che Khuất Điểm Ảnh (Occlusion Level):} Tỷ trọng che phủ không hề suy thuyên khi nhóm đối tượng bị khuất bóng cây, vạch kẻ ngang hoặc do thân xe tải ép tuyến lộ diện khá dày đặc (Occluded \& Heavily Occluded Level). Với những Box nhãn khuyết mờ đặc điểm này, hệ lụy sụp đổ lớn nhất sẽ xảy ra ngay hệ thống Hậu xử lý tín hiệu (Post-Processing). Khi đoàn xe xếp hàng đỗ dọc theo lộ tuyến với một nửa mui xe trước che lấp vào đuôi xe sau, thuật toán chặn nhiễu NMS (Non-Maximum Suppression) cơ bản sẽ mắc lỗi mù cục bộ. Ngay khi đạt chuẩn ngưỡng IOU Threshold vượt định mức, NMS nhầm lẫn đánh giá 2 luồng viền sát nhau quy là chung 1 đối tượng rác và lược cắt thẳng tay mục tiêu thật đằng sau. Bài học lớn ở đây là việc bắt buộc chuyển hướng đánh giá sang thuật toán cấu hình phân cực linh hoạt \textbf{Soft-NMS} theo hệ số tự giảm dần trọng số điểm rơi hay sử dụng \textbf{IoU-aware NMS} mới triệt để gỡ bỏ được cục diện nhiễu khung bao hỗn độn này.
+\textbf{Phân tích hiện tượng che khuất (Occlusion Level):} Tỷ trọng che phủ không hề suy thuyên khi nhóm đối tượng bị khuất bóng cây, vạch kẻ ngang hoặc do thân xe tải ép tuyến lộ diện khá dày đặc (Occluded \& Heavily Occluded Level). Với những Box nhãn khuyết mờ đặc điểm này, hệ lụy sụp đổ lớn nhất sẽ xảy ra ngay hệ thống Hậu xử lý tín hiệu (Post-Processing). Khi đoàn xe xếp hàng đỗ dọc theo lộ tuyến với một nửa mui xe trước che lấp vào đuôi xe sau, thuật toán chặn nhiễu NMS (Non-Maximum Suppression) cơ bản sẽ mắc lỗi mù cục bộ. Ngay khi đạt chuẩn ngưỡng IOU Threshold vượt định mức, NMS nhầm lẫn đánh giá 2 luồng viền sát nhau quy là chung 1 đối tượng rác và lược cắt thẳng tay mục tiêu thật đằng sau. Bài học lớn ở đây là việc bắt buộc chuyển hướng đánh giá sang thuật toán cấu hình phân cực linh hoạt \textbf{Soft-NMS} theo hệ số tự giảm dần trọng số điểm rơi hay sử dụng \textbf{IoU-aware NMS} mới triệt để gỡ bỏ được cục diện nhiễu khung bao hỗn độn này.
 
 \section{Chuẩn bị Dataset, DataLoader và Dữ liệu đầu vào}
 \subsection{Quản lý Dữ liệu và DataLoader}
