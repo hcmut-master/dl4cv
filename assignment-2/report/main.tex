@@ -616,51 +616,51 @@ Ngoài so sánh One-stage vs Two-stage ở trên, nhóm tiến hành thực nghi
 \end{figure}
 
 \begin{table}[H]
-\centering
-\caption{So sánh hiệu năng tổng thể: YOLOv8s (CNN-based) vs DETR (Transformer-based) trên KITTI.}
-\label{tab:cnn-transformer-results}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Chỉ số} & \textbf{YOLOv8s} & \textbf{DETR} & \textbf{Chênh lệch} \\
-\hline
-mAP@0.50 & \textbf{0.8858} & 0.7428 & $-16.1\%$ \\
-\hline
-mAP@0.75 & \textbf{0.7879} & 0.5010 & $-36.4\%$ \\
-\hline
-mAP@0.50:0.95 & \textbf{0.6796} & 0.4570 & $-32.8\%$ \\
-\hline
-FPS (Tesla T4) & \textbf{39.7} & 11.8 & $-70.3\%$ \\
-\hline
-Latency (ms/ảnh) & \textbf{25.2} & 85.1 & $+237.7\%$ \\
-\hline
-\end{tabular}
+	\centering
+	\caption{So sánh hiệu năng tổng thể: YOLOv8s (CNN-based) vs DETR (Transformer-based) trên KITTI.}
+	\label{tab:cnn-transformer-results}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Chỉ số}  & \textbf{YOLOv8s} & \textbf{DETR} & \textbf{Chênh lệch} \\
+		\hline
+		mAP@0.50         & \textbf{0.8858}  & 0.7428        & $-16.1\%$           \\
+		\hline
+		mAP@0.75         & \textbf{0.7879}  & 0.5010        & $-36.4\%$           \\
+		\hline
+		mAP@0.50:0.95    & \textbf{0.6796}  & 0.4570        & $-32.8\%$           \\
+		\hline
+		FPS (Tesla T4)   & \textbf{39.7}    & 11.8          & $-70.3\%$           \\
+		\hline
+		Latency (ms/ảnh) & \textbf{25.2}    & 85.1          & $+237.7\%$          \\
+		\hline
+	\end{tabular}
 \end{table}
 
 \subsubsection{Đánh giá theo Từng Lớp (Per-class AP@0.50:0.95)}
 
 \begin{table}[H]
-\centering
-\caption{So sánh AP@0.50:0.95 theo từng lớp đối tượng: YOLOv8s vs DETR trên KITTI.}
-\label{tab:cnn-transformer-perclass}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Lớp đối tượng} & \textbf{YOLOv8s} & \textbf{DETR} & \textbf{Chênh lệch} \\
-\hline
-Car & \textbf{0.7968} & 0.6455 & $-19.0\%$ \\
-\hline
-Van & \textbf{0.7845} & 0.4728 & $-39.7\%$ \\
-\hline
-Truck & \textbf{0.8414} & 0.6381 & $-24.2\%$ \\
-\hline
-Pedestrian & \textbf{0.4740} & 0.3722 & $-21.5\%$ \\
-\hline
-Person\_sitting & \textbf{0.5059} & 0.1948 & $-61.5\%$ \\
-\hline
-Cyclist & \textbf{0.6173} & 0.3941 & $-36.2\%$ \\
-\hline
-Tram & \textbf{0.7375} & 0.4811 & $-34.8\%$ \\
-\hline
-\end{tabular}
+	\centering
+	\caption{So sánh AP@0.50:0.95 theo từng lớp đối tượng: YOLOv8s vs DETR trên KITTI.}
+	\label{tab:cnn-transformer-perclass}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Lớp đối tượng} & \textbf{YOLOv8s} & \textbf{DETR} & \textbf{Chênh lệch} \\
+		\hline
+		Car                    & \textbf{0.7968}  & 0.6455        & $-19.0\%$           \\
+		\hline
+		Van                    & \textbf{0.7845}  & 0.4728        & $-39.7\%$           \\
+		\hline
+		Truck                  & \textbf{0.8414}  & 0.6381        & $-24.2\%$           \\
+		\hline
+		Pedestrian             & \textbf{0.4740}  & 0.3722        & $-21.5\%$           \\
+		\hline
+		Person\_sitting        & \textbf{0.5059}  & 0.1948        & $-61.5\%$           \\
+		\hline
+		Cyclist                & \textbf{0.6173}  & 0.3941        & $-36.2\%$           \\
+		\hline
+		Tram                   & \textbf{0.7375}  & 0.4811        & $-34.8\%$           \\
+		\hline
+	\end{tabular}
 \end{table}
 
 \begin{figure}[H]
@@ -678,37 +678,37 @@ Tram & \textbf{0.7375} & 0.4811 & $-34.8\%$ \\
 	\item \textbf{Nguyên nhân DETR kém hiệu quả --- Vấn đề hội tụ:} Cần nhấn mạnh kết quả này \textbf{chưa phản ánh đúng tiềm năng thực sự của DETR}. Paper gốc huấn luyện DETR 300 epochs trên COCO, trong khi thực nghiệm này chỉ train 20 epochs do giới hạn GPU Kaggle. Hungarian matching loss yêu cầu nhiều thời gian hơn để hội tụ so với các hàm loss truyền thống. Nếu được train đủ epochs, DETR có thể thu hẹp đáng kể khoảng cách.
 
 	\item \textbf{Phân tích Per-class --- Ảnh hưởng của kích thước đối tượng:}
-	\begin{itemize}
-		\item \textit{Đối tượng lớn (Car, Truck):} Khoảng cách nhỏ nhất (19--24\%). DETR với global attention có lợi thế lý thuyết trên đối tượng lớn, nhưng chưa phát huy do thiếu epochs.
-		\item \textit{Đối tượng nhỏ (Pedestrian, Person\_sitting, Cyclist):} Khoảng cách lớn nhất --- \texttt{Person\_sitting} chênh tới 61.5\%. DETR chỉ sử dụng feature map $H/32 \times W/32$ (không có FPN multi-scale), khiến đối tượng nhỏ mất thông tin chi tiết. YOLOv8s với FPN (P3, P4, P5) hỗ trợ tốt hơn cho small object detection.
-	\end{itemize}
+	      \begin{itemize}
+		      \item \textit{Đối tượng lớn (Car, Truck):} Khoảng cách nhỏ nhất (19--24\%). DETR với global attention có lợi thế lý thuyết trên đối tượng lớn, nhưng chưa phát huy do thiếu epochs.
+		      \item \textit{Đối tượng nhỏ (Pedestrian, Person\_sitting, Cyclist):} Khoảng cách lớn nhất --- \texttt{Person\_sitting} chênh tới 61.5\%. DETR chỉ sử dụng feature map $H/32 \times W/32$ (không có FPN multi-scale), khiến đối tượng nhỏ mất thông tin chi tiết. YOLOv8s với FPN (P3, P4, P5) hỗ trợ tốt hơn cho small object detection.
+	      \end{itemize}
 
 	\item \textbf{Trade-off CNN vs Transformer:}
 
-	\begin{table}[H]
-	\centering
-	\caption{Tổng hợp trade-off giữa CNN-based và Transformer-based detector.}
-	\label{tab:cnn-transformer-tradeoff}
-	\begin{tabular}{|l|c|c|}
-	\hline
-	\textbf{Tiêu chí} & \textbf{YOLOv8s (CNN)} & \textbf{DETR (Transformer)} \\
-	\hline
-	Tốc độ inference & 39.7 FPS ($\checkmark$ real-time) & 11.8 FPS ($\times$ real-time) \\
-	\hline
-	GPU memory (batch) & 16 (thấp) & 4 (cao) \\
-	\hline
-	Thời gian train tổng & $\sim$90 phút (50 ep.) & $\sim$6 giờ (20 ep.) \\
-	\hline
-	mAP@0.50 & 0.8858 & 0.7428 \\
-	\hline
-	Small object & Tốt (FPN multi-scale) & Hạn chế ($H/32$ single-scale) \\
-	\hline
-	Hậu xử lý & Cần NMS & Không cần NMS \\
-	\hline
-	Epochs hội tụ & 50 & 300+ (paper gốc) \\
-	\hline
-	\end{tabular}
-	\end{table}
+	      \begin{table}[H]
+		      \centering
+		      \caption{Tổng hợp trade-off giữa CNN-based và Transformer-based detector.}
+		      \label{tab:cnn-transformer-tradeoff}
+		      \begin{tabular}{|l|c|c|}
+			      \hline
+			      \textbf{Tiêu chí}    & \textbf{YOLOv8s (CNN)}            & \textbf{DETR (Transformer)}   \\
+			      \hline
+			      Tốc độ inference     & 39.7 FPS ($\checkmark$ real-time) & 11.8 FPS ($\times$ real-time) \\
+			      \hline
+			      GPU memory (batch)   & 16 (thấp)                         & 4 (cao)                       \\
+			      \hline
+			      Thời gian train tổng & $\sim$90 phút (50 ep.)            & $\sim$6 giờ (20 ep.)          \\
+			      \hline
+			      mAP@0.50             & 0.8858                            & 0.7428                        \\
+			      \hline
+			      Small object         & Tốt (FPN multi-scale)             & Hạn chế ($H/32$ single-scale) \\
+			      \hline
+			      Hậu xử lý            & Cần NMS                           & Không cần NMS                 \\
+			      \hline
+			      Epochs hội tụ        & 50                                & 300+ (paper gốc)              \\
+			      \hline
+		      \end{tabular}
+	      \end{table}
 
 	\item \textbf{Kết luận:} Trong điều kiện thực nghiệm hiện tại, phương pháp CNN-based (YOLOv8s) vượt trội so với Transformer-based (DETR) trên cả ba trục: độ chính xác, tốc độ, và hiệu quả tài nguyên. Tuy nhiên, DETR mang lại ưu điểm thiết kế quan trọng: loại bỏ NMS, end-to-end training, và khả năng mở rộng sang Deformable DETR hoặc RT-DETR.
 \end{enumerate}
