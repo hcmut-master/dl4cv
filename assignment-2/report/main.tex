@@ -178,11 +178,11 @@
 % PHẦN 1: GIỚI THIỆU
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Giới thiệu}
-Báo cáo này trình bày kết quả thực hiện Bài tập lớn số 2 trong khuôn khổ môn học Học sâu và Ứng dụng trong Thị giác máy tính. Căn cứ theo yêu cầu từ tài liệu mô tả đồ án, sinh viên được định hướng vận dụng kiến thức mạng học sâu để giải quyết một trong ba bài toán hạt nhân của thị giác máy tính: \textbf{Phân loại ảnh định danh (Image Classification), Phát hiện đối tượng (Object Detection), hoặc Phân vùng ngữ nghĩa cảnh vật (Semantic Segmentation)}. Đồng thời, đề bài đặt ra tiêu chuẩn khắt khe về việc hiện thực hóa toàn vẹn vòng đời một dự án (End-to-End Pipeline), trải dài từ khâu Phân tích Khám phá Định lượng (EDA), thiết lập DataLoader tích hợp kỹ thuật Augmentation, cho đến lập trình mô hình, kiểm định độ đo và phân tích đánh giá nguyên nhân lỗi (Error Analysis).
+Báo cáo này trình bày kết quả thực hiện Bài tập lớn số 2 trong khuôn khổ môn học Học sâu và Ứng dụng trong Thị giác máy tính. Theo yêu cầu đề bài, sinh viên áp dụng kiến thức mạng học sâu để giải quyết một trong ba bài toán cốt lõi của thị giác máy tính: \textbf{Phân loại ảnh (Image Classification), Phát hiện đối tượng (Object Detection), hoặc Phân vùng ngữ nghĩa (Semantic Segmentation)}. Đồng thời, đề bài yêu cầu hiện thực hóa đầy đủ quy trình xử lý từ đầu đến cuối (End-to-End Pipeline), bao gồm: Phân tích Dữ liệu Khám phá (EDA), thiết lập DataLoader tích hợp kỹ thuật Augmentation, huấn luyện mô hình, đánh giá chỉ số hiệu năng và phân tích lỗi (Error Analysis).
 
-Dựa trên những yêu cầu đó, nhóm thực hiện quyết định chọn hướng đi \textbf{Phát hiện đối tượng từ ảnh (Object Detection)}. Lý do cho sự lựa chọn này xuất phát từ tính ứng dụng sống còn và đầy thử thách của bài toán định vị vị trí trong nền kĩ thuật công nghiệp hiện đại, đặc biệt là mảng trí tuệ tự hành (Autonomous Driving). Mục tiêu cốt lõi của nghiên cứu nhằm giải phẫu rạch ròi cấu trúc, đối chiếu hiệu năng giữa hai hệ sinh thái kiến trúc đối lập: đại diện truy xuất One-stage thời gian thực (\textbf{YOLOv8}) và nền tảng chuẩn xác Two-stage (\textbf{Faster R-CNN} tích hợp xương sống ResNet50-FPN).
+Dựa trên các yêu cầu trên, nhóm quyết định chọn bài toán \textbf{Phát hiện đối tượng (Object Detection)}. Lý do xuất phát từ tính ứng dụng cao và tính thách thức của bài toán trong các hệ thống công nghiệp hiện đại, đặc biệt trong lĩnh vực xe tự hành (Autonomous Driving). Mục tiêu cốt lõi là phân tích chi tiết kiến trúc và so sánh hiệu năng giữa hai trường phái phát hiện đối tượng: kiến trúc One-stage (\textbf{YOLOv8}) và kiến trúc Two-stage (\textbf{Faster R-CNN} với backbone ResNet50-FPN). Ngoài ra, nhóm mở rộng nghiên cứu sang kiến trúc Transformer-based (\textbf{DETR}) nhằm so sánh phương pháp trích xuất đặc trưng CNN với cơ chế Self-Attention.
 
-Tập dữ liệu được nhóm tinh tuyển sử dụng là \textbf{KITTI}, một bộ dữ liệu hình ảnh phức tạp tiêu chuẩn quốc tế chuyên phục vụ nghiên cứu kịch bản giao thông phức hợp. Các nội dung được trình bày tường tận phía dưới sẽ là minh chứng cụ thể cho hành trình áp dụng kiến thức tiên tiến để huấn luyện máy tính tháo gỡ điểm mù từ môi trường thực tế.
+Tập dữ liệu được sử dụng là \textbf{KITTI} \cite{kitti} --- bộ dữ liệu chuẩn quốc tế phục vụ nghiên cứu các bài toán thị giác máy tính trong kịch bản giao thông thực tế. Các phần tiếp theo trình bày chi tiết quy trình thực hiện, từ phân tích dữ liệu, thiết kế mô hình, đến đánh giá và so sánh kết quả thực nghiệm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PHẦN 2: CƠ SỞ LÝ THUYẾT
@@ -204,7 +204,7 @@ Khác với phân loại ảnh thông thường, việc xác định đúng/sai 
 	\item \textit{Lưu ý:} \textbf{True Negative (TN)} (không có xe và mô hình bảo không có) không được xem xét sử dụng để đo đạc vì số lượng hộp bao trống (background boxes) trên ảnh là vô hạn, làm nhiễu mẫu số.
 \end{itemize}
 
-\subsubsection{Biến số Cân bằng Trọng yếu: Precision, Recall và F1-Score}
+\subsubsection{Precision, Recall và F1-Score}
 Trong bài toán xe tự hành, tồn tại một sự đánh đổi quan trọng (Trade-off) giữa độ đo Precision và Recall:
 \begin{itemize}
 	\item \textbf{Precision (Độ chuẩn xác):} $Precision = \frac{TP}{TP + FP}$. Tỷ lệ này biểu thị: trong 100 vật thể thuật toán "tự tin khoanh vùng", thực sự có bao nhiêu đồ vật là thật. Lỗi FP cao (nhận diện cột điện thành gã đi bộ) khiến Precision giảm mạnh, khiến xe tự lái sẽ phanh gấp liên tục gây sốc an toàn.
@@ -212,7 +212,7 @@ Trong bài toán xe tự hành, tồn tại một sự đánh đổi quan trọn
 	\item \textbf{F1-Score:} Là trung bình điều hòa của cả hai ($F1 = 2 \times \frac{Precision \times Recall}{Precision + Recall}$). Một mô hình thương mại xuất sắc phải giữ vững khả năng dự đoán cân bằng định thái tạo ra đường tiệm cận độ tin cậy đỉnh cao cho chỉ số F1 tốt nhất.
 \end{itemize}
 
-\subsubsection{Tiêu chuẩn Vàng Đánh giá: AP và mAP}
+\subsubsection{Average Precision (AP) và Mean Average Precision (mAP)}
 Hai mô hình sở hữu F1-score giống nhau nhưng hành vi phản ứng điểm tin cậy lại rất khác biệt. Để đánh giá đường dài toàn diện, \textbf{Precision-Recall Curve (Đường cong PR)} được vẽ ra nhờ cơ chế quét thử các dự đoán từ mốc Confidence cực đại xuống thấp nhất:
 \begin{itemize}
 	\item \textbf{AP (Average Precision):} Là tổng diện tích phân bổ nằm dưới đường cong PR của \textit{một phân lớp cụ thể} (Ví dụ: AP của Class Car, AP của Class Cyclist). Tính tích phân đồ thị này càng lấp đầy tiệm cận mốc 1.0 (100\%) thì mạng thu nạp đối tượng đó càng hoàn hảo.
@@ -220,19 +220,50 @@ Hai mô hình sở hữu F1-score giống nhau nhưng hành vi phản ứng đi�
 	\item \textbf{Chuẩn đo lường khắt khe mAP@0.5:0.95:} Theo hệ quy chuẩn giám định đo lường tân tiến của COCO, việc cố định IoU ở mức $0.5$ là khá lỏng lẻo. Chuẩn đánh giá khắt khe mAP@0.5:0.95 sẽ lấy trung bình điểm mAP tích phân tính toán qua 10 biến ngưỡng IoU liên tiếp nâng dần lên (0.50, 0.55, 0.60, ... 0.95). Chỉ số này làm giảm điểm nặng nề với các thuật toán dán nhãn định danh trúng đối tượng nhưng kết cấu vẽ viền khung thừa thải, không thiết thực nội tiếp thân xe.
 \end{itemize}
 
-\subsubsection{Hiệu suất Đo lường Cấu trúc (Hardware Metrics)}
+\subsubsection{Chỉ số Hiệu suất Phần cứng (Hardware Performance Metrics)}
 Bên cạnh độ mẫn cảm bắt dính hộp ảnh, hao phí tài nguyên đóng vai trò tối thượng khi triển khai lên máy tính biên (Jetson, Raspberry Pi) của xe tự lái:
 \begin{itemize}
-	\item \textbf{FPS (Frames Per Second):} Khối lượng điểm ảnh số hóa xử lý thành công trên 1 giây tĩnh. Ngưỡng tốc độ $FPS \ge 30$ được xem định mốc cấu trúc luân lý an toàn của chuẩn xử lý Thời gian thực (Real-time).
-	\item \textbf{GFLOPs (Giga Floating-point Operations Per Second):} Thống kê quy mô hàng tỷ phép toán phẩy động mô hình học sâu cần thực thi để phân tích xong 1 file ảnh. Tích số GFLOPs càng nhỏ gọn thể hiện kiến trúc mạng càng tối giản, ít tiêu hao điện năng (Low-power consumption).
+	\item \textbf{FPS (Frames Per Second):} Số lượng khung hình (frames) mà mô hình xử lý được trong 1 giây. Ngưỡng $FPS \ge 30$ được coi là yêu cầu tối thiểu để đạt chuẩn xử lý thời gian thực (Real-time) trong các ứng dụng xe tự hành \cite{yolov8}.
+	\item \textbf{GFLOPs (Giga Floating-point Operations):} Tổng số phép toán dấu phẩy động (tính bằng tỷ đơn vị) mà mô hình cần thực thi để xử lý một ảnh đầu vào. Giá trị GFLOPs càng thấp cho thấy kiến trúc mạng càng hiệu quả về mặt tính toán, phù hợp hơn cho các thiết bị biên có tài nguyên hạn chế (Edge Devices).
 \end{itemize}
 
 \subsection{Phân loại Kiến trúc: Mạng One-stage và Two-stage}
-Ngành học sâu phát triển Object Detection hiện tại phân kỳ làm hai trường phái luận giải chính:
+Các phương pháp Object Detection dựa trên học sâu hiện nay được chia thành hai nhóm kiến trúc chính:
 \begin{itemize}
-	\item \textbf{Two-stage Detection (Điển hình: Dòng họ R-CNN):} Quá trình dự báo chia làm 2 giai đoạn ngắt quãng. Giai đoạn 1 chạy một mạng phát sinh độc lập hàng ngàn các ranh giới ứng viên có biểu hiện hình dạng vật thể (Region Proposal Network). Giai đoạn 2 điều hướng khối ma trận qua các ứng viên này để phân lớp nhãn và tinh chỉnh vi tọa độ. Kết quả cung cấp độ chính xác tiệm cận tuyệt đối, nhưng đánh đổi sự đình trệ thời gian rất nặng nề, hoàn toàn bất khả thi đối với thiết bị hệ nhúng và xe tự lái.
-	\item \textbf{One-stage Detection (Điển hình: YOLO, SSD):} Mô hình tái thiết lại vấn đề thành một vòng tính toán quy nạp duy nhất dưới dạng mạng End-to-end. Trong một lần nạp hình nguyên liệu, mạng tự động xuất và dự báo phân bổ song song toàn bộ ma trận số học hộp định hình và ma trận phân định thể loại trên mạng lưới ô Grid Cell. Thiết kế thu gọn cấu trúc này vắt kiệt tối giản tham số phần cứng, giúp xử lý khối lượng dòng khung hình đạt chuẩn Thời gian thực (Real-time Inference).
+	\item \textbf{Two-stage Detection (Điển hình: Dòng họ R-CNN):} Quá trình phát hiện chia làm 2 giai đoạn tuần tự. Giai đoạn 1 sử dụng mạng đề xuất vùng (Region Proposal Network -- RPN) để sinh ra hàng ngàn vùng ứng viên có khả năng chứa vật thể. Giai đoạn 2 trích xuất đặc trưng từ các vùng ứng viên này để phân loại nhãn và tinh chỉnh tọa độ bounding box. Ưu điểm: độ chính xác cao nhờ cơ chế tinh chỉnh hai lần. Nhược điểm: tốc độ inference chậm do phải xử lý tuần tự qua hai giai đoạn \cite{faster-rcnn}.
+	\item \textbf{One-stage Detection (Điển hình: YOLO, SSD):} Mô hình dự đoán trực tiếp tọa độ bounding box và nhãn phân loại trong một lần lan truyền thuận (forward pass) duy nhất. Ảnh đầu vào được chia thành lưới ô (Grid Cell), mỗi ô đồng thời dự đoán hộp bao và xác suất phân lớp. Kiến trúc đơn giản hơn giúp giảm đáng kể số lượng tham số và đạt tốc độ xử lý thời gian thực (Real-time Inference) \cite{yolov8}.
 \end{itemize}
+
+\begin{table}[H]
+	\centering
+	\caption{Bảng tổng hợp so sánh kiến trúc One-stage và Two-stage Detection.}
+	\label{tab:one-vs-two-stage}
+	\begin{tabular}{|l|p{5.2cm}|p{5.2cm}|}
+		\hline
+		\textbf{Tiêu chí}  & \textbf{Two-stage (Faster R-CNN)}                                    & \textbf{One-stage (YOLOv8)}                                              \\
+		\hline
+		Số giai đoạn xử lý & 2 giai đoạn tuần tự (RPN $\rightarrow$ Classifier)                   & 1 giai đoạn duy nhất (End-to-end)                                        \\
+		\hline
+		Backbone           & ResNet50 + FPN                                                       & CSPDarknet + PANet                                                       \\
+		\hline
+		Cơ chế phát hiện   & Region Proposal $\rightarrow$ RoI Align $\rightarrow$ Classification & Grid-based, Anchor-free, dự đoán trực tiếp trên multi-scale feature maps \\
+		\hline
+		Chiến lược Anchor  & Anchor-based (nhiều scale \& ratio)                                  & Anchor-free (Center-based regression)                                    \\
+		\hline
+		Hậu xử lý (NMS)    & Cần NMS                                                              & Cần NMS (nhưng ít box hơn)                                               \\
+		\hline
+		Hàm Loss           & Cross-Entropy + Smooth L1                                            & CIoU + DFL + BCE                                                         \\
+		\hline
+		Độ chính xác (mAP) & Cao hơn, đặc biệt ở IoU cao                                          & Thấp hơn nhẹ, nhưng cạnh tranh                                           \\
+		\hline
+		Tốc độ (FPS)       & Chậm ($\sim$7 FPS trên Tesla T4)                                     & Nhanh ($\sim$45 FPS trên Tesla T4)                                       \\
+		\hline
+		Số tham số         & $\sim$41.5M                                                          & $\sim$25.9M                                                              \\
+		\hline
+		Phù hợp ứng dụng   & Phân tích y tế, kiểm tra chất lượng                                  & Xe tự hành, giám sát thời gian thực                                      \\
+		\hline
+	\end{tabular}
+\end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PHẦN 3: EDA
@@ -386,10 +417,10 @@ Nhóm khai thác thư viện \textit{Albumentations} để áp dụng điều ch
 
 \section{Kiến trúc Mô hình Học Sâu - So sánh và Đánh giá}
 
-Để trả lời cho mục tiêu bài toán, nhóm thực hiện phân chia kỹ năng thiết lập cho 2 nhóm kiến trúc riêng biệt trong bài toán Object Detection. \textbf{Việc lựa chọn đại diện xuất sắc của hai trường phái Two-stage và One-stage cho phép đi sâu đánh giá sự đánh đổi (trade-off) giữa Tốc độ thực thi (Speed/FPS) và Độ chính xác (mAP) tại các điều kiện đa dạng của KITTI.}
+Nhóm triển khai hai nhóm kiến trúc đại diện cho hai trường phái Object Detection. Việc lựa chọn này cho phép đánh giá trực tiếp sự đánh đổi (trade-off) giữa tốc độ xử lý (FPS) và độ chính xác (mAP) trên cùng tập dữ liệu KITTI.
 
 \subsection{Phương pháp Faster R-CNN (Kiến trúc Two-stage)}
-Faster R-CNN với Backbone ResNet50-FPN là đại diện kinh điển mang tới chuẩn mực đánh giá (baseline) độ chính xác hoàn hảo trong các bài toán nhận diện có sự chồng chéo phức tạp. Nhóm tiến hành cấu hình Transfer Learning, tinh chỉnh trọng số đã được Pre-train trên bộ COCO, đồng thời thay đổi phân lớp cuối (Head) để tương thích với số lượng lớp chuyên biệt của KITTI (8 phân lớp vật thể + 1 Background):
+Faster R-CNN với backbone ResNet50-FPN \cite{faster-rcnn, resnet, fpn} là kiến trúc Two-stage tiêu biểu, được sử dụng rộng rãi làm baseline trong các bài toán phát hiện đối tượng. Nhóm áp dụng Transfer Learning từ trọng số pre-trained trên COCO, đồng thời thay thế classification head để tương thích với số lượng lớp của KITTI (8 lớp + 1 Background):
 
 \begin{lstlisting}[language=Python, caption=Khoi tao va cau hinh Transfer Learning Faster R-CNN]
 import torchvision
@@ -408,14 +439,14 @@ model.to(DEVICE)
 
 \subsubsection*{Phân tích Chuyên sâu Cấu trúc Faster R-CNN}
 \begin{itemize}
-	\item \textbf{Mạng Trích xuất Đặc trưng (ResNet50 + FPN):} ResNet50 là xương sống chính thực hiện khai phá đặc trưng, khắc phục hiện tượng suy giảm gradient (vanishing gradient) cực mạnh qua các khối Skip-Connection. Đặc biệt ở môi trường giao thông phức tạp, kích cỡ vật thể biến thiên liên tục. Mạng bộ phận FPN (Feature Pyramid Network) được sử dụng để giải quyết triệt để bài toán đa tỷ lệ (Multi-scale) này. Bằng cách kết nối cấu trúc tháp đặc trưng từ nhánh Bottom-up và Top-down thông qua các đường nối ngang (lateral connections), FPN cho phép khôi phục trọn vẹn ngữ nghĩa của các loại xe nhỏ ở khoảng cách xa.
-	\item \textbf{Mạng Đề xuất Vùng (Region Proposal Network - RPN):} Là điểm nhấn cách mạng thay thế rập khuôn Selective Search. RPN sử dụng Mạng nơ-ron CNN trực tiếp trượt sinh ra các Hộp neo (Anchors) đa tỷ lệ (scale và aspect ratios). Đầu ra của RPN phân loại nhanh chóng phần nền (background) để chỉ chắt lọc các khu vực tiềm năng (foreground), tiết kiệm tính toán khổng lồ cho lớp Classifier phân tầng đằng sau.
-	\item \textbf{Lớp Trích xuất RoI Align (Khắc phục hạn chế RoI Pooling):} Do việc chuyển đổi tọa độ thập phân về số nguyên ở lớp RoI Pooling gây thất thoát không gian vi mô, kiến trúc hiện hành chèn thêm lớp \textbf{RoI Align} kết hợp bộ nội suy song tuyến (Bilinear Interpolation). Giao thức này bảo tồn y nguyên vị trí chính xác của vùng viền khuếch đại, đáp ứng tiêu chuẩn khắt khe cho Bounding box tự lái xe tự động.
-	\item \textbf{Hàm Tối ưu \& Đánh giá Lợi / Hại:} Ứng dụng Multi-task Loss đan xen chặt chẽ Classification (Cross-Entropy) và Regression Box (Smooth L1 Loss) đảm bảo rào cản vững chắc trước những vật thể chênh lệch viền. Nhờ năng lực lọc phân cực và phán đoán tỉ mỉ, Faster R-CNN cho mAP tiệm cận ngưỡng lý tưởng đối với các nhãn che khuất. Bù lại, kiến trúc trung chuyển Two-stage kinh viện này tạo nút thắt cổ chai vật lý tại việc chờ đợi tensor, cướp đi khả năng bám đuôi độ trễ thời gian thực (real-time FPS) ngay cả trên phần cứng công nghiệp.
+	\item \textbf{Backbone (ResNet50 + FPN) \cite{resnet, fpn}:} ResNet50 sử dụng các khối Residual (Skip-Connection) để giải quyết vấn đề vanishing gradient khi mạng có nhiều lớp. FPN (Feature Pyramid Network) bổ sung cấu trúc tháp đặc trưng đa tỷ lệ (multi-scale) bằng cách kết hợp thông tin từ nhánh Bottom-up và Top-down qua các đường nối ngang (lateral connections), giúp phát hiện hiệu quả cả vật thể lớn và nhỏ.
+	\item \textbf{Region Proposal Network (RPN):} Thay thế thuật toán Selective Search truyền thống, RPN sử dụng mạng CNN trượt trên feature map để sinh các anchor box đa tỷ lệ (nhiều scale và aspect ratio). RPN phân loại nhanh foreground/background và chỉ chuyển các vùng tiềm năng sang giai đoạn tiếp theo, giảm đáng kể khối lượng tính toán.
+	\item \textbf{RoI Align:} Khắc phục hạn chế lượng tử hóa tọa độ (quantization error) của RoI Pooling bằng phép nội suy song tuyến (Bilinear Interpolation). Kỹ thuật này bảo toàn chính xác vị trí không gian của các đặc trưng, cải thiện đáng kể độ chính xác localization ở các ngưỡng IoU cao.
+	\item \textbf{Hàm mất mát và Đánh giá tổng thể:} Faster R-CNN sử dụng Multi-task Loss kết hợp Classification Loss (Cross-Entropy) và Box Regression Loss (Smooth L1). Nhờ cơ chế tinh chỉnh bounding box hai lần (lần 1 ở RPN, lần 2 ở classifier head), Faster R-CNN đạt mAP cao đặc biệt ở các ngưỡng IoU khắt khe. Tuy nhiên, kiến trúc Two-stage tạo ra bottleneck về tốc độ do phải xử lý tuần tự: RPN $\rightarrow$ RoI extraction $\rightarrow$ Classification, khiến FPS thấp hơn đáng kể so với kiến trúc One-stage.
 \end{itemize}
 
 \subsection{Phương pháp YOLOv8m (Kiến trúc One-stage / Anchor-Free)}
-Trái ngược với chiến lược hai giai đoạn hạng nặng, YOLOv8 đại diện cho xu thế Nhận diện Một bước (Single-Pass), trực tiếp phân hóa đồng thời tọa độ và tỷ lệ lớp từ biểu đồ đặc trưng. Biến thể cỡ trung YOLOv8m (Medium) được ấn định nhằm cân đối hoàn hảo sức mạnh tính toán và khả năng thực thi thông số. Quá trình tiền huấn luyện được lập chỉ mục bài bản qua cơ chế nạp cấu hình đa luồng Hyperparameters:
+YOLOv8 \cite{yolov8} là kiến trúc One-stage thế hệ mới, dự đoán đồng thời tọa độ bounding box và nhãn phân loại trong một lần forward pass. Nhóm sử dụng biến thể YOLOv8m (Medium) nhằm cân bằng giữa độ chính xác và tốc độ xử lý. Cấu hình huấn luyện như sau:
 
 \begin{lstlisting}[language=Python, caption=Tham so cau hinh huan luyen YOLOv8 (Medium)]
 from ultralytics import YOLO
@@ -439,17 +470,17 @@ results = model.train(
 )
 \end{lstlisting}
 
-\subsubsection*{Phân tích Chuyên sâu Cấu trúc YOLOv8}
+\subsubsection*{Phân tích Cấu trúc YOLOv8}
 \begin{itemize}
-	\item \textbf{Khung Xương sống (Modified CSPDarknet) \& Mô đun C2f:} Backbone cải thiện tích chập qua tái cấu trúc Cross-stage Partial block. Bước tiến sáng giá nhất nằm ở việc loại bỏ C3 bằng khối \textbf{C2f} (Cross Stage Partial bottleneck with 2 convolutions). Thiết kế vi mô liên kết đa nhánh của C2f thu nhận và khuếch đại trọn vẹn Gradient truyền ngược đi sâu cực đỉnh. Đồng thời, vùng Neck có gắn \textbf{PANet} (Path Aggregation Network) phụ trách chuyển phát nhịp nhàng thông tin hạ tầng và thượng tầng không gian chéo, hạn chế tối đa vấn đề nhiễu vùng viễn ảnh.
-	\item \textbf{Đầu Dự đoán Thiết kế Kép (Decoupled Head):} Giải quyết triệt để xung đột băng thông tại bước đưa quyết định, YOLOv8 tách lẻ độc lập nhánh Regression (đo kích cỡ hộp) và Classification (định tính nhãn hiệu). Sự chuyên môn hóa này giúp cho hệ điều hướng trọng số mỗi nhánh tối ưu độ suy biến dữ liệu mượt mà, tăng đáng kể mAP đối với các nhãn mất cân bằng (imbalanced minority class).
-	\item \textbf{Triết lý Hệ Phi-Neo (Anchor-Free Center):} Tham gia đo lường mật độ xe di chuyển tự do với góc nghiêng và khoảng cách không đồng nhất như bộ KITTI, định hình khung Anchor thủ công qua K-Means rườm rà dễ dẫn đến sai số. Cấu trúc mới tiếp cận Vector hướng tâm xuất phát từ giữa điểm lõi phóng ra 4 cạnh Bounding Box bao quát, siêu linh hoạt ứng phó với cả xe vi mô hoặc buồng hàng khổng lồ.
-	\item \textbf{Khởi Hoạch CIoU \& DFL (Distribution Focal Loss):} YOLOv8 trang bị cặp Loss kết hợp siêu việt: Đầu tiên \textbf{CIoU} định thức đo lường cả diện tích Trùng lặp (Intersection), Khoảng cách Tâm và Tỉ lệ khung biên (Aspect Ratio Difference) nhằm ôm sát phương tiện đang cắt kéo qua khung hình. Phối hợp với \textbf{DFL Loss} thay vì gò bó trong xác suất nhị phân, nay lan tỏa xác suất suy luận viền qua dạng phân phối chuỗi rời rạc. Vô cùng hiệu quả khắc trị viền xe chìm trong bóng đêm che khuất nửa phía.
-	\item \textbf{Hệ Thống Phân Tầng Học Đồng Nhất (Task-Aligned Assigner):} Thay thế việc lấy IOU tĩnh đối chiếu rập khuôn, bộ gán mác linh động đánh giá năng suất cả Loss hộp giao và dự đoán Confidence tốt ưu nhất để ấn định là 'mục tiêu cực thực', đồng thời phân tách nhiễu loạn của nền nhiễu ảnh tĩnh.
+	\item \textbf{Backbone (Modified CSPDarknet) \& Mô đun C2f \cite{cspnet}:} Backbone sử dụng cấu trúc Cross-Stage Partial (CSP) cải tiến. Điểm khác biệt chính so với các phiên bản trước là việc thay thế khối C3 bằng khối \textbf{C2f} (CSP bottleneck with 2 convolutions), cho phép truyền gradient hiệu quả hơn qua nhiều nhánh song song. Phần Neck sử dụng \textbf{PANet} (Path Aggregation Network) \cite{panet} để tổng hợp thông tin đặc trưng đa tỷ lệ theo cả hai chiều bottom-up và top-down.
+	\item \textbf{Decoupled Head:} YOLOv8 tách riêng hai nhánh dự đoán: Regression (tọa độ bounding box) và Classification (nhãn phân loại). Việc tách biệt này giúp mỗi nhánh tối ưu hóa độc lập, cải thiện mAP đặc biệt trên các lớp mất cân bằng (imbalanced classes).
+	\item \textbf{Anchor-Free Detection:} Thay vì định nghĩa anchor box cố định (yêu cầu K-Means clustering trên từng dataset), YOLOv8 dự đoán trực tiếp khoảng cách từ tâm điểm đến 4 cạnh bounding box. Cách tiếp cận này linh hoạt hơn khi xử lý các đối tượng có tỷ lệ khung hình đa dạng trong KITTI.
+	\item \textbf{CIoU Loss \& DFL (Distribution Focal Loss) \cite{ciou}:} Hàm \textbf{CIoU} đo lường đồng thời diện tích giao (IoU), khoảng cách tâm, và tỷ lệ khung hình giữa predicted box và ground-truth box. \textbf{DFL} mô hình hóa tọa độ bounding box dưới dạng phân phối xác suất rời rạc thay vì giá trị đơn, giúp cải thiện độ chính xác localization cho các đối tượng bị che khuất một phần.
+	\item \textbf{Task-Aligned Assigner:} Thay thế chiến lược gán nhãn dựa trên ngưỡng IoU cố định, YOLOv8 sử dụng bộ gán nhãn dựa trên cả classification score và localization quality để xác định positive/negative samples, giúp cải thiện chất lượng huấn luyện.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PHẦN 5.3-5.6: SO SÁNH BACKBONE CNN vs TRANSFORMER (YOLOv8s vs DETR)
+% PHẦN 5.3-5.6: SO SÁNH BACKBONE CNN vs TRANSFORMER (YOLOv8m vs DETR)
 % Nội dung: Kiến trúc DETR chuyên sâu, bảng so sánh CNN vs Transformer,
 %           cách thực hiện với code, tham số huấn luyện
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -518,53 +549,77 @@ Khung đánh giá được triển khai chặt chẽ bằng cách thực thi hai
 	\end{tabular}
 \end{table}
 
-\textbf{Insight Phân tích Số liệu Đối chiếu (mAP):}
+\textbf{Phân tích kết quả mAP:}
 \begin{itemize}
-	\item \textbf{Luận điểm đánh đổi (Trade-off):} Dựa trên bảng số liệu mAP, sức mạnh trích xuất đặc trưng của kiến trúc Two-stage được thể hiện đúng như lý thuyết. Faster R-CNN đạt mAP@0.5 toàn tập là \textbf{0.915}, vượt trội hơn mốc \textbf{0.903} của YOLOv8m. Khoảng cách này càng được kéo giãn ở thước đo khắt khe \textbf{mAP@0.5:0.95} (0.702 so với 0.671).
-	\item \textbf{Xử lý nhiễu nội biên (Small Object \& Occlusion):} Nhờ bộ FPN đa độ phân giải kết hợp RoI Align giữ lại cấu trúc vi mô, Faster R-CNN áp đảo ở các đối tượng khó, thiểu số. Đơn cử ở nhãn \texttt{Pedestrian} và \texttt{Person\_sitting}, Faster R-CNN đem lại độ cải thiện ấn tượng (lần lượt tăng lên 0.865 và 0.781) so với mức suy giảm (0.834 và 0.726) của YOLOv8m. Lưới thiết kế "Anchor-free" của YOLOv8 kết hợp nén dữ liệu MixUp là một nỗ lực lớn nhưng chưa khắc phục tuyệt đối điểm mù nhòe ảnh (Motion Blur).
-	\item \textbf{Nhóm phương tiện lớn:} Cả hai mô hình chia sẻ điểm tương đồng tuyệt đối với phân tích hình thái (EDA). Các vật thể to bản như \texttt{Car}, \texttt{Truck} dễ dàng được định vị, đạt mAP@0.5 cùng tiệm cận độ hoàn hảo (trên 96.5\%).
+	\item \textbf{Trade-off Speed vs Accuracy:} Kết quả xác nhận đúng lý thuyết về sự đánh đổi giữa hai trường phái. Faster R-CNN đạt mAP@0.5 tổng thể là \textbf{0.915}, cao hơn mốc \textbf{0.903} của YOLOv8m. Khoảng cách này tăng lên ở ngưỡng đánh giá khắt khe hơn: \textbf{mAP@0.5:0.95} đạt 0.702 (Faster R-CNN) so với 0.671 (YOLOv8m). Nguyên nhân chính là cơ chế Two-stage cho phép tinh chỉnh bounding box hai lần (ở RPN và classifier head), nên localization chính xác hơn ở các ngưỡng IoU cao ($\ge 0.75$).
+	\item \textbf{Đối tượng nhỏ và bị che khuất:} Faster R-CNN vượt trội rõ rệt ở các lớp khó: \texttt{Pedestrian} (0.865 vs 0.834 mAP@0.5) và \texttt{Person\_sitting} (0.781 vs 0.726). Sự chênh lệch này là nhờ RoI Align bảo toàn chính xác vị trí không gian khi trích xuất đặc trưng từ feature map, trong khi kiến trúc Anchor-free của YOLOv8 dự đoán trực tiếp trên grid nên dễ mất thông tin chi tiết với các đối tượng chiếm ít pixel.
+	\item \textbf{Đối tượng lớn:} Cả hai mô hình đều đạt hiệu năng cao và tương đương trên các lớp phương tiện lớn (\texttt{Car}, \texttt{Truck}: mAP@0.5 $> 96.5\%$), phù hợp với phân tích EDA cho thấy các đối tượng này có kích thước pixel lớn và đặc trưng rõ ràng.
 \end{itemize}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\textwidth]{Images/output_17.png}
+	\includegraphics[width=0.85\textwidth]{Images/output_19.png}
 	\caption{Kết quả trực quan hóa dự đoán một khung ảnh thực nghiệm của YOLOv8}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\textwidth]{Images/output_18.png}
+	\includegraphics[width=0.85\textwidth]{Images/output_20.png}
 	\caption{Chất lượng mạng bắt ảnh với các khoảng cách xa từ tâm Vanishing Point}
 \end{figure}
 
-\subsection{Số liệu Đánh giá Tốc độ Inference (FPS Real-time Benchmark)}
+\subsection{Đánh giá Tốc độ Inference (Speed Benchmark)}
 
-Tốc độ phân tích khung hình (Speed Inference) là rào cản tối thượng cho mọi thiết bị xe gắn chíp tự lái. Kiểm chứng Benchmark thực tế được trích xuất trên môi trường \textbf{GPU nền tảng Tesla T4}:
+Tốc độ inference là yếu tố quyết định khả năng triển khai mô hình trong các ứng dụng thời gian thực. Bảng dưới trình bày kết quả benchmark trên \textbf{GPU Tesla T4} (16GB VRAM):
 
 \begin{table}[H]
 	\centering
-	\caption{Benchmark theo Thời gian thực (Real-time FPS) trên Validation Set}
-	\begin{tabular}{l l r}
+	\caption{Benchmark theo Thời gian thực trên thiết bị GPU Tesla T4 (Inference: 640x640, Batch=1)}
+	\begin{tabular}{l c c r}
 		\toprule
-		\textbf{Kiến trúc Model}  & \textbf{Thiết bị phần cứng đánh giá}       & \textbf{Tốc độ tính toán}  \\
+		\textbf{Kiến trúc Model}  & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Tốc độ quy đổi}    \\
 		\midrule
-		Faster R-CNN (ResNet50)   & GPU Tesla T4 (Single - Inference)          & $7.0\text{ FPS}$           \\
-		\textbf{YOLOv8m (Medium)} & \textbf{GPU Tesla T4 (Single - Inference)} & $\mathbf{45.4\text{ FPS}}$ \\
+		Faster R-CNN (ResNet50)   & $\sim 41.5$         & $\sim 206.0$    & $7.0\text{ FPS}$           \\
+		\textbf{YOLOv8m (Medium)} & $\mathbf{25.9}$     & $\mathbf{78.9}$ & $\mathbf{45.4\text{ FPS}}$ \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\textbf{SO SÁNH MÔ THỨC VÀ THẢO LUẬN LỖI (ERROR ANALYSIS):}
+\textbf{Thảo luận và Phân tích Lỗi (Error Analysis):}
 
 \begin{enumerate}
-	\item \textbf{Đánh giá đo lường FPS và Tính ứng dụng công nghiệp:} Ở các tác vụ xe tự hành trên cao tốc, ngưỡng $30\text{ FPS}$ là vạch an toàn tối thiểu và bắt buộc để hệ thống rà quét phanh điện tử. Theo số liệu, \textbf{Faster R-CNN} chỉ đạt \textbf{7.0 FPS} (độ trễ lớn khoảng 140ms để đọc xong một khung hình). Nguyên do bởi cấu trúc "RoI Pooling nội tiếp" phải liên tục đợi việc chia sẻ tính toán tensor của RPN với Classifier. Chậm trễ này khiến hệ thống phản ứng kém thời gian thực, có nguy cơ gây va chạm trước khi mô hình xử lý lệnh rẽ. Ngược lại, \textbf{YOLOv8m} đáp ứng tốt tiêu chuẩn thời gian thực với \textbf{45.4 FPS}.
-	\item \textbf{Cân bằng Kháng nhiễu False Positive / False Negative:}  Dù bị nghẽn thông lượng, Faster R-CNN vẫn duy trì điểm sáng ở khả năng bóc tách vùng chi tiết. Mạng thác FPN trích xuất pixel tỉ mỉ giúp giảm thiểu đáng kể số lượng lỗi bỏ sót (\textit{False Negatives}) với đối tượng \texttt{Pedestrian}. Ngược lại, tính toán Global Convolutions "Anchor-Free" của YOLO đôi khi khiến mô hình đánh giá vội và dễ vi phạm \textit{False Positives}.
-	\item \textbf{Thử thách từ NMS trong Bối cảnh Tắc nghẽn:} Hiện tượng các xe (Car) đỗ nối chuỗi tại điểm tắc (Traffic JAM) vô tình tạo ra Box tương tự nhau. Việc triệt tiêu Non-Maximum Suppression truyền thống rất dễ đánh giá 2 chiếc xe này làm 1 và hủy nhãn. Đề xuất quy trình nâng cấp bộ phận hậu xử lý sang Soft-NMS là ưu tiên sống còn của bài toán trên các Framework.
+	\item \textbf{Phân tích FPS và khả năng triển khai:} Trong ứng dụng xe tự hành, ngưỡng $30\text{ FPS}$ là yêu cầu tối thiểu để hệ thống phản ứng kịp thời. \textbf{Faster R-CNN} chỉ đạt \textbf{7.0 FPS} (tương đương $\sim$143ms/frame), chủ yếu do bottleneck tại bước trích xuất RoI tuần tự qua hàng trăm region proposals. Điều này khiến Faster R-CNN không phù hợp cho triển khai real-time trên edge devices. Ngược lại, \textbf{YOLOv8m} đạt \textbf{45.4 FPS} ($\sim$22ms/frame), vượt xa ngưỡng real-time. Về mặt tính toán, YOLOv8m chỉ cần 78.9 GFLOPs so với 206.0 GFLOPs của Faster R-CNN (giảm $\sim$62\%), cho thấy kiến trúc One-stage hiệu quả hơn đáng kể về tài nguyên.
+	\item \textbf{Phân tích False Positive / False Negative:} Faster R-CNN có tỷ lệ False Negative thấp hơn trên lớp \texttt{Pedestrian} nhờ FPN đa tỷ lệ kết hợp RoI Align bảo toàn thông tin chi tiết. Ngược lại, YOLOv8 với kiến trúc Anchor-free dự đoán trực tiếp trên feature map, thiếu bước lọc region proposal nên có xu hướng sinh nhiều False Positive hơn trong các vùng ảnh nền phức tạp (cây cối, biển báo).
+	\item \textbf{Vấn đề NMS với đối tượng chồng lấn:} Khi nhiều xe đỗ sát nhau (traffic jam), các bounding box dự đoán có IoU cao với nhau. Thuật toán NMS truyền thống có thể loại bỏ nhầm box của xe thật đứng sau xe khác. Giải pháp khả thi là chuyển sang \textbf{Soft-NMS} \cite{softnms} (giảm dần confidence thay vì loại bỏ hoàn toàn) hoặc sử dụng kiến trúc không cần NMS như DETR.
 \end{enumerate}
 
 \section{Tổng kết}
-Thông qua đồ án này, nhóm hoàn thành mục tiêu hệ thống hóa kiến thức toàn năng từ Phân tích dữ liệu (EDA định lượng vị trí, phương vị) đến triển khai hai nhóm mạng thiết yếu của thị giác học sâu. Tùy thuộc vào yêu cầu bài toán công nghiệp: Ưu tiên phân tích cảnh y tế siêu nhỏ, cần chọn \textbf{Faster R-CNN}. Đối mặt tính khốc liệt của tự hành tốc độ cao trong thời gian thực, họ \textbf{YOLO} chính là đáp án duy nhất và tối ưu. Các chuẩn mực kỹ thuật khai mở sẽ mở đường cho các chủ đề tinh chỉnh tiếp theo bằng Transformer và Attention-Mechanism.
+Báo cáo đã trình bày đầy đủ quy trình End-to-End cho bài toán Object Detection trên tập dữ liệu KITTI, từ phân tích dữ liệu khám phá (EDA), thiết kế DataLoader và Augmentation, đến huấn luyện và đánh giá ba kiến trúc: Faster R-CNN (Two-stage), YOLOv8m (One-stage), và DETR (Transformer-based).
+
+Kết quả thực nghiệm xác nhận sự đánh đổi (trade-off) rõ ràng giữa độ chính xác và tốc độ:
+\begin{itemize}
+	\item \textbf{Faster R-CNN} đạt mAP@0.5 cao nhất (0.915) và vượt trội ở các đối tượng nhỏ, bị che khuất. Phù hợp cho các ứng dụng yêu cầu độ chính xác cao nhưng không đòi hỏi xử lý thời gian thực.
+	\item \textbf{YOLOv8m} đạt 45.4 FPS với mAP@0.5 là 0.903, đáp ứng yêu cầu real-time cho xe tự hành. Kiến trúc nhẹ hơn (25.9M tham số so với 41.5M) giúp triển khai hiệu quả trên edge devices.
+\end{itemize}
+
+\textbf{Hạn chế và Hướng phát triển:} Báo cáo chưa thực hiện phân tích lỗi định lượng chi tiết (confusion matrix theo kích thước đối tượng) và chưa report đầy đủ kết quả DETR do giới hạn thời gian huấn luyện trên GPU. Hướng phát triển tiếp theo bao gồm: (1) ablation study về ảnh hưởng của augmentation, (2) triển khai Soft-NMS để cải thiện phát hiện trong vùng tắc nghẽn, và (3) thử nghiệm các biến thể DETR cải tiến (Deformable DETR, RT-DETR) để giảm thời gian hội tụ.
+
 % TÀI LIỆU THAM KHẢO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \addcontentsline{toc}{section}{Tài liệu tham khảo}
+\begin{thebibliography}{99}
+	\bibitem{faster-rcnn} Ren, S., He, K., Girshick, R., and Sun, J. ``Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks.'' \textit{Advances in Neural Information Processing Systems (NeurIPS)}, 28, 2015.
+	\bibitem{yolov8} Jocher, G., Chaurasia, A., and Qiu, J. ``Ultralytics YOLOv8.'' \textit{GitHub repository}, 2023. \url{https://github.com/ultralytics/ultralytics}
+	\bibitem{kitti} Geiger, A., Lenz, P., and Urtasun, R. ``Are we ready for autonomous driving? The KITTI vision benchmark suite.'' \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2012.
+	\bibitem{detr} Carion, N., Massa, F., Synnaeve, G., Usunier, N., Kirillov, A., and Zagoruyko, S. ``End-to-End Object Detection with Transformers.'' \textit{European Conference on Computer Vision (ECCV)}, 2020.
+	\bibitem{resnet} He, K., Zhang, X., Ren, S., and Sun, J. ``Deep Residual Learning for Image Recognition.'' \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2016.
+	\bibitem{fpn} Lin, T.Y., Dollar, P., Girshick, R., He, K., Hariharan, B., and Belongie, S. ``Feature Pyramid Networks for Object Detection.'' \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2017.
+	\bibitem{focal-loss} Lin, T.Y., Goyal, P., Girshick, R., He, K., and Dollar, P. ``Focal Loss for Dense Object Detection.'' \textit{IEEE International Conference on Computer Vision (ICCV)}, 2017.
+	\bibitem{ciou} Zheng, Z., Wang, P., Liu, W., Li, J., Ye, R., and Ren, D. ``Distance-IoU Loss: Faster and Better Learning for Bounding Box Regression.'' \textit{AAAI Conference on Artificial Intelligence}, 2020.
+	\bibitem{cspnet} Wang, C.Y., Liao, H.Y.M., Wu, Y.H., Chen, P.Y., Hsieh, J.W., and Yeh, I.H. ``CSPNet: A New Backbone that can Enhance Learning Capability of CNN.'' \textit{IEEE/CVF CVPR Workshops}, 2020.
+	\bibitem{panet} Liu, S., Qi, L., Qin, H., Shi, J., and Jia, J. ``Path Aggregation Network for Instance Segmentation.'' \textit{IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 2018.
+	\bibitem{softnms} Bodla, N., Singh, B., Chellappa, R., and Davis, L.S. ``Soft-NMS -- Improving Object Detection with One Line of Code.'' \textit{IEEE International Conference on Computer Vision (ICCV)}, 2017.
+	\bibitem{albumentations} Buslaev, A., Iglovikov, V.I., Khvedchenya, E., Parinov, A., Druzhinin, M., and Kalinin, A.A. ``Albumentations: Fast and Flexible Image Augmentations.'' \textit{Information}, 11(2), 125, 2020.
+	\bibitem{coco} Lin, T.Y., Maire, M., Belongie, S., et al. ``Microsoft COCO: Common Objects in Context.'' \textit{European Conference on Computer Vision (ECCV)}, 2014.
+\end{thebibliography}
 
 \end{document}

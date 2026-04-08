@@ -5,9 +5,9 @@
 
 \subsection{Phương pháp DETR (Kiến trúc Transformer-based / Set Prediction)}
 
-Ngoài hai trường phái kinh điển One-stage (YOLOv8) và Two-stage (Faster R-CNN) thuần CNN đã phân tích ở trên, nhóm mở rộng nghiên cứu sang hướng tiếp cận thứ ba mang tính cách mạng: \textbf{DETR (DEtection TRansformer)} --- mô hình đầu tiên áp dụng kiến trúc Transformer vào bài toán Object Detection, được giới thiệu bởi Carion et al. tại Facebook AI Research (ECCV 2020). DETR tái định nghĩa hoàn toàn bài toán phát hiện đối tượng từ mô hình hồi quy hộp truyền thống sang bài toán \textbf{dự đoán tập hợp (Set Prediction)}, loại bỏ triệt để các thành phần thủ công như anchor boxes, NMS, và region proposals.
+Ngoài hai trường phái kinh điển One-stage (YOLOv8) và Two-stage (Faster R-CNN) thuần CNN đã phân tích ở trên, nhóm mở rộng nghiên cứu sang hướng tiếp cận thứ ba: \textbf{DETR (DEtection TRansformer)} \cite{detr} --- mô hình đầu tiên áp dụng kiến trúc Transformer vào bài toán Object Detection, được giới thiệu bởi Carion et al. tại Facebook AI Research (ECCV 2020). DETR tái định nghĩa bài toán phát hiện đối tượng thành bài toán \textbf{dự đoán tập hợp (Set Prediction)}, loại bỏ các thành phần thủ công như anchor boxes, NMS, và region proposals.
 
-Mục đích của việc bổ sung DETR nhằm đáp ứng yêu cầu đề bài mục 4.2: \textit{``Backbone hoặc kiến trúc khác nhau (CNN vs Transformer)''} --- so sánh trực tiếp phương pháp trích xuất đặc trưng thuần CNN (YOLOv8 với CSPDarknet) và phương pháp kết hợp CNN + Transformer (DETR với ResNet-50 + Transformer Encoder-Decoder).
+\textit{\textbf{Lưu ý về biến thể YOLOv8:}} Trong phần so sánh CNN vs Transformer này, nhóm sử dụng YOLOv8\textbf{s} (Small) thay vì YOLOv8m (Medium) như ở các phần trước. Lý do là DETR tiêu tốn GPU memory rất lớn (batch size chỉ đạt 4 trên Tesla T4), nên cần biến thể nhẹ hơn của YOLO để đảm bảo so sánh công bằng về tài nguyên tính toán.
 
 \begin{lstlisting}[language=Python, caption=Khởi tạo và cấu hình Transfer Learning DETR]
 from transformers import DetrForObjectDetection
@@ -147,3 +147,5 @@ Tập dữ liệu & KITTI (80\% train / 20\% val) & KITTI (80\% train / 20\% val
 	\item \textbf{Gradient clipping (chỉ DETR):} Transformer dễ gặp hiện tượng gradient exploding do attention weights nhân ma trận lớn, nên cần clip gradient ở max\_norm = 0.1.
 	\item \textbf{Số epochs (50 vs 20):} DETR được train ít epochs hơn (20 thay vì 300 theo paper gốc) do giới hạn thời gian GPU trên Kaggle. Mỗi epoch DETR mất khoảng 3 phút (tổng $\approx 60$ phút), trong khi mỗi epoch YOLOv8 chỉ mất 18 giây (tổng $\approx 15$ phút cho 50 epochs). Điều này phản ánh thực tế về chi phí tính toán Transformer vs CNN.
 \end{itemize}
+
+\textit{\textbf{Lưu ý:} Do giới hạn thời gian GPU và số epochs huấn luyện DETR còn rất thấp so với yêu cầu của paper gốc (20/300 epochs), kết quả thực nghiệm của DETR chưa đạt được hiệu năng tối ưu và sẽ được bổ sung trong các nghiên cứu tiếp theo khi có đủ tài nguyên tính toán.}
